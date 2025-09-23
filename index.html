@@ -25,9 +25,6 @@
       <img src="assets/icons/logo.svg" id="titleIcon" alt="Handwriting Repeater logo" />
       <div class="title-texts">
         <h1 class="title-text">Handwriting Repeater</h1>
-        <button class="box-button" id="dateButton" type="button">
-          <h1 class="date-text" id="dateText">Loading date…</h1>
-        </button>
       </div>
     </div>
 
@@ -39,210 +36,159 @@
         <canvas id="writer" width="1200" height="600"></canvas>
         <canvas id="writerMask" width="1200" height="600"></canvas>
 
-        <div class="interface">
-          <div class="controls-container disable-select">
-            <div id="rewriteResetContainer">
-              <div class="left-controls-container">
-                <div class="slider-with-text">
-                  <input class="slider" id="zoomSlider" type="range" min="0.5" max="4" value="1" step="0.1" />
-                  <p class="slider-text" id="zoomText">Zoom</p>
-                </div>
-                <div class="slider-with-text">
-                  <input class="slider" id="speedSlider" type="range" min="0.1" max="10" value="2" step="0.1" />
-                  <p class="slider-text" id="writeSpeedText">Write Speed</p>
-                </div>
-              </div>
-
-              <div class="centre-controls-container">
-                <button class="box-button icon-button" id="rewriteButton" type="button">
-                  <span>Rewrite!</span>
-                  <img src="assets/icons/playIcon.svg" alt="Play" />
-                </button>
-              </div>
-
-              <div class="right-controls-container">
-                <button class="icon-only-button" id="resetButton" type="button">
-                  <img src="assets/icons/binIcon.svg" alt="Reset" />
-                </button>
-                <div class="undo-redo-container">
-                  <button class="icon-only-button" id="undoButton" type="button">
-                    <img src="assets/icons/undoIcon.svg" alt="Undo" />
-                  </button>
-                  <button class="icon-only-button" id="redoButton" type="button">
-                    <img src="assets/icons/redoIcon.svg" alt="Redo" />
-                  </button>
-                </div>
-                <button class="icon-only-button" id="fullscreenButton" type="button">
-                  <img src="assets/icons/fullscreenIcon.svg" alt="Fullscreen mode" />
-                </button>
-              </div>
-            </div>
+        <div id="boardDate" aria-label="Date" role="button" tabindex="0">Loading date…</div>
+        <div id="retroTv" aria-hidden="true">
+          <div class="tv-frame">
+            <iframe id="tvPlayer" title="Retro TV" loading="lazy"></iframe>
+          </div>
+        </div>
+      </div>
+      <div id="toolbarBottom" role="toolbar" aria-label="Handwriting controls" class="disable-select">
+        <div class="toolbar-group toolbar-left">
+          <button class="icon-only-button toolbar-button" id="zoomOutButton" type="button" aria-label="Zoom out">
+            <span aria-hidden="true">−</span>
+          </button>
+          <button class="icon-only-button toolbar-button" id="zoomInButton" type="button" aria-label="Zoom in">
+            <span aria-hidden="true">+</span>
+          </button>
+          <div class="toolbar-slider" aria-label="Write speed">
+            <label class="visually-hidden" for="speedSlider">Write speed</label>
+            <input class="slider" id="speedSlider" type="range" min="0.1" max="10" value="2" step="0.1" />
           </div>
         </div>
 
-        <div class="sidebars">
-          <div class="sidebar-left" id="sidebarLeft">
-            <div class="sidebar-options" id="leftSidebarOptions">
-              <button class="box-button icon-button" id="penSizeButton" type="button">
-                <img src="assets/icons/penMediumIcon.svg" alt="Pen size" />
-                <span>Pen Size</span>
-              </button>
-              <div class="options-button-options" id="penSizeButtonOptions">
-                <button class="box-button icon-button" id="smallPenButton" type="button">
-                  <img src="assets/icons/penSmallIcon.svg" alt="Small pen" />
-                  <span>Small</span>
-                </button>
-                <button class="box-button icon-button option-selected" id="mediumPenButton" type="button">
-                  <img src="assets/icons/penMediumIcon.svg" alt="Medium pen" />
-                  <span>Medium</span>
-                </button>
-                <button class="box-button icon-button" id="largePenButton" type="button">
-                  <img src="assets/icons/penLargeIcon.svg" alt="Large pen" />
-                  <span>Large</span>
-                </button>
-              </div>
-
-              <button class="box-button icon-button" id="penTypeButton" type="button">
-                <img src="assets/icons/pen.svg" alt="Pen type" />
-                <span>Pen Type</span>
-              </button>
-              <div class="options-button-options" id="penTypeButtonOptions">
-                <button class="box-button icon-button option-selected" id="markerPenTypeButton" type="button">
-                  <img src="assets/icons/pen.svg" alt="Marker" />
-                  <span>Pen</span>
-                </button>
-                <button class="box-button icon-button" id="pencilPenTypeButton" type="button">
-                  <img src="assets/icons/pencil.svg" alt="Pencil" />
-                  <span>Pencil</span>
-                </button>
-                <button class="box-button icon-button" id="quillPenTypeButton" type="button">
-                  <img src="assets/icons/quill.svg" alt="Quill" />
-                  <span>Quill</span>
-                </button>
-                <button class="box-button icon-button" id="nonePenTypeButton" type="button">
-                  <img src="assets/icons/nonePen.svg" alt="None" />
-                  <span>None</span>
-                </button>
-              </div>
-
-              <button class="box-button icon-button" id="penColourButton" type="button">
-                <img src="assets/icons/blackPenColourIcon.svg" alt="Pen colour" />
-                <span>Pen Colour</span>
-              </button>
-              <div class="options-button-options" id="penColourButtonOptions">
-                <button class="box-button icon-button option-selected" id="blackPenColourButton" type="button">
-                  <img src="assets/icons/blackPenColourIcon.svg" alt="Black" />
-                </button>
-                <button class="box-button icon-button" id="redPenColourButton" type="button">
-                  <img src="assets/icons/redPenColourIcon.svg" alt="Red" />
-                </button>
-                <button class="box-button icon-button" id="greenPenColourButton" type="button">
-                  <img src="assets/icons/greenPenColourIcon.svg" alt="Green" />
-                </button>
-                <button class="box-button icon-button" id="bluePenColourButton" type="button">
-                  <img src="assets/icons/bluePenColourIcon.svg" alt="Blue" />
-                </button>
-                <button class="box-button icon-button" id="yellowPenColourButton" type="button">
-                  <img src="assets/icons/yellowPenColourIcon.svg" alt="Yellow" />
-                </button>
-                <button class="box-button icon-button" id="purplePenColourButton" type="button">
-                  <img src="assets/icons/purplePenColourIcon.svg" alt="Purple" />
-                </button>
-                <button class="box-button icon-button" id="orangePenColourButton" type="button">
-                  <img src="assets/icons/orangePenColourIcon.svg" alt="Orange" />
-                </button>
-                <button class="box-button icon-button" id="darkGreenPenColourButton" type="button">
-                  <img src="assets/icons/darkGreenPenColourIcon.svg" alt="Dark green" />
-                </button>
-                <button class="box-button icon-button" id="pinkPenColourButton" type="button">
-                  <img src="assets/icons/pinkPenColourIcon.svg" alt="Pink" />
-                </button>
-                <button class="box-button icon-button" id="brownPenColourButton" type="button">
-                  <img src="assets/icons/brownPenColourIcon.svg" alt="Brown" />
-                </button>
-                <button class="box-button icon-button" id="greyPenColourButton" type="button">
-                  <img src="assets/icons/greyPenColourIcon.svg" alt="Grey" />
-                </button>
-              </div>
-
-              <button class="box-button icon-button" id="loopButton" type="button">
-                <img src="assets/icons/loopIcon.svg" alt="Loop mode" />
-                <span>Loop Mode</span>
-              </button>
-              <button class="box-button icon-button" id="traceButton" type="button">
-                <img src="assets/icons/traceIcon.svg" alt="Trace mode" />
-                <span>Trace Mode</span>
-              </button>
-            </div>
-            <button class="collapse-tab" id="collapseLeftSidebar" type="button">
-              <img src="assets/icons/arrowIconRight.svg" alt="Collapse left sidebar" />
-            </button>
-          </div>
-
-          <div class="sidebar-right">
-            <div class="sidebar-options" id="rightSidebarOptions">
-              <button class="box-button icon-button" id="backgroundButton" type="button">
-                <img src="assets/icons/blueDottedLinesIcon.svg" alt="Page lines" />
-                <span>Page Lines</span>
-              </button>
-              <div class="options-button-options" id="backgroundButtonOptions">
-                <button class="box-button icon-button option-selected" id="backgroundButton1" type="button">
-                  <img src="assets/icons/blueDottedLinesIcon.svg" alt="Blue dotted lines" />
-                </button>
-                <button class="box-button icon-button" id="backgroundButton2" type="button">
-                  <img src="assets/icons/greyDottedLinesIcon.svg" alt="Grey dotted lines" />
-                </button>
-                <button class="box-button icon-button" id="backgroundButton3" type="button">
-                  <img src="assets/icons/redBlueLinesIcon.svg" alt="Red and blue lines" />
-                </button>
-                <button class="box-button icon-button" id="backgroundButton9" type="button">
-                  <img src="assets/icons/greyDottedLines2Icon.svg" alt="Grey dotted lines" />
-                </button>
-                <button class="box-button icon-button" id="backgroundButton7" type="button">
-                  <img src="assets/icons/yellowTramLinesIcon.svg" alt="Yellow tram lines" />
-                </button>
-                <button class="box-button icon-button" id="backgroundButton5" type="button">
-                  <img src="assets/icons/groundIcon.svg" alt="Ground line" />
-                </button>
-                <button class="box-button icon-button" id="backgroundButton4" type="button">
-                  <img src="assets/icons/greyLinesIcon.svg" alt="Grey lines" />
-                </button>
-                <button class="box-button icon-button" id="backgroundButton6" type="button">
-                  <img src="assets/icons/squaresIcon.svg" alt="Squares" />
-                </button>
-                <button class="box-button icon-button" id="backgroundButton8" type="button">
-                  <img src="assets/icons/blankIcon.svg" alt="Blank" />
-                </button>
-              </div>
-
-              <button class="box-button icon-button" id="pageColourButton" type="button">
-                <img src="assets/icons/whitePageColourIcon.svg" alt="Page colour" />
-                <span>Page Colour</span>
-              </button>
-              <div class="options-button-options" id="pageColourButtonOptions">
-                <button class="box-button icon-button option-selected" id="whitePageButton" type="button">
-                  <img src="assets/icons/whitePageColourIcon.svg" alt="White page" />
-                </button>
-                <button class="box-button icon-button" id="peachPageButton" type="button">
-                  <img src="assets/icons/peachPageColourIcon.svg" alt="Peach page" />
-                </button>
-                <button class="box-button icon-button" id="yellowPageButton" type="button">
-                  <img src="assets/icons/yellowPageColourIcon.svg" alt="Yellow page" />
-                </button>
-                <button class="box-button icon-button" id="bluePageButton" type="button">
-                  <img src="assets/icons/bluePageColourIcon.svg" alt="Blue page" />
-                </button>
-                <button class="box-button icon-button" id="blueGreyPageButton" type="button">
-                  <img src="assets/icons/blueGreyPageColourIcon.svg" alt="Blue grey page" />
-                </button>
-              </div>
-
-            </div>
-            <button class="collapse-tab" id="collapseRightSidebar" type="button">
-              <img src="assets/icons/arrowIconLeft.svg" alt="Collapse right sidebar" />
-            </button>
-          </div>
+        <div class="toolbar-group toolbar-centre">
+          <button class="icon-only-button toolbar-button rewrite-button" id="rewriteButton" type="button" aria-label="Rewrite">
+            <img src="assets/icons/playIcon.svg" alt="Rewrite" />
+          </button>
         </div>
+
+        <div class="toolbar-group toolbar-right">
+          <button class="icon-only-button toolbar-button" id="undoButton" type="button" aria-label="Undo">
+            <img src="assets/icons/undoIcon.svg" alt="Undo" />
+          </button>
+          <button class="icon-only-button toolbar-button" id="redoButton" type="button" aria-label="Redo">
+            <img src="assets/icons/redoIcon.svg" alt="Redo" />
+          </button>
+          <button class="icon-only-button toolbar-button" id="resetButton" type="button" aria-label="Reset">
+            <img src="assets/icons/binIcon.svg" alt="Reset" />
+          </button>
+          <button class="icon-only-button toolbar-button" id="pageStyleButton" type="button" aria-label="Page style" aria-expanded="false" aria-haspopup="dialog">
+            <img src="assets/icons/blueDottedLinesIcon.svg" alt="Page style" />
+          </button>
+          <div class="toolbar-slider pen-size-slider" aria-label="Pen size">
+            <button class="icon-only-button toolbar-button" id="penSizeButton" type="button" aria-label="Pen size indicator">
+              <img src="assets/icons/penMediumIcon.svg" alt="Pen size" />
+            </button>
+            <label class="visually-hidden" for="penSizeSlider">Pen size</label>
+            <input class="slider" id="penSizeSlider" type="range" min="1" max="40" value="6" step="1" />
+          </div>
+          <button class="icon-only-button toolbar-button" id="penColourButton" type="button" aria-label="Colour palette" aria-expanded="false" aria-haspopup="dialog">
+            <img src="assets/icons/blackPenColourIcon.svg" alt="Colour palette" />
+          </button>
+          <button class="icon-only-button toolbar-button" id="uploadPenImageButton" type="button" aria-label="Upload pen image">
+            <span aria-hidden="true">📷</span>
+          </button>
+          <button class="icon-only-button toolbar-button" id="timerButton" type="button" aria-label="Timer">
+            <span aria-hidden="true">⏱</span>
+          </button>
+          <button class="icon-only-button toolbar-button" id="fullscreenButton" type="button" aria-label="Fullscreen mode">
+            <img src="assets/icons/fullscreenIcon.svg" alt="Fullscreen" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="options-button-options" id="pageStyleOptions" role="dialog" aria-label="Page style options">
+      <div class="options-section">
+        <h2 class="options-title">Page Lines</h2>
+        <div class="options-grid" id="backgroundButtonOptions">
+          <button class="box-button icon-button option-selected" id="backgroundButton1" type="button">
+            <img src="assets/icons/blueDottedLinesIcon.svg" alt="Blue dotted lines" />
+          </button>
+          <button class="box-button icon-button" id="backgroundButton2" type="button">
+            <img src="assets/icons/greyDottedLinesIcon.svg" alt="Grey dotted lines" />
+          </button>
+          <button class="box-button icon-button" id="backgroundButton3" type="button">
+            <img src="assets/icons/redBlueLinesIcon.svg" alt="Red and blue lines" />
+          </button>
+          <button class="box-button icon-button" id="backgroundButton9" type="button">
+            <img src="assets/icons/greyDottedLines2Icon.svg" alt="Grey dotted lines" />
+          </button>
+          <button class="box-button icon-button" id="backgroundButton7" type="button">
+            <img src="assets/icons/yellowTramLinesIcon.svg" alt="Yellow tram lines" />
+          </button>
+          <button class="box-button icon-button" id="backgroundButton5" type="button">
+            <img src="assets/icons/groundIcon.svg" alt="Ground line" />
+          </button>
+          <button class="box-button icon-button" id="backgroundButton4" type="button">
+            <img src="assets/icons/greyLinesIcon.svg" alt="Grey lines" />
+          </button>
+          <button class="box-button icon-button" id="backgroundButton6" type="button">
+            <img src="assets/icons/squaresIcon.svg" alt="Squares" />
+          </button>
+          <button class="box-button icon-button" id="backgroundButton8" type="button">
+            <img src="assets/icons/blankIcon.svg" alt="Blank" />
+          </button>
+        </div>
+      </div>
+      <div class="options-section">
+        <h2 class="options-title">Page Colour</h2>
+        <div class="options-grid" id="pageColourButtonOptions">
+          <button class="box-button icon-button option-selected" id="whitePageButton" type="button">
+            <img src="assets/icons/whitePageColourIcon.svg" alt="White page" />
+          </button>
+          <button class="box-button icon-button" id="peachPageButton" type="button">
+            <img src="assets/icons/peachPageColourIcon.svg" alt="Peach page" />
+          </button>
+          <button class="box-button icon-button" id="yellowPageButton" type="button">
+            <img src="assets/icons/yellowPageColourIcon.svg" alt="Yellow page" />
+          </button>
+          <button class="box-button icon-button" id="bluePageButton" type="button">
+            <img src="assets/icons/bluePageColourIcon.svg" alt="Blue page" />
+          </button>
+          <button class="box-button icon-button" id="blueGreyPageButton" type="button">
+            <img src="assets/icons/blueGreyPageColourIcon.svg" alt="Blue grey page" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="options-button-options" id="penColourButtonOptions" role="dialog" aria-label="Pen colour options">
+      <div class="options-grid">
+        <button class="box-button icon-button option-selected" id="blackPenColourButton" type="button">
+          <img src="assets/icons/blackPenColourIcon.svg" alt="Black" />
+        </button>
+        <button class="box-button icon-button" id="redPenColourButton" type="button">
+          <img src="assets/icons/redPenColourIcon.svg" alt="Red" />
+        </button>
+        <button class="box-button icon-button" id="greenPenColourButton" type="button">
+          <img src="assets/icons/greenPenColourIcon.svg" alt="Green" />
+        </button>
+        <button class="box-button icon-button" id="bluePenColourButton" type="button">
+          <img src="assets/icons/bluePenColourIcon.svg" alt="Blue" />
+        </button>
+        <button class="box-button icon-button" id="yellowPenColourButton" type="button">
+          <img src="assets/icons/yellowPenColourIcon.svg" alt="Yellow" />
+        </button>
+        <button class="box-button icon-button" id="purplePenColourButton" type="button">
+          <img src="assets/icons/purplePenColourIcon.svg" alt="Purple" />
+        </button>
+        <button class="box-button icon-button" id="orangePenColourButton" type="button">
+          <img src="assets/icons/orangePenColourIcon.svg" alt="Orange" />
+        </button>
+        <button class="box-button icon-button" id="darkGreenPenColourButton" type="button">
+          <img src="assets/icons/darkGreenPenColourIcon.svg" alt="Dark green" />
+        </button>
+        <button class="box-button icon-button" id="pinkPenColourButton" type="button">
+          <img src="assets/icons/pinkPenColourIcon.svg" alt="Pink" />
+        </button>
+        <button class="box-button icon-button" id="brownPenColourButton" type="button">
+          <img src="assets/icons/brownPenColourIcon.svg" alt="Brown" />
+        </button>
+        <button class="box-button icon-button" id="greyPenColourButton" type="button">
+          <img src="assets/icons/greyPenColourIcon.svg" alt="Grey" />
+        </button>
       </div>
     </div>
 
