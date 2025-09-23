@@ -4,18 +4,11 @@ import { formatDateWithOrdinal, getIconUrl, clamp } from './utils.js';
 const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 600;
 
-const PEN_SIZES = {
-  small: { id: 'smallPenButton', width: 4, icon: 'penSmallIcon.svg' },
-  medium: { id: 'mediumPenButton', width: 8, icon: 'penMediumIcon.svg' },
-  large: { id: 'largePenButton', width: 14, icon: 'penLargeIcon.svg' }
-};
-
-const PEN_TYPES = {
-  marker: { id: 'markerPenTypeButton', imageKey: 'pen', icon: 'pen.svg' },
-  pencil: { id: 'pencilPenTypeButton', imageKey: 'pencil', icon: 'pencil.svg' },
-  quill: { id: 'quillPenTypeButton', imageKey: 'quill', icon: 'quill.svg' },
-  none: { id: 'nonePenTypeButton', imageKey: 'none', icon: 'nonePen.svg' }
-};
+const PEN_SIZE_MIN = 1;
+const PEN_SIZE_MAX = 40;
+const SMALL_ICON = 'penSmallIcon.svg';
+const MEDIUM_ICON = 'penMediumIcon.svg';
+const LARGE_ICON = 'penLargeIcon.svg';
 
 const PEN_COLOURS = {
   black: { id: 'blackPenColourButton', colour: '#000000', icon: 'blackPenColourIcon.svg' },
@@ -228,8 +221,6 @@ export class Controls {
     this.linesContext = this.rewriterLinesCanvas.getContext('2d');
     this.pageContext = this.rewriterPageCanvas.getContext('2d');
 
-    this.traceButton = document.getElementById('traceButton');
-    this.loopButton = document.getElementById('loopButton');
     this.rewriteButton = document.getElementById('rewriteButton');
     this.undoButton = document.getElementById('undoButton');
     this.redoButton = document.getElementById('redoButton');
@@ -237,8 +228,6 @@ export class Controls {
 
     this.penSizeButton = document.getElementById('penSizeButton');
     this.penSizeOptions = document.getElementById('penSizeButtonOptions');
-    this.penTypeButton = document.getElementById('penTypeButton');
-    this.penTypeOptions = document.getElementById('penTypeButtonOptions');
     this.penColourButton = document.getElementById('penColourButton');
     this.penColourOptions = document.getElementById('penColourButtonOptions');
     this.backgroundButton = document.getElementById('backgroundButton');
@@ -266,14 +255,13 @@ export class Controls {
 
     this.openOptionsMenu = null;
 
-    this.penSizeButtons = mapButtons(PEN_SIZES);
-    this.penTypeButtons = mapButtons(PEN_TYPES);
     this.penColourButtons = mapButtons(PEN_COLOURS);
     this.backgroundButtons = mapButtons(BACKGROUND_ICONS);
     this.pageColourButtons = mapButtons(PAGE_COLOURS);
 
     this.initialiseCanvases();
     this.setupOptionToggles();
+    this.loadPenPreferences();
     this.setupPenControls();
     this.setupBackgroundControls();
     this.setupSliders();
@@ -303,7 +291,6 @@ export class Controls {
   setupOptionToggles() {
     const toggleMap = [
       [this.penSizeButton, this.penSizeOptions],
-      [this.penTypeButton, this.penTypeOptions],
       [this.penColourButton, this.penColourOptions],
       [this.backgroundButton, this.backgroundOptions],
       [this.pageColourButton, this.pageColourOptions]
@@ -349,23 +336,7 @@ export class Controls {
   }
 
   setupPenControls() {
-    Object.entries(PEN_SIZES).forEach(([key, config]) => {
-      const button = this.penSizeButtons[config.id];
-      if (!button) return;
-      button.addEventListener('click', () => {
-        this.setPenSize(key);
-        this.closeOpenOptionsMenu();
-      });
-    });
-
-    Object.entries(PEN_TYPES).forEach(([key, config]) => {
-      const button = this.penTypeButtons[config.id];
-      if (!button) return;
-      button.addEventListener('click', () => {
-        this.setPenType(key);
-        this.closeOpenOptionsMenu();
-      });
-    });
+    this.initialisePenSizeSlider();
 
     Object.entries(PEN_COLOURS).forEach(([key, config]) => {
       const button = this.penColourButtons[config.id];
@@ -375,14 +346,6 @@ export class Controls {
         this.closeOpenOptionsMenu();
       });
     });
-
-    if (this.loopButton) {
-      this.loopButton.addEventListener('click', () => {
-        this.userData.userSettings.isLoopOn = !this.userData.userSettings.isLoopOn;
-        this.loopButton.classList.toggle('option-selected', this.userData.userSettings.isLoopOn);
-        this.userData.saveToLocalStorage();
-      });
-    }
   }
 
   setupBackgroundControls() {
@@ -493,44 +456,24 @@ export class Controls {
   }
 
   applyInitialState() {
-    this.setPenSize(this.resolvePenSizeKey(this.userData.userSettings.selectedPenWidth), false);
+    this.setPenSize(this.userData.userSettings.selectedPenWidth ?? DEFAULT_SETTINGS.selectedPenWidth, false);
     this.setPenColour(this.resolvePenColourKey(this.userData.userSettings.selectedPenColour), false);
-    this.setPenType(this.userData.userSettings.penType ?? DEFAULT_SETTINGS.penType, false);
     this.setBackground(this.userData.userSettings.selectedBackground ?? DEFAULT_SETTINGS.selectedBackground, false);
     this.setPageColour(this.resolvePageColourKey(this.userData.userSettings.selectedPageColour), false);
     this.setZoom(this.userData.userSettings.zoomLevel ?? DEFAULT_SETTINGS.zoomLevel, false);
     this.setRewriteSpeed(this.userData.userSettings.rewriteSpeed ?? DEFAULT_SETTINGS.rewriteSpeed, false);
-
-    if (this.loopButton) {
-      this.loopButton.classList.toggle('option-selected', !!this.userData.userSettings.isLoopOn);
-    }
-
-    if (this.traceButton) {
-      this.traceButton.classList.toggle('option-selected', !!this.userData.userSettings.isTraceOn);
-    }
   }
 
-  setPenSize(key, persist = true) {
-    const config = PEN_SIZES[key] ?? PEN_SIZES.medium;
-    this.userData.userSettings.selectedPenWidth = config.width;
-    updateSelectedClass(this.penSizeButtons, config.id);
-    this.updateButtonIcon(this.penSizeButton, config.icon);
-    if (persist) {
-      this.userData.saveToLocalStorage();
+  setPenSize(value, persist = true) {
+    const size = clamp(Number(value) || DEFAULT_SETTINGS.selectedPenWidth, PEN_SIZE_MIN, PEN_SIZE_MAX);
+    this.userData.userSettings.selectedPenWidth = size;
+    this.updatePenSizeSliderDisplay(size);
+    this.updateButtonIcon(this.penSizeButton, this.resolvePenSizeIcon(size));
+
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem('pen.size', String(size));
     }
-  }
 
-  resolvePenSizeKey(width) {
-    const entry = Object.entries(PEN_SIZES).find(([, cfg]) => cfg.width === width);
-    return entry ? entry[0] : 'medium';
-  }
-
-  setPenType(key, persist = true) {
-    const config = PEN_TYPES[key] ?? PEN_TYPES.marker;
-    this.userData.userSettings.penType = key;
-    this.userData.userSettings.selectedPenImage = config.imageKey;
-    updateSelectedClass(this.penTypeButtons, config.id);
-    this.updateButtonIcon(this.penTypeButton, config.icon);
     if (persist) {
       this.userData.saveToLocalStorage();
     }
@@ -541,6 +484,11 @@ export class Controls {
     this.userData.userSettings.selectedPenColour = config.colour;
     updateSelectedClass(this.penColourButtons, config.id);
     this.updateButtonIcon(this.penColourButton, config.icon);
+
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem('pen.color', config.colour);
+    }
+
     if (persist) {
       this.userData.saveToLocalStorage();
     }
@@ -549,6 +497,89 @@ export class Controls {
   resolvePenColourKey(colour) {
     const entry = Object.entries(PEN_COLOURS).find(([, cfg]) => cfg.colour.toLowerCase() === (colour ?? '').toLowerCase());
     return entry ? entry[0] : 'black';
+  }
+
+  initialisePenSizeSlider() {
+    if (!this.penSizeOptions) {
+      return;
+    }
+
+    this.penSizeOptions.innerHTML = '';
+
+    const container = document.createElement('div');
+    container.className = 'pen-size-slider-container';
+
+    const label = document.createElement('div');
+    label.className = 'pen-size-label';
+    label.textContent = 'Pen Size';
+
+    const valueDisplay = document.createElement('div');
+    valueDisplay.className = 'pen-size-value';
+
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = String(PEN_SIZE_MIN);
+    slider.max = String(PEN_SIZE_MAX);
+    slider.step = '1';
+    slider.value = String(this.userData.userSettings.selectedPenWidth ?? DEFAULT_SETTINGS.selectedPenWidth);
+    slider.id = 'penSizeSliderInput';
+    slider.className = 'pen-size-slider';
+
+    container.appendChild(label);
+    container.appendChild(valueDisplay);
+    container.appendChild(slider);
+
+    this.penSizeOptions.appendChild(container);
+
+    this.penSizeValue = valueDisplay;
+    this.penSizeSlider = slider;
+
+    this.updatePenSizeSliderDisplay(Number(slider.value));
+
+    slider.addEventListener('input', () => {
+      const size = Number(slider.value) || DEFAULT_SETTINGS.selectedPenWidth;
+      this.setPenSize(size);
+    });
+  }
+
+  updatePenSizeSliderDisplay(size) {
+    if (this.penSizeSlider && this.penSizeSlider.value !== String(size)) {
+      this.penSizeSlider.value = String(size);
+    }
+
+    if (this.penSizeValue) {
+      this.penSizeValue.textContent = `${Math.round(size)} px`;
+    }
+  }
+
+  resolvePenSizeIcon(size) {
+    if (size <= 4) {
+      return SMALL_ICON;
+    }
+
+    if (size >= 12) {
+      return LARGE_ICON;
+    }
+
+    return MEDIUM_ICON;
+  }
+
+  loadPenPreferences() {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return;
+    }
+
+    const storedSize = Number(window.localStorage.getItem('pen.size'));
+    if (Number.isFinite(storedSize)) {
+      this.userData.userSettings.selectedPenWidth = clamp(storedSize, PEN_SIZE_MIN, PEN_SIZE_MAX);
+    }
+
+    const storedColour = window.localStorage.getItem('pen.color');
+    if (typeof storedColour === 'string' && storedColour) {
+      const key = this.resolvePenColourKey(storedColour);
+      const config = PEN_COLOURS[key];
+      this.userData.userSettings.selectedPenColour = config?.colour ?? storedColour;
+    }
   }
 
   setBackground(key, persist = true) {
