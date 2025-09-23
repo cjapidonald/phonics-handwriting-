@@ -10,13 +10,13 @@ userData.loadFromLocalStorage();
 
 const controls = new Controls(userData);
 
-let rewriterTraceContext = controls.rewriterTraceCanvas.getContext('2d');
-let rewriterLinesContext = controls.rewriterLinesCanvas.getContext('2d');
-rewriterLinesContext.imageSmoothingEnabled = false
-let rewriterContext = controls.rewriterCanvas.getContext('2d');
-            
+const rewriterTraceContext = controls.rewriterTraceCanvas.getContext('2d');
+const rewriterLinesContext = controls.rewriterLinesCanvas.getContext('2d');
+rewriterLinesContext.imageSmoothingEnabled = false;
+const rewriterContext = controls.rewriterCanvas.getContext('2d');
+
 rewriterContext.lineCap = "round";
-let rewriterMaskContext = controls.rewriterMaskCanvas.getContext('2d');
+const rewriterMaskContext = controls.rewriterMaskCanvas.getContext('2d');
 
 // Colours
 await drawStoredLines(rewriterContext, true, false);
@@ -40,6 +40,8 @@ function resetcanvasWriter()
     rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
     rewriterContext.strokeStyle = userData.userSettings.selectedPenColour;
     userData.deletedLines = [];
+    userData.storedLines = [];
+    userData.saveToLocalStorage();
 }
 
 // TODO move to controls
@@ -48,14 +50,16 @@ controls.traceButton.onclick = async () => {
     userData.userSettings.isTraceOn = !userData.userSettings.isTraceOn;
 
     controls.traceButton.classList.remove("option-selected");
-    
+
     const rewriterTraceContext = controls.rewriterTraceCanvas.getContext('2d');
     rewriterTraceContext.clearRect(0, 0, controls.rewriterTraceCanvas.width, controls.rewriterTraceCanvas.height)
-    
+
     if (userData.userSettings.isTraceOn) {
         controls.traceButton.classList.add("option-selected");
-        await drawStoredLines(rewriterTraceContext, true, true); 
+        await drawStoredLines(rewriterTraceContext, true, true);
     }
+
+    userData.saveToLocalStorage();
 }
 
 // Bottom controls
@@ -66,28 +70,29 @@ controls.undoButton.onclick = async function()
         userData.deletedLines.push(userData.storedLines.pop());
         rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
         await drawStoredLines(rewriterContext, true, false);
+        userData.saveToLocalStorage();
     }
 }
 
 controls.redoButton.onclick = async function()
 {
     if (!isRewriting && userData.deletedLines.length != 0) {
-        userData.storedLines.push(userData.deletedLines.pop());    
+        userData.storedLines.push(userData.deletedLines.pop());
         rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
         await drawStoredLines(rewriterContext, true, false);
+        userData.saveToLocalStorage();
     }
 }
 let controller = new AbortController();
 let signal = controller.signal;
 
-const playImageSrc = "images/playIcon.svg";
-const stopImageSrc = "images/stopIcon.svg";
-const rewriteButtonImage = controls.rewriteButton.getElementsByTagName('img')[0];
+const playImageSrc = utils.getIconUrl('playIcon.svg');
+const stopImageSrc = utils.getIconUrl('stopIcon.svg');
+const rewriteButtonImage = controls.rewriteButton.querySelector('img');
 
 controls.resetButton.onclick = function() {
     controller?.abort();
     resetcanvasWriter();
-    userData.storedLines = [];
 }
 
 controls.rewriteButton.onclick = async () => {    

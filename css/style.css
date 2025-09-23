@@ -242,10 +242,6 @@ body {
 }
 
 
-#helpButton {
-    display: none; /* TODO */
-}
-
 .sidebar-options {
     pointer-events: auto;
     display: flex;
