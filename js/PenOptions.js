@@ -2,6 +2,7 @@ export class PenOptions {
   constructor(colour = '#000000', width = 6) {
     this.colour = colour;
     this.width = width;
+    this.size = width;
   }
 
   static fromObject(value) {
@@ -10,14 +11,16 @@ export class PenOptions {
     }
 
     const colour = typeof value.colour === 'string' ? value.colour : '#000000';
-    const width = Number(value.width);
+    const rawWidth = value.width ?? value.size;
+    const width = Number(rawWidth);
     return new PenOptions(colour, Number.isFinite(width) ? width : 6);
   }
 
   toJSON() {
     return {
       colour: this.colour,
-      width: this.width
+      width: this.width,
+      size: this.size
     };
   }
 }
