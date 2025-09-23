@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<!-- saved from url=(0061)file:///Users/donaldcjapi/Desktop/Handwriting%20Repeater.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <!-- TODO <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+    <meta name="description" content="A web app that can be used to effectively demonstrate correct handwriting technique. With useful features such as Loop and Trace, stand back and watch the handwriting teach itself!">
+    <meta name="google-adsense-account" content="ca-pub-7814326930117674">
+    <meta name="google-site-verification" content="trCK2wLL9i76vPCScU34nWJnmlRaDWiZ_Js_sR9K9WU">
+    <title>Handwriting Repeater</title>
+    <link rel="icon" type="image/x-icon" href="https://handwritingrepeater.app/images/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://handwritingrepeater.app/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://handwritingrepeater.app/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://handwritingrepeater.app/images/favicon-16x16.png">
+    <link rel="manifest" href="https://handwritingrepeater.app/site.webmanifest">
+    <link rel="stylesheet" href="./Handwriting Repeater_files/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link href="./Handwriting Repeater_files/css2" rel="stylesheet">
+  <link type="text/css" rel="stylesheet" id="dark-mode-custom-link"><link type="text/css" rel="stylesheet" id="dark-mode-general-link"><style lang="en" type="text/css" id="dark-mode-custom-style"></style><style lang="en" type="text/css" id="dark-mode-native-style"></style><style lang="en" type="text/css" id="dark-mode-native-sheet"></style><style id="custom-cursor" type="text/css">body button, body [type='button'], body input[type='reset'], body input[type='submit'], body [role="button"], ::-webkit-search-cancel-button, ::-webkit-search-decoration, ::-webkit-scrollbar-button, ::-webkit-file-upload-button, [role^=button], .cc_pointer, [type="search"]::-webkit-search-cancel-button, a, select, [type="search"]::-webkit-search-decoration, .paper-button, .ytp-progress-bar-container, input[type=submit], :link, :visited, a > *, img,  ::-webkit-scrollbar-button, .ogdlpmhglpejoiomcodnpjnfgcpmgale_pointer, ::-webkit-file-upload-button, .ytp-volume-panel, #myogdlpmhglpejoiomcodnpjnfgcpmgale .icon, body .custom-cursor-on-hover {cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAE1klEQVR4AexXW2gcZRT+Zmdm01yaxtxtotbG24M11SIFQTGKFW+lRqFIpQ+x2OqDCIoFoSCCWBWj8cEimleJt1IxCiK1VqXFVmOrUtpEk5KNtc1929242Z2d8Tv/7GR3k51ZU4JPLvvN+f9zzpzv+88/FyaEYr/JN3djuiuKqa5jiHWuKZa+2HiwgGjnVdC0nXBQycKtSOlP0y7pP1iAFq7LY3NQljdfgkmwgCUgKFbifwHFO+BogMM0R6clivV0kXFWDjgjZQB2mDCBNGETAekXEwoWABLaFOGRpynmYlgCzgkWYOWSy/i/3gLpgKxeIFvhsAM/vmMi8uEaRD6+OmBh/zoU3AF1DXAb0rJ6gak1NTQducds/OU2vbZfH9q3RzENftqA4d7rKaxUzRdxCBagtoDEcvFRRINTtumVFTes3VK2CjsqWvBkRct2DPQ+0VZSN7I13PTrNen6fgzuv0LxD3xRAueF4PpMLJLA1Sty1641Lil5NzqCjrMn8OLEIG4MV6G9bOVrHeWXG3eV1uOZFS3NFSnn8et+/35ve2lT/O7hjefw21cPkcf3HyxAtoArh4KJ72ZiOBiPIWnrOJlI4YPpUW1DaX355xem8NJoBKPJFG4tqd32XM3qBzeV1+tbK1fWbq5s3uPLzkCwAIsrF3J1KxqYsZguF6SAvm9icfwxm0DP9BQFWegcO4s7ymvrD9PfMTyEnWciqNbC8iYlVeE/KxYOuF7uv5AJcrYCJAd9s5aOj6ajgIoZmKLAoUQS3eOTsJgzkgS+PB93S/kcswKOH7wSPx9YlZeXYgekOItBOkHSPMvY6USaT0kKlRyiZ+I8bJVLH+3gTDrLkVfcnYTgHDBuOtXX81Rt8+DzjauH2odOHsORQ7eosHcXsJAi5t6DJO6YBLljlWNiMsl3B4XBE+uYdKhqBQ+h9f11uzZU1GyOW0CppuPhqrrWjobG/Th69HaAHVCFDbaZKDRWRMzzSJVlrohTY8YKUrvOUF9stmX3X+PoHotiV2QUXWfG0FZetey+5dXvwzaXQwrNJ/HmYoVE5ZB0TiBJ58aG7VIVPoZS69Y9CsfYBtu0CfwQS+PlyDgeqam+tFkLb1etFAKBIswQyVzgEYmdv0XiS+uJwtSuN6TMza3dcMLPigCkdZz428HesTi21FRvlDlUIRJ7hJ5Vfj1zEWZsro+1eO45xeFzcAVIcP21b8DWe3mCKrhvYhaHp5KGEjVHmEPi+Tw7vzsiRLbHMgakvB+yAiQjsWwHCeMiQm6lb6Nyi+WQqqLshLuy7IUpIgRzcebIXADjtJT2Q76AOy/7k+SvQk6UYgJZhbJGPqH4BLm5Mheoc+RCJCyjz49c/PkCxKOZnRQwQWQI2YEFJCysSChKWq8wfyxzwjZ+krJ+WCigrT4Gy3gL84sqER4xrVopCZTNiHQ4lzyBjB1jGveWH/cjF/9CAeJNmW/DNmezIgx1YUIKK2QI1Zgxz3pixAos/Wt+2jlS0g+FBTxQOY60wQcRi7srcbfDI/KskKhxoY5QJPTP/Ig9f2EBEtWM99SKhUQgRGK9O0CsPHjEyvvGZimbj331HSEWMUziEykVBJ7lE77fPEQBp/iUtPh8cOGELH6k8K2hZaHBggfkjV/HY9oFn+pz7n8AAAD//7ob5EMAAAAGSURBVAMAujk7QdJ+hbEAAAAASUVORK5CYII=") 10 0, pointer !important;} html,body,body select,body .custom-cursor-default-hover {cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFYklEQVR4AcSWa2wUVRiG33POzG731i2lRSiFqm0trRANMVFbGqJFCCIhyN3EYEzUeIkh/lECJE1U/hgCmEiC0UjiD8nKJQVSUoUUAjEIKNj4Q4KpBNuy3V62F7q7s7sz4/dN2xSClC0tZTLfnDNzzpz3Oe+5zEhEd30He68XD+mQpLtK9CYuo2fnfMpP+kkAIjFLBEtLZd4viO7YNNkEBID4dSuKKm22e61r7k4tuvsYwl9MmywQCYEEIHEi1Yx1ejG2ZlUuy3dP/R3RvS9MBoQkkTgFWqweNKTasEQVYJeneuZ8zPgJ4X3bYTdqXP6gggHIARuwNRxPXkPYSmKW9GO7Z7623v3EZm9bxym0HSx6cAC2GICtCEDh33SMXGiHtAW8QsN7nmJ84p9XVWT6LqO5bs2DgJCwRcwBsDTAcuFovAWdVgqCIBRFjSsftTkVOQvc00LqyvG9uHh0QvcMAtAScMQZQKE1GcfPiQ4ompg2zVDbBsqUD6u9M7AhOPvt3EDwAppOz5soNySJDwHQMDCI7UJd7AY6zTTIHUfnV6Mfzekk8mUWNgYLK+ZlZZ/DH+ffdQrHeZEwtTisIXEGoHyLYeB4vJP6LxA2U/iHxBXNE2VJaOTNy4E873L/lD3ui5cO4UzTFIzjIAd0AmD7ORiEwtZR1x9BN7kwg3rtoRXC4oKGBbaETXOjIsuHt/KmrZzpdV/C2SvVuM9DQgzPARKm3sPSAXKizUihfiDqNFuieWhSSnouIcgFDklpjtTxRn5uUZXP24jTzVsRIpucNzK/SKRVbHAIGIDFOZUA9bqutxu9aQtFKgsW9ZrnhKBUkQsc7ATD1OT41Ma8wKf+/BsncbJzZubyvAdbyuAew+k5i3PwcOhoM0wc6+9DQGrIky6wKIckAEec0kEoicezXPiwwL+wzCWa0NC9PFMISZMwDbJ8xIVhAErJhUPRKLpME8W6izYo6QSLM4hOAMIS6DBs/Nln4XyvZWULLQpLvYaGvjmZQNCM0ghAgV4aCu79yH3YsFDf049CAkiZApf6kzgdNfBDJN6zs2Wg8fNrA7v3tBrv/BhJP3OiPRa4sCBYgqXBDViS/RcyOCQJJyluEb8dAOxC10300VwodbtxpjfZdzaWKr9a/83UnurCF62awk1YNP1rLMn/DcsLYhlo3laFhkDSRsQ9ZmEOzt8aGsIGcKQ7jmK3C9V+bzYMtQq1tdZtLd3njYRN+4DJwhwsTCvAWY58PzQ8tLoOdNBXmyRrgh7kKv0jnGiZigk4JC3DBMjmkWFgCBZ3ludLMFUTl0XIhcOdCTxKLtQEPLkw3R9PgD5tbTZtRKYCCQ2GsyLYFbyK58tP0fPNDAByIdRuwCclnvbpeETq76NuoGC8EOzAgCPg2M4gOv2giJWonNvgNL6wuJ7Kz1AgYkgciaQw3aWwONfthcQ2p844LpJ6NgRAttsabUpiDZ4tHxQfbthUWxiAhyp0w0SOJlHm0TBL195EKFEyXO1+UkkWJ5yNyNaSSGMdKsuP3dHQogJyQGMnaNORaOyyEZACS3M1FzS99o76Y3ggIRUBqDRMtR5VT9bd9V3h3kKgFjmG/a1AtiZR4pF4zC3X45D91F3fu0eBRNLFY/46KssOj1p3sf8yLBligE5D4Vw36LMMLMujHwQLn4367iiFkoRb8VzF/lHqjBRZchssLQX6BhxoE/AooMgDzPHiFRy0q0YqZp6TmVelmiuy/iYXvuUvYJcJnKffhTD5R9mbVFpKMeZzbADcfNqxO87ZUATJHdfx1dUUSrBK7ONnY42xA6wVrfSz+CUJfZ9MYw5Wiw+wQrTT/f+e93r4HwAAAP//XmDuWwAAAAZJREFUAwAIAius2UKFRQAAAABJRU5ErkJggg==") 0 0, auto !important;}</style><script async="" src="./Handwriting Repeater_files/js"></script><script async="" src="./Handwriting Repeater_files/js(1)"></script></head>
+  
+  <body>
+
+    <div class="title-container">
+      <img src="./Handwriting Repeater_files/logo.svg" id="titleIcon">
+      <div class="title-texts">
+        <h1 class="title-text">Handwriting Repeater</h1>
+        <button class="box-button" id="dateButton">
+          <h1 class="date-text" id="dateText">Tuesday, 23rd September 2025</h1>
+        </button>
+      </div>
+    </div>
+    <div class="main-container disable-select">
+      <div class="writer-container">
+        <canvas id="writerPage" width="4000" height="600"></canvas>
+        <canvas id="writerTrace" width="4000" height="600"></canvas>
+        <canvas id="writerLines" width="4000" height="600"></canvas>
+        <canvas id="writer" width="4000" height="600"></canvas>
+        <canvas id="writerMask" width="4000" height="600"></canvas>
+        <div class="interface">
+          <div class="controls-container disable-select">
+            <div id="rewriteResetContainer">
+              <div class="left-controls-container">
+                <div class="slider-with-text">
+                  <input class="slider" id="zoomSlider" type="range" min="1" max="4" value="4" step="0.1">
+                  <p class="slider-text" id="zoomText">Zoom</p>
+                </div>
+                <div class="slider-with-text">
+                  <input class="slider" id="speedSlider" type="range" min="0.1" max="10" value="2" step="0.1">
+                  <p class="slider-text" id="writeSpeedText">Write Speed</p>
+                </div>
+              </div>
+              
+              <div class="centre-controls-container">
+                <button class="box-button icon-button" id="rewriteButton"><span>Rewrite!</span><img src="./Handwriting Repeater_files/playIcon.svg"></button>
+              </div>
+              
+              <div class="right-controls-container">
+                <button class="icon-only-button" id="resetButton"><img src="./Handwriting Repeater_files/binIcon.svg"></button>
+                <div class="undo-redo-container">
+                  <button class="icon-only-button" id="undoButton"><img src="./Handwriting Repeater_files/undoIcon.svg"></button>
+                  <button class="icon-only-button" id="redoButton"><img src="./Handwriting Repeater_files/redoIcon.svg"></button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sidebars">
+          <div class="sidebar-left" id="sidebarLeft">
+              <div class="sidebar-options" id="leftSidebarOptions">
+
+                <button class="box-button icon-button" id="penSizeButton"><img src="./Handwriting Repeater_files/penMediumIcon.svg"><span>Pen Size</span></button>
+                <div class="options-button-options" id="penSizeButtonOptions" style="left: 231.792px; top: 157.021px;">
+                  <button class="box-button icon-button" id="smallPenButton"><img src="./Handwriting Repeater_files/penSmallIcon.svg"><span>Small</span></button>
+                  <button class="box-button icon-button option-selected" id="mediumPenButton"><img src="./Handwriting Repeater_files/penMediumIcon.svg"><span>Medium</span></button>
+                  <button class="box-button icon-button" id="largePenButton"><img src="./Handwriting Repeater_files/penLargeIcon.svg"><span>Large</span></button>
+                </div>
+
+                <button class="box-button icon-button" id="penTypeButton"><img src="./Handwriting Repeater_files/pen.svg"><span>Pen Type</span></button>
+                <div class="options-button-options" id="penTypeButtonOptions" style="left: 231.792px; top: 235.021px;">
+                  <button class="box-button icon-button option-selected" id="markerPenTypeButton"><img src="./Handwriting Repeater_files/pen.svg"><span>Pen</span></button>
+                  <button class="box-button icon-button" id="pencilPenTypeButton"><img src="./Handwriting Repeater_files/pencil.svg"><span>Pencil</span></button>
+                  <button class="box-button icon-button" id="quillPenTypeButton"><img src="./Handwriting Repeater_files/quill.svg"><span>Quill</span></button>
+                  <button class="box-button icon-button" id="nonePenTypeButton"><img src="./Handwriting Repeater_files/nonePen.svg"><span>None</span></button>
+                </div>
+
+                <button class="box-button icon-button" id="penColourButton"><img src="./Handwriting Repeater_files/blackPenColourIcon.svg"><span>Pen Colour</span></button>
+                <div class="options-button-options" id="penColourButtonOptions" style="left: 231.792px; top: 313.021px;">
+                  <button class="box-button icon-button option-selected" id="blackPenColourButton"><img src="./Handwriting Repeater_files/blackPenColourIcon.svg"></button>
+                  <button class="box-button icon-button" id="redPenColourButton"><img src="./Handwriting Repeater_files/redPenColourIcon.svg"></button>
+                  <button class="box-button icon-button" id="greenPenColourButton"><img src="./Handwriting Repeater_files/greenPenColourIcon.svg"></button>
+                  <button class="box-button icon-button" id="bluePenColourButton"><img src="./Handwriting Repeater_files/bluePenColourIcon.svg"></button>
+                  <button class="box-button icon-button" id="yellowPenColourButton"><img src="./Handwriting Repeater_files/yellowPenColourIcon.svg"></button>
+                  <button class="box-button icon-button" id="purplePenColourButton"><img src="./Handwriting Repeater_files/purplePenColourIcon.svg"></button>
+                  <button class="box-button icon-button" id="orangePenColourButton"><img src="./Handwriting Repeater_files/orangePenColourIcon.svg"></button>
+                  <button class="box-button icon-button" id="darkGreenPenColourButton"><img src="./Handwriting Repeater_files/darkGreenPenColourIcon.svg"></button>
+                  <button class="box-button icon-button" id="pinkPenColourButton"><img src="./Handwriting Repeater_files/pinkPenColourIcon.svg"></button>
+                  <button class="box-button icon-button" id="brownPenColourButton"><img src="./Handwriting Repeater_files/brownPenColourIcon.svg"></button>
+                  <button class="box-button icon-button" id="greyPenColourButton"><img src="./Handwriting Repeater_files/greyPenColourIcon.svg"></button>
+                </div>
+
+                <button class="box-button icon-button" id="loopButton"><img src="./Handwriting Repeater_files/loopIcon.svg"><span>Loop Mode</span></button>
+                <button class="box-button icon-button" id="traceButton"><img src="./Handwriting Repeater_files/traceIcon.svg"><span>Trace Mode</span></button>                
+              </div>
+              <button class="collapse-tab" id="collapseLeftSidebar"><img src="./Handwriting Repeater_files/arrowIconRight.svg"></button>
+          </div>
+          <div class="sidebar-right" style="margin-right: 0px;">
+              <div class="sidebar-options" id="rightSidebarOptions">
+                
+                <button class="box-button icon-button" id="backgroundButton"><img src="./Handwriting Repeater_files/blueDottedLinesIcon.svg"><span>Page Lines</span></button>
+                <div class="options-button-options" id="backgroundButtonOptions" style="left: 510.281px; top: 157.021px;">
+                  <button class="box-button icon-button option-selected" id="backgroundButton1"><img src="./Handwriting Repeater_files/blueDottedLinesIcon.svg"></button>
+                  <button class="box-button icon-button" id="backgroundButton2"><img src="./Handwriting Repeater_files/greyDottedLinesIcon.svg"></button>
+                  <button class="box-button icon-button" id="backgroundButton3"><img src="./Handwriting Repeater_files/redBlueLinesIcon.svg"></button>
+                  <button class="box-button icon-button" id="backgroundButton9"><img src="./Handwriting Repeater_files/greyDottedLines2Icon.svg"></button>
+                  <button class="box-button icon-button" id="backgroundButton7"><img src="./Handwriting Repeater_files/yellowTramLinesIcon.svg"></button>
+                  <button class="box-button icon-button" id="backgroundButton5"><img src="./Handwriting Repeater_files/groundIcon.svg"></button>
+                  <button class="box-button icon-button" id="backgroundButton4"><img src="./Handwriting Repeater_files/greyLinesIcon.svg"></button>
+                  <button class="box-button icon-button" id="backgroundButton6"><img src="./Handwriting Repeater_files/squaresIcon.svg"></button>
+                  <button class="box-button icon-button" id="backgroundButton8"><img src="./Handwriting Repeater_files/blankIcon.svg"></button>
+                </div>
+                
+                <button class="box-button icon-button" id="pageColourButton"><img src="./Handwriting Repeater_files/whitePageColourIcon.svg"><span>Page Colour</span></button>
+                <div class="options-button-options" id="pageColourButtonOptions" style="left: 510.281px; top: 235.021px;">
+                  <button class="box-button icon-button option-selected" id="whitePageButton"><img src="./Handwriting Repeater_files/whitePageColourIcon.svg"></button>
+                  <button class="box-button icon-button" id="peachPageButton"><img src="./Handwriting Repeater_files/peachPageColourIcon.svg"></button>
+                  <button class="box-button icon-button" id="yellowPageButton"><img src="./Handwriting Repeater_files/yellowPageColourIcon.svg"></button>
+                  <button class="box-button icon-button" id="bluePageButton"><img src="./Handwriting Repeater_files/bluePageColourIcon.svg"></button>
+                  <button class="box-button icon-button" id="blueGreyPageButton"><img src="./Handwriting Repeater_files/blueGreyPageColourIcon.svg"></button>
+                </div>
+
+                <button class="box-button icon-button" id="fullscreenButton"><img src="./Handwriting Repeater_files/fullscreenIcon.svg"><span>Fullscreen Mode</span></button>
+                <button class="box-button icon-button" id="helpButton"><img src="./Handwriting Repeater_files/helpIcon.svg"><span>Help</span></button>
+                <button class="box-button icon-button" id="contactButton"><img src="./Handwriting Repeater_files/contactIcon.svg"><span>Contact Us</span></button>
+              </div>
+              <button class="collapse-tab" id="collapseRightSidebar"><img src="./Handwriting Repeater_files/arrowIconLeft.svg"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="./Handwriting Repeater_files/script.js" type="module"></script>
+
+    <a href="https://handwritingrepeater.app/#" onclick="showCookieBanner(); return false;" style="display: flex; align-self: center;">Privacy Policy and Cookies Settings</a>
+
+    <footer style="display: flex; align-self: center; margin-block: 20px;">
+        © Handwriting Repeater 2025
+    </footer>
+
+    <!-- Cookie Popup HTML -->
+    <div id="cookie-popup" style="display: none; position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.6); justify-content: center; align-items: center; z-index: 10000;">
+      <div style="background: #fff; max-width: 500px; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
+        <h3 style="margin-top: 0;">We use cookies</h3>
+        <p>We use cookies to improve your experience and analyse traffic using Google Analytics. Read our <a href="https://handwritingrepeater.app/privacy-policy.html" target="_blank">Privacy Policy</a>.</p>
+        <div style="margin-top: 20px; text-align: right;">
+          <button class="box-button" onclick="handleCookieConsent(false)" style="padding: 5px 15px;">Reject</button>
+          <button class="box-button" onclick="handleCookieConsent(true)" style="padding: 5px 15px;">Accept</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="formContainer">
+      <form id="emailForm" action="https://api.web3forms.com/submit" method="POST">
+          
+          <div id="contactHeader">
+            <p>We'd love to hear from you!</p>
+            <button class="box-button" id="closeFormButton">✖</button>
+          </div>
+          <p>
+              Feel free to send us a message if you run into any issues, have suggestions for any improvements, or just enjoy using our app. 
+              <br>
+              <br>
+              You can email us directly at <a href="mailto:handwritingrepeater.app@gmail.com">handwritingrepeater.app@gmail.com</a> or use the form below!
+          </p>
+          <!-- Replace with your Access Key -->
+          <input type="hidden" name="access_key" value="6c156268-b0f1-4482-a239-f568722bfb0b">
+
+          <!-- Form Inputs. Each input must have a name="" attribute -->
+          <h1>Name</h1>
+          <input type="text" name="name" required="" placeholder="e.g. Bob">
+          <h1>Email</h1>
+          <input type="email" name="email" required="" placeholder="e.g. bob@example.com">
+          <h1>Message</h1>
+          <textarea name="message" required="" placeholder="Write your message here..."></textarea>
+  
+          <!-- Honeypot Spam Protection -->
+          <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
+  
+          <!-- Custom Confirmation / Success Page -->
+          <!-- <input type="hidden" name="redirect" value="https://mywebsite.com/thanks.html"> -->
+  
+          <button class="box-button" id="submitButton" type="submit">Submit</button>
+          <p id="emailResult"></p>
+      </form>
+    </div>
+
+    <script>
+      const form = document.getElementById('emailForm');
+      const result = document.getElementById('emailResult');
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const object = Object.fromEntries(formData);
+        const json = JSON.stringify(object);
+        result.innerHTML = "Please wait..."
+
+          fetch('https://api.web3forms.com/submit', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'Accept': 'application/json'
+                  },
+                  body: json
+              })
+              .then(async (response) => {
+                  let json = await response.json();
+                  if (response.status == 200) {
+                      result.innerHTML = json.message;
+                  } else {
+                      console.log(response);
+                      result.innerHTML = json.message;
+                  }
+              })
+              .catch(error => {
+                  console.log(error);
+                  result.innerHTML = "Something went wrong!";
+              })
+              .then(function() {
+                  form.reset();
+              });
+      });
+    </script>
+
+    <!-- Cookie Consent Script -->
+    <script>
+      function showCookieBanner() {
+        setCookie("cookie_consent", "", -1); // Expire the cookie immediately
+        document.getElementById("cookie-popup").style.display = "flex";
+      }
+
+      function setCookie(name, value, days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        const expires = "expires=" + date.toUTCString();
+        document.cookie = name + "=" + value + ";" + expires + ";path=/";
+      }
+
+      function getCookie(name) {
+        const cname = name + "=";
+        const decoded = decodeURIComponent(document.cookie);
+        const cookies = decoded.split(';');
+        for (let c of cookies) {
+          while (c.charAt(0) == ' ') c = c.substring(1);
+          if (c.indexOf(cname) == 0) return c.substring(cname.length, c.length);
+        }
+        return "";
+      }
+
+      function handleCookieConsent(accepted) {
+        setCookie("cookie_consent", accepted ? "accepted" : "rejected", 365);
+        document.getElementById("cookie-popup").style.display = "none";
+        if (accepted) {
+          loadAnalytics();
+        }
+      }
+
+      function loadAnalytics() {
+        const script = document.createElement('script');
+        script.setAttribute("async", "");
+        script.setAttribute("src", "https://www.googletagmanager.com/gtag/js?id=G-45NB3EQYGX");
+        document.head.appendChild(script);
+
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', 'G-45NB3EQYGX');
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const consent = getCookie("cookie_consent");
+        if (consent === "accepted") {
+          loadAnalytics();
+        } else {
+          // Show popup if consent cookie rejected or doesn't exist
+          document.getElementById("cookie-popup").style.display = "flex";
+        }
+      });
+
+    </script>
+
+  
+
+
+</body></html>
