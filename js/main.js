@@ -10,7 +10,6 @@ userData.loadFromLocalStorage();
 
 const controls = new Controls(userData);
 
-const rewriterTraceContext = controls.rewriterTraceCanvas.getContext('2d');
 const rewriterLinesContext = controls.rewriterLinesCanvas.getContext('2d');
 rewriterLinesContext.imageSmoothingEnabled = false;
 const rewriterContext = controls.rewriterCanvas.getContext('2d');
@@ -19,7 +18,7 @@ rewriterContext.lineCap = "round";
 const rewriterMaskContext = controls.rewriterMaskCanvas.getContext('2d');
 
 // Colours
-await drawStoredLines(rewriterContext, true, false);
+await drawStoredLines(rewriterContext, true);
 
 //
 
@@ -36,29 +35,10 @@ let currentLine = [];
 function resetcanvasWriter()
 {
     rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
-    rewriterTraceContext.clearRect(0, 0, controls.rewriterTraceCanvas.width, controls.rewriterTraceCanvas.height);
     rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
     rewriterContext.strokeStyle = userData.userSettings.selectedPenColour;
     userData.deletedLines = [];
     userData.storedLines = [];
-    userData.saveToLocalStorage();
-}
-
-// TODO move to controls
-
-controls.traceButton.onclick = async () => {
-    userData.userSettings.isTraceOn = !userData.userSettings.isTraceOn;
-
-    controls.traceButton.classList.remove("option-selected");
-
-    const rewriterTraceContext = controls.rewriterTraceCanvas.getContext('2d');
-    rewriterTraceContext.clearRect(0, 0, controls.rewriterTraceCanvas.width, controls.rewriterTraceCanvas.height)
-
-    if (userData.userSettings.isTraceOn) {
-        controls.traceButton.classList.add("option-selected");
-        await drawStoredLines(rewriterTraceContext, true, true);
-    }
-
     userData.saveToLocalStorage();
 }
 
@@ -69,7 +49,7 @@ controls.undoButton.onclick = async function()
     if (!isRewriting && userData.deletedLines.length < 100 && userData.storedLines.length > 0) {
         userData.deletedLines.push(userData.storedLines.pop());
         rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
-        await drawStoredLines(rewriterContext, true, false);
+        await drawStoredLines(rewriterContext, true);
         userData.saveToLocalStorage();
     }
 }
@@ -79,7 +59,7 @@ controls.redoButton.onclick = async function()
     if (!isRewriting && userData.deletedLines.length != 0) {
         userData.storedLines.push(userData.deletedLines.pop());
         rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
-        await drawStoredLines(rewriterContext, true, false);
+        await drawStoredLines(rewriterContext, true);
         userData.saveToLocalStorage();
     }
 }
@@ -104,7 +84,7 @@ controls.rewriteButton.onclick = async () => {
 }
 
 async function rewrite(signal = new AbortSignal()) {
-    
+
     if (signal.aborted || isRewriting || !userData.storedLines.length) {
         rewriteButtonImage.src = playImageSrc;
         return;
@@ -113,51 +93,32 @@ async function rewrite(signal = new AbortSignal()) {
     rewriteButtonImage.src = stopImageSrc;
     if (typeof gtag === "function") {
         gtag('event', 'activate_rewrite', {
-            'loop_on': userData.userSettings.isLoopOn,
-            'trace_on': userData.userSettings.isTraceOn,
             'selected_background': userData.userSettings.selectedBackground,
             'selected_page_colour': userData.userSettings.selectedPageColour,
-            'selected_pen_image': userData.userSettings.selectedPenImage,
             'write_speed_multiplier': userData.userSettings.rewriteSpeed,
             'zoom': userData.userSettings.zoomLevel
         });
     }
 
     isRewriting = true;
-    
-    do 
-    {        
+
+    try {
         rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
-        rewriterTraceContext.clearRect(0, 0, controls.rewriterTraceCanvas.width, controls.rewriterTraceCanvas.height);
-
-        if (userData.userSettings.isTraceOn)
-        {
-            await drawStoredLines(rewriterTraceContext, true, true, signal);
-        }
-
-        await drawStoredLines(rewriterContext, false, false, signal);
-
+        await drawStoredLines(rewriterContext, false, signal);
+    } finally {
+        isRewriting = false;
         rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
-        
+        rewriteButtonImage.src = playImageSrc;
+
         if (signal.aborted) {
-            break;
+            rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
         }
 
-        if (userData.userSettings.isLoopOn)
-        {
-            await new Promise(r => setTimeout(r, 1000));
-        }
-    } while (userData.userSettings.isLoopOn & isRewriting);
-
-    isRewriting = false;
-    rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
-    rewriterTraceContext.clearRect(0, 0, controls.rewriterTraceCanvas.width, controls.rewriterTraceCanvas.height);
-    await drawStoredLines(rewriterContext, true, false, undefined);
-
-    rewriteButtonImage.src = playImageSrc;    
+        await drawStoredLines(rewriterContext, true);
+    }
 }
 
-async function drawStoredLines(ctx, instantDraw = false, traceDraw = false, abortSignal = undefined) {
+async function drawStoredLines(ctx, instantDraw = false, abortSignal = undefined) {
 
     ctx.lineCap = "round";
 
@@ -173,15 +134,7 @@ async function drawStoredLines(ctx, instantDraw = false, traceDraw = false, abor
             }
             
             ctx.lineWidth = userData.storedLines[i][j].penOptions.width;
-
-            const baseColour = userData.storedLines[i][j].penOptions.colour;
-            const traceColour = 'rgb(200, 200, 200)';
-            if (traceDraw) {
-                ctx.strokeStyle = traceColour;
-            }
-            else {
-                ctx.strokeStyle = baseColour;
-            }
+            ctx.strokeStyle = userData.storedLines[i][j].penOptions.colour;
 
             ctx.beginPath();        
             ctx.moveTo(userData.storedLines[i][j].start.x, userData.storedLines[i][j].start.y);
@@ -189,14 +142,14 @@ async function drawStoredLines(ctx, instantDraw = false, traceDraw = false, abor
             
             if (!instantDraw) {
                 rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
-                
+
                 let penImage = utils.PenEnumToImage(userData.userSettings.selectedPenImage);
                 if (penImage) {
                     rewriterMaskContext.drawImage(penImage, userData.storedLines[i][j].end.x, userData.storedLines[i][j].end.y - penImage.height);
                 }
             }
-            ctx.stroke();   
-    
+            ctx.stroke();
+
             if (!instantDraw) {
                 await new Promise(r => setTimeout(r, 50 / userData.userSettings.rewriteSpeed));
             }

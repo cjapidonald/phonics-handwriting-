@@ -328,6 +328,48 @@ body {
     pointer-events: none;
 }
 
+.options-button-options-show input[type="range"],
+.options-button-options-show .pen-size-slider-container {
+    pointer-events: all;
+}
+
+#penTypeButton,
+#penTypeButtonOptions,
+#loopButton,
+#traceButton {
+    display: none;
+}
+
+.pen-size-slider-container {
+    background-color: rgba(183, 208, 255, 0.95);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 220px;
+    padding: 16px;
+}
+
+.pen-size-label {
+    font-weight: 700;
+    text-shadow: 0.05em 0.05em royalblue;
+    color: white;
+    text-align: center;
+}
+
+.pen-size-value {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0.05em 0.05em royalblue;
+    text-align: center;
+}
+
+.pen-size-slider {
+    width: 100%;
+    accent-color: royalblue;
+}
+
 .sidebar-options button {
     margin-block: -1px;
     display: flex;
