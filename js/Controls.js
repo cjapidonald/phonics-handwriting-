@@ -1,211 +1,32 @@
 import { DEFAULT_SETTINGS } from './UserData.js';
-import { formatDateWithOrdinal, getIconUrl, clamp } from './utils.js';
+import { formatDateWithOrdinal, clamp } from './utils.js';
 
 const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 600;
 
 const PEN_SIZE_MIN = 1;
 const PEN_SIZE_MAX = 40;
-const SMALL_ICON = 'penSmallIcon.svg';
-const MEDIUM_ICON = 'penMediumIcon.svg';
-const LARGE_ICON = 'penLargeIcon.svg';
 
-const PEN_COLOURS = {
-  black: { id: 'blackPenColourButton', colour: '#000000', icon: 'blackPenColourIcon.svg' },
-  red: { id: 'redPenColourButton', colour: '#d8342c', icon: 'redPenColourIcon.svg' },
-  green: { id: 'greenPenColourButton', colour: '#0f7a3d', icon: 'greenPenColourIcon.svg' },
-  blue: { id: 'bluePenColourButton', colour: '#1e4dd8', icon: 'bluePenColourIcon.svg' },
-  yellow: { id: 'yellowPenColourButton', colour: '#f5c400', icon: 'yellowPenColourIcon.svg' },
-  purple: { id: 'purplePenColourButton', colour: '#7f3f98', icon: 'purplePenColourIcon.svg' },
-  orange: { id: 'orangePenColourButton', colour: '#f17f1a', icon: 'orangePenColourIcon.svg' },
-  darkGreen: { id: 'darkGreenPenColourButton', colour: '#1b5035', icon: 'darkGreenPenColourIcon.svg' },
-  pink: { id: 'pinkPenColourButton', colour: '#e969ad', icon: 'pinkPenColourIcon.svg' },
-  brown: { id: 'brownPenColourButton', colour: '#5b3a1d', icon: 'brownPenColourIcon.svg' },
-  grey: { id: 'greyPenColourButton', colour: '#5e5e5e', icon: 'greyPenColourIcon.svg' }
-};
+const PEN_COLOUR_SWATCHES = [
+  '#111111',
+  '#444444',
+  '#1e4dd8',
+  '#d8342c',
+  '#0f7a3d',
+  '#7f3f98',
+  '#f17f1a',
+  '#5b3a1d',
+  '#e969ad',
+  '#00bcd4',
+  '#ffffff'
+];
 
-const PAGE_COLOURS = {
-  white: { id: 'whitePageButton', colour: '#ffffff', icon: 'whitePageColourIcon.svg' },
-  peach: { id: 'peachPageButton', colour: '#ffe9d5', icon: 'peachPageColourIcon.svg' },
-  yellow: { id: 'yellowPageButton', colour: '#fff7c2', icon: 'yellowPageColourIcon.svg' },
-  blue: { id: 'bluePageButton', colour: '#e5f1ff', icon: 'bluePageColourIcon.svg' },
-  blueGrey: { id: 'blueGreyPageButton', colour: '#dce6f2', icon: 'blueGreyPageColourIcon.svg' }
-};
-
-const BACKGROUND_DRAWERS = {
-  'blue-dotted': drawBlueDottedLines,
-  'grey-dotted': drawGreyDottedLines,
+const PAGE_STYLE_DRAWERS = {
+  blank: clearBackground,
   'red-blue': drawRedBlueGuidelines,
-  'grey-dotted-2': drawGreyDottedLinesDense,
-  'yellow-tram': drawYellowTramLines,
-  ground: drawGroundLine,
-  'grey-lines': drawGreyLines,
   squares: drawSquares,
-  blank: clearBackground
+  'grey-dotted': drawGreyDottedLines
 };
-
-const BACKGROUND_ICONS = {
-  'blue-dotted': { id: 'backgroundButton1', icon: 'blueDottedLinesIcon.svg' },
-  'grey-dotted': { id: 'backgroundButton2', icon: 'greyDottedLinesIcon.svg' },
-  'red-blue': { id: 'backgroundButton3', icon: 'redBlueLinesIcon.svg' },
-  'grey-dotted-2': { id: 'backgroundButton9', icon: 'greyDottedLines2Icon.svg' },
-  'yellow-tram': { id: 'backgroundButton7', icon: 'yellowTramLinesIcon.svg' },
-  ground: { id: 'backgroundButton5', icon: 'groundIcon.svg' },
-  'grey-lines': { id: 'backgroundButton4', icon: 'greyLinesIcon.svg' },
-  squares: { id: 'backgroundButton6', icon: 'squaresIcon.svg' },
-  blank: { id: 'backgroundButton8', icon: 'blankIcon.svg' }
-};
-
-function clearBackground(ctx, width, height) {
-  ctx.clearRect(0, 0, width, height);
-}
-
-function withContext(ctx, drawFn) {
-  ctx.save();
-  try {
-    drawFn();
-  } finally {
-    ctx.restore();
-  }
-}
-
-function drawHorizontalLines(ctx, width, height, { spacing, colour, widthPx = 2, dash = [], offset = 0 }) {
-  withContext(ctx, () => {
-    ctx.clearRect(0, 0, width, height);
-    ctx.strokeStyle = colour;
-    ctx.lineWidth = widthPx;
-    ctx.setLineDash(dash);
-
-    for (let y = offset; y <= height; y += spacing) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-  });
-}
-
-function drawBlueDottedLines(ctx, width, height) {
-  drawHorizontalLines(ctx, width, height, {
-    spacing: 80,
-    colour: '#1e4dd8',
-    widthPx: 2,
-    dash: [12, 24],
-    offset: 60
-  });
-}
-
-function drawGreyDottedLines(ctx, width, height) {
-  drawHorizontalLines(ctx, width, height, {
-    spacing: 70,
-    colour: '#7a7a7a',
-    widthPx: 2,
-    dash: [10, 20],
-    offset: 50
-  });
-}
-
-function drawGreyDottedLinesDense(ctx, width, height) {
-  drawHorizontalLines(ctx, width, height, {
-    spacing: 50,
-    colour: '#7a7a7a',
-    widthPx: 1.5,
-    dash: [6, 18],
-    offset: 40
-  });
-}
-
-function drawRedBlueGuidelines(ctx, width, height) {
-  withContext(ctx, () => {
-    ctx.clearRect(0, 0, width, height);
-    ctx.lineWidth = 2;
-
-    const spacing = 80;
-    for (let y = spacing; y <= height; y += spacing) {
-      ctx.beginPath();
-      ctx.strokeStyle = '#1e4dd8';
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-
-      const mid = y - spacing / 2;
-      ctx.beginPath();
-      ctx.strokeStyle = '#d8342c';
-      ctx.moveTo(0, mid);
-      ctx.lineTo(width, mid);
-      ctx.stroke();
-    }
-  });
-}
-
-function drawYellowTramLines(ctx, width, height) {
-  withContext(ctx, () => {
-    ctx.clearRect(0, 0, width, height);
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = '#f5c400';
-    const spacing = 75;
-    for (let y = spacing; y <= height; y += spacing) {
-      ctx.beginPath();
-      ctx.moveTo(0, y - spacing / 3);
-      ctx.lineTo(width, y - spacing / 3);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(0, y + spacing / 3);
-      ctx.lineTo(width, y + spacing / 3);
-      ctx.stroke();
-    }
-  });
-}
-
-function drawGroundLine(ctx, width, height) {
-  withContext(ctx, () => {
-    ctx.clearRect(0, 0, width, height);
-    const groundHeight = height * 0.2;
-    ctx.fillStyle = '#9fd26c';
-    ctx.fillRect(0, height - groundHeight, width, groundHeight);
-
-    ctx.strokeStyle = '#5c8f35';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(0, height - groundHeight);
-    ctx.lineTo(width, height - groundHeight);
-    ctx.stroke();
-  });
-}
-
-function drawGreyLines(ctx, width, height) {
-  drawHorizontalLines(ctx, width, height, {
-    spacing: 70,
-    colour: '#8f8f8f',
-    widthPx: 2,
-    dash: [],
-    offset: 50
-  });
-}
-
-function drawSquares(ctx, width, height) {
-  withContext(ctx, () => {
-    ctx.clearRect(0, 0, width, height);
-    const spacing = 70;
-    ctx.strokeStyle = '#1f4ea3';
-    ctx.lineWidth = 1.5;
-
-    for (let y = spacing; y <= height; y += spacing) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-
-    for (let x = spacing; x <= width; x += spacing) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
-      ctx.stroke();
-    }
-  });
-}
 
 export class Controls {
   constructor(userData) {
@@ -218,29 +39,47 @@ export class Controls {
     this.rewriterPageCanvas = document.getElementById('writerPage');
     this.rewriterMaskCanvas = document.getElementById('writerMask');
 
-    this.linesContext = this.rewriterLinesCanvas.getContext('2d');
-    this.pageContext = this.rewriterPageCanvas.getContext('2d');
+    this.linesContext = this.rewriterLinesCanvas?.getContext('2d') ?? null;
+    this.pageContext = this.rewriterPageCanvas?.getContext('2d') ?? null;
 
-    this.rewriteButton = document.getElementById('rewriteButton');
-    this.undoButton = document.getElementById('undoButton');
-    this.redoButton = document.getElementById('redoButton');
-    this.resetButton = document.getElementById('resetButton');
+    this.rewriteButton = document.getElementById('btnRewrite');
+    this.undoButton = document.getElementById('btnUndo');
+    this.redoButton = document.getElementById('btnRedo');
+    this.resetButton = document.getElementById('btnReset');
+    this.fullscreenButton = document.getElementById('btnFullscreen');
 
-    this.penSizeButton = document.getElementById('penSizeButton');
-    this.penSizeSlider = document.getElementById('penSizeSlider');
-    this.penColourButton = document.getElementById('penColourButton');
-    this.penColourOptions = document.getElementById('penColourButtonOptions');
-    this.pageStyleButton = document.getElementById('pageStyleButton');
-    this.pageStyleOptions = document.getElementById('pageStyleOptions');
-    this.backgroundOptions = document.getElementById('backgroundButtonOptions');
-    this.pageColourOptions = document.getElementById('pageColourButtonOptions');
+    this.zoomOutButton = document.getElementById('btnZoomOut');
+    this.zoomInButton = document.getElementById('btnZoomIn');
 
-    this.zoomSlider = document.getElementById('zoomSlider');
-    this.speedSlider = document.getElementById('speedSlider');
-    this.zoomOutButton = document.getElementById('zoomOutButton');
-    this.zoomInButton = document.getElementById('zoomInButton');
+    this.speedSlider = document.getElementById('sliderSpeed');
+    this.penSizeSlider = document.getElementById('sliderPenSize');
 
-    this.fullscreenButton = document.getElementById('fullscreenButton');
+    this.pageStyleButton = document.getElementById('btnPageStyle');
+    this.pageStylePopover = document.getElementById('pageStylePopover');
+    this.pageStyleButtons = this.pageStylePopover
+      ? Array.from(this.pageStylePopover.querySelectorAll('[data-page-style]'))
+      : [];
+
+    this.pageColourButtons = this.pageStylePopover
+      ? Array.from(this.pageStylePopover.querySelectorAll('[data-page-colour]'))
+      : [];
+
+    this.paletteButton = document.getElementById('btnPalette');
+    this.palettePopover = document.getElementById('palettePopover');
+    this.paletteSwatches = this.palettePopover
+      ? Array.from(this.palettePopover.querySelectorAll('.swatch[data-colour]'))
+      : [];
+    this.customColourInput = document.getElementById('colorPicker');
+
+    this.timerButton = document.getElementById('btnTimer');
+    this.timerMenu = document.getElementById('timerMenu');
+    this.timerOptions = this.timerMenu
+      ? Array.from(this.timerMenu.querySelectorAll('.timer-option'))
+      : [];
+    this.timerProgress = document.getElementById('timerProgress');
+
+    this.uploadPenButton = document.getElementById('btnUploadPen');
+    this.penImageInput = document.getElementById('inputPenImage');
 
     this.cookiePopup = document.getElementById('cookiePopup');
     this.cookieAcceptButton = document.getElementById('cookieAcceptButton');
@@ -249,18 +88,15 @@ export class Controls {
 
     this.boardDate = document.getElementById('boardDate');
 
-    this.openOptionsMenu = null;
-    this.openOptionsButton = null;
+    this.openPopover = null;
+    this.openPopoverButton = null;
 
-    this.penColourButtons = mapButtons(PEN_COLOURS);
-    this.backgroundButtons = mapButtons(BACKGROUND_ICONS);
-    this.pageColourButtons = mapButtons(PAGE_COLOURS);
-
+    this.migrateSettings();
     this.initialiseCanvases();
-    this.setupOptionToggles();
-    this.loadPenPreferences();
+    this.setupPopovers();
+    this.loadStoredPreferences();
     this.setupPenControls();
-    this.setupBackgroundControls();
+    this.setupPageControls();
     this.setupSliders();
     this.setupZoomButtons();
     this.setupAuxiliaryButtons();
@@ -268,6 +104,37 @@ export class Controls {
     this.setupDateDisplay();
     this.applyToolbarLayoutVersion();
     this.applyInitialState();
+  }
+
+  migrateSettings() {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return;
+    }
+
+    const storedData = this.userData?.userSettings ?? DEFAULT_SETTINGS;
+    const map = new Map([
+      ['pen.size', storedData.selectedPenWidth ?? DEFAULT_SETTINGS.selectedPenWidth],
+      ['pen.color', storedData.selectedPenColour ?? DEFAULT_SETTINGS.selectedPenColour],
+      ['pen.imageSrc', storedData.customPenImageSrc ?? ''],
+      ['pen.imageScale', storedData.penImageScale ?? DEFAULT_SETTINGS.penImageScale],
+      ['page.style', storedData.selectedBackground ?? DEFAULT_SETTINGS.selectedBackground],
+      ['page.color', storedData.selectedPageColour ?? DEFAULT_SETTINGS.selectedPageColour],
+      ['timer.durationLastUsed', window.localStorage.getItem('timer.durationLastUsed') ?? '60'],
+      ['tv.enabled', window.localStorage.getItem('tv.enabled') ?? 'true']
+    ]);
+
+    map.forEach((value, key) => {
+      if (value === undefined || value === null) {
+        return;
+      }
+      if (window.localStorage.getItem(key) === null) {
+        window.localStorage.setItem(key, String(value));
+      }
+    });
+
+    ['pen.type', 'pen.mode', 'pen.selected', 'ui.sidebarLayoutVersion'].forEach(key => {
+      window.localStorage.removeItem(key);
+    });
   }
 
   initialiseCanvases() {
@@ -286,57 +153,123 @@ export class Controls {
     });
   }
 
-  setupOptionToggles() {
-    const toggleMap = [
-      [this.pageStyleButton, this.pageStyleOptions],
-      [this.penColourButton, this.penColourOptions]
+  setupPopovers() {
+    const pairs = [
+      [this.pageStyleButton, this.pageStylePopover],
+      [this.paletteButton, this.palettePopover],
+      [this.timerButton, this.timerMenu]
     ];
 
-    toggleMap.forEach(([button, container]) => {
-      if (!button || !container) return;
+    pairs.forEach(([button, popover]) => {
+      if (!button || !popover) return;
       button.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
-        this.toggleOptionsMenu(container, button);
+        this.togglePopover(button, popover);
       });
     });
 
     document.addEventListener('click', event => {
-      if (this.openOptionsMenu && !this.openOptionsMenu.contains(event.target)) {
-        this.closeOpenOptionsMenu();
+      if (this.openPopover && !this.openPopover.contains(event.target)) {
+        this.closeOpenPopover();
+      }
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        this.closeOpenPopover();
       }
     });
   }
 
-  toggleOptionsMenu(container, button) {
-    if (!container || !button) return;
-
-    if (this.openOptionsMenu === container) {
-      this.closeOpenOptionsMenu();
+  togglePopover(button, popover) {
+    if (!button || !popover) {
       return;
     }
 
-    this.closeOpenOptionsMenu();
-    const rect = button.getBoundingClientRect();
-    container.style.left = `${rect.left}px`;
-    container.style.top = `${rect.bottom + 8}px`;
-    container.classList.add('options-button-options-show');
+    if (this.openPopover === popover) {
+      this.closeOpenPopover();
+      return;
+    }
+
+    this.closeOpenPopover();
+
+    popover.style.left = '0px';
+    popover.style.top = '0px';
+    popover.classList.add('is-visible');
+
+    requestAnimationFrame(() => {
+      const rect = button.getBoundingClientRect();
+      const width = popover.offsetWidth;
+      const height = popover.offsetHeight;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      const left = Math.min(
+        viewportWidth - width - 16,
+        Math.max(16, rect.left + rect.width / 2 - width / 2)
+      );
+      const top = Math.min(
+        viewportHeight - height - 16,
+        rect.bottom + 12
+      );
+
+      popover.style.left = `${left}px`;
+      popover.style.top = `${top}px`;
+    });
+
     button.setAttribute('aria-expanded', 'true');
-    this.openOptionsMenu = container;
-    this.openOptionsButton = button;
+    this.openPopover = popover;
+    this.openPopoverButton = button;
   }
 
-  closeOpenOptionsMenu() {
-    if (this.openOptionsMenu) {
-      this.openOptionsMenu.classList.remove('options-button-options-show');
-      this.openOptionsMenu.style.left = '';
-      this.openOptionsMenu.style.top = '';
+  closeOpenPopover() {
+    if (this.openPopover) {
+      this.openPopover.classList.remove('is-visible');
+      this.openPopover.style.left = '';
+      this.openPopover.style.top = '';
     }
-    if (this.openOptionsButton) {
-      this.openOptionsButton.setAttribute('aria-expanded', 'false');
+    if (this.openPopoverButton) {
+      this.openPopoverButton.setAttribute('aria-expanded', 'false');
     }
-    this.openOptionsMenu = null;
-    this.openOptionsButton = null;
+    this.openPopover = null;
+    this.openPopoverButton = null;
+  }
+
+  loadStoredPreferences() {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return;
+    }
+
+    const storedSize = Number(window.localStorage.getItem('pen.size'));
+    if (Number.isFinite(storedSize)) {
+      this.userData.userSettings.selectedPenWidth = clamp(storedSize, PEN_SIZE_MIN, PEN_SIZE_MAX);
+    }
+
+    const storedColour = window.localStorage.getItem('pen.color');
+    if (typeof storedColour === 'string' && storedColour) {
+      this.userData.userSettings.selectedPenColour = storedColour;
+    }
+
+    const storedImage = window.localStorage.getItem('pen.imageSrc');
+    if (typeof storedImage === 'string') {
+      this.userData.userSettings.customPenImageSrc = storedImage;
+    }
+
+    const storedScale = Number(window.localStorage.getItem('pen.imageScale'));
+    if (Number.isFinite(storedScale) && storedScale > 0) {
+      this.userData.userSettings.penImageScale = storedScale;
+    }
+
+    const storedBackground = window.localStorage.getItem('page.style');
+    if (storedBackground && PAGE_STYLE_DRAWERS[storedBackground]) {
+      this.userData.userSettings.selectedBackground = storedBackground;
+    }
+
+    const storedPageColour = window.localStorage.getItem('page.color');
+    if (storedPageColour) {
+      this.userData.userSettings.selectedPageColour = storedPageColour;
+    }
   }
 
   setupPenControls() {
@@ -347,47 +280,51 @@ export class Controls {
       });
     }
 
-    Object.entries(PEN_COLOURS).forEach(([key, config]) => {
-      const button = this.penColourButtons[config.id];
-      if (!button) return;
+    this.paletteSwatches.forEach(button => {
       button.addEventListener('click', () => {
-        this.setPenColour(key);
-        this.closeOpenOptionsMenu();
+        const colour = button.dataset.colour;
+        this.highlightPaletteSwatch(colour);
+        this.setPenColour(colour, true);
+        this.closeOpenPopover();
       });
     });
+
+    if (this.customColourInput) {
+      this.customColourInput.addEventListener('input', () => {
+        const value = this.customColourInput.value;
+        this.clearPaletteSelection();
+        this.setPenColour(value, true);
+      });
+    }
+
+    if (this.uploadPenButton && this.penImageInput) {
+      this.uploadPenButton.addEventListener('click', () => {
+        this.penImageInput.click();
+      });
+    }
   }
 
-  setupBackgroundControls() {
-    Object.entries(BACKGROUND_ICONS).forEach(([key, config]) => {
-      const button = this.backgroundButtons[config.id];
-      if (!button) return;
+  setupPageControls() {
+    this.pageStyleButtons.forEach(button => {
       button.addEventListener('click', () => {
-        this.setBackground(key);
-        this.closeOpenOptionsMenu();
+        const key = button.dataset.pageStyle;
+        this.setBackground(key, true);
+        this.closeOpenPopover();
       });
     });
 
-    Object.entries(PAGE_COLOURS).forEach(([key, config]) => {
-      const button = this.pageColourButtons[config.id];
-      if (!button) return;
+    this.pageColourButtons.forEach(button => {
       button.addEventListener('click', () => {
-        this.setPageColour(key);
-        this.closeOpenOptionsMenu();
+        const colour = button.dataset.pageColour;
+        this.setPageColour(colour, true);
       });
     });
   }
 
   setupSliders() {
-    if (this.zoomSlider) {
-      this.zoomSlider.addEventListener('input', () => {
-        const zoomValue = clamp(Number(this.zoomSlider.value) || DEFAULT_SETTINGS.zoomLevel, 0.5, 4);
-        this.setZoom(zoomValue, true);
-      });
-    }
-
     if (this.speedSlider) {
       this.speedSlider.addEventListener('input', () => {
-        const speed = clamp(Number(this.speedSlider.value) || DEFAULT_SETTINGS.rewriteSpeed, 0.1, 10);
+        const speed = clamp(Number(this.speedSlider.value) || DEFAULT_SETTINGS.rewriteSpeed, 0.5, 4);
         this.setRewriteSpeed(speed, true);
       });
     }
@@ -398,7 +335,7 @@ export class Controls {
     if (this.zoomOutButton) {
       this.zoomOutButton.addEventListener('click', () => {
         const current = this.userData.userSettings.zoomLevel ?? DEFAULT_SETTINGS.zoomLevel;
-        const next = clamp(Number((current - step).toFixed(2)), 0.5, 4);
+        const next = clamp(Number((current - step).toFixed(2)), 0.5, 3);
         this.setZoom(next, true);
       });
     }
@@ -406,7 +343,7 @@ export class Controls {
     if (this.zoomInButton) {
       this.zoomInButton.addEventListener('click', () => {
         const current = this.userData.userSettings.zoomLevel ?? DEFAULT_SETTINGS.zoomLevel;
-        const next = clamp(Number((current + step).toFixed(2)), 0.5, 4);
+        const next = clamp(Number((current + step).toFixed(2)), 0.5, 3);
         this.setZoom(next, true);
       });
     }
@@ -497,9 +434,9 @@ export class Controls {
 
   applyInitialState() {
     this.setPenSize(this.userData.userSettings.selectedPenWidth ?? DEFAULT_SETTINGS.selectedPenWidth, false);
-    this.setPenColour(this.resolvePenColourKey(this.userData.userSettings.selectedPenColour), false);
+    this.setPenColour(this.userData.userSettings.selectedPenColour ?? DEFAULT_SETTINGS.selectedPenColour, false);
     this.setBackground(this.userData.userSettings.selectedBackground ?? DEFAULT_SETTINGS.selectedBackground, false);
-    this.setPageColour(this.resolvePageColourKey(this.userData.userSettings.selectedPageColour), false);
+    this.setPageColour(this.userData.userSettings.selectedPageColour ?? DEFAULT_SETTINGS.selectedPageColour, false);
     this.setZoom(this.userData.userSettings.zoomLevel ?? DEFAULT_SETTINGS.zoomLevel, false);
     this.setRewriteSpeed(this.userData.userSettings.rewriteSpeed ?? DEFAULT_SETTINGS.rewriteSpeed, false);
   }
@@ -507,9 +444,9 @@ export class Controls {
   setPenSize(value, persist = true) {
     const size = clamp(Number(value) || DEFAULT_SETTINGS.selectedPenWidth, PEN_SIZE_MIN, PEN_SIZE_MAX);
     this.userData.userSettings.selectedPenWidth = size;
-    this.updateButtonIcon(this.penSizeButton, this.resolvePenSizeIcon(size));
     if (this.penSizeSlider && this.penSizeSlider.value !== String(size)) {
       this.penSizeSlider.value = String(size);
+      this.penSizeSlider.setAttribute('aria-valuenow', String(size));
     }
 
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -521,126 +458,110 @@ export class Controls {
     }
   }
 
-  setPenColour(key, persist = true) {
-    const config = PEN_COLOURS[key] ?? PEN_COLOURS.black;
-    this.userData.userSettings.selectedPenColour = config.colour;
-    updateSelectedClass(this.penColourButtons, config.id);
-    this.updateButtonIcon(this.penColourButton, config.icon);
+  clearPaletteSelection() {
+    this.paletteSwatches.forEach(button => button.classList.remove('is-selected'));
+  }
+
+  highlightPaletteSwatch(colour) {
+    this.paletteSwatches.forEach(button => {
+      const isSelected = button.dataset.colour.toLowerCase() === (colour ?? '').toLowerCase();
+      button.classList.toggle('is-selected', isSelected);
+    });
+  }
+
+  setPenColour(colour, persist = true) {
+    const fallback = DEFAULT_SETTINGS.selectedPenColour;
+    const nextColour = typeof colour === 'string' && colour ? colour : fallback;
+    this.userData.userSettings.selectedPenColour = nextColour;
+
+    this.highlightPaletteSwatch(nextColour);
+
+    if (this.paletteButton) {
+      this.paletteButton.style.setProperty('--active-colour', nextColour);
+    }
+
+    if (this.customColourInput && this.customColourInput.value !== nextColour) {
+      if (!PEN_COLOUR_SWATCHES.some(value => value.toLowerCase() === nextColour.toLowerCase())) {
+        this.customColourInput.value = nextColour;
+      }
+    }
 
     if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem('pen.color', config.colour);
+      window.localStorage.setItem('pen.color', nextColour);
     }
 
     if (persist) {
       this.userData.saveToLocalStorage();
-    }
-  }
-
-  resolvePenColourKey(colour) {
-    const entry = Object.entries(PEN_COLOURS).find(([, cfg]) => cfg.colour.toLowerCase() === (colour ?? '').toLowerCase());
-    return entry ? entry[0] : 'black';
-  }
-
-  resolvePenSizeIcon(size) {
-    if (size <= 4) {
-      return SMALL_ICON;
-    }
-
-    if (size >= 12) {
-      return LARGE_ICON;
-    }
-
-    return MEDIUM_ICON;
-  }
-
-  loadPenPreferences() {
-    if (typeof window === 'undefined' || !window.localStorage) {
-      return;
-    }
-
-    const storedSize = Number(window.localStorage.getItem('pen.size'));
-    if (Number.isFinite(storedSize)) {
-      this.userData.userSettings.selectedPenWidth = clamp(storedSize, PEN_SIZE_MIN, PEN_SIZE_MAX);
-    }
-
-    const storedColour = window.localStorage.getItem('pen.color');
-    if (typeof storedColour === 'string' && storedColour) {
-      const key = this.resolvePenColourKey(storedColour);
-      const config = PEN_COLOURS[key];
-      this.userData.userSettings.selectedPenColour = config?.colour ?? storedColour;
     }
   }
 
   setBackground(key, persist = true) {
-    const config = BACKGROUND_ICONS[key] ?? BACKGROUND_ICONS['blue-dotted'];
-    this.userData.userSettings.selectedBackground = key;
-    updateSelectedClass(this.backgroundButtons, config.id);
-    this.updateButtonIcon(this.pageStyleButton, config.icon);
+    const styleKey = PAGE_STYLE_DRAWERS[key] ? key : 'red-blue';
+    this.userData.userSettings.selectedBackground = styleKey;
+    if (this.linesContext) {
+      const drawer = PAGE_STYLE_DRAWERS[styleKey] ?? clearBackground;
+      drawer(this.linesContext, CANVAS_WIDTH, CANVAS_HEIGHT);
+    }
 
-    const drawer = BACKGROUND_DRAWERS[key] ?? clearBackground;
-    drawer(this.linesContext, CANVAS_WIDTH, CANVAS_HEIGHT);
+    this.pageStyleButtons.forEach(button => {
+      button.classList.toggle('is-selected', button.dataset.pageStyle === styleKey);
+    });
+
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem('page.style', styleKey);
+    }
 
     if (persist) {
       this.userData.saveToLocalStorage();
     }
   }
 
-  setPageColour(key, persist = true) {
-    const config = PAGE_COLOURS[key] ?? PAGE_COLOURS.white;
-    this.userData.userSettings.selectedPageColour = config.colour;
-    updateSelectedClass(this.pageColourButtons, config.id);
+  setPageColour(colour, persist = true) {
+    const value = typeof colour === 'string' && colour ? colour : DEFAULT_SETTINGS.selectedPageColour;
+    this.userData.userSettings.selectedPageColour = value;
 
     if (this.pageContext) {
       this.pageContext.save();
-      this.pageContext.fillStyle = config.colour;
+      this.pageContext.fillStyle = value;
       this.pageContext.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       this.pageContext.restore();
     }
 
+    this.pageColourButtons.forEach(button => {
+      button.classList.toggle('is-selected', button.dataset.pageColour?.toLowerCase() === value.toLowerCase());
+    });
+
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem('page.color', value);
+    }
+
     if (persist) {
       this.userData.saveToLocalStorage();
     }
   }
 
-  resolvePageColourKey(colour) {
-    const entry = Object.entries(PAGE_COLOURS).find(([, cfg]) => cfg.colour.toLowerCase() === (colour ?? '').toLowerCase());
-    return entry ? entry[0] : 'white';
-  }
-
   setZoom(value, persist = true) {
-    const zoom = clamp(Number(value) || DEFAULT_SETTINGS.zoomLevel, 0.5, 4);
+    const zoom = clamp(Number(value) || DEFAULT_SETTINGS.zoomLevel, 0.5, 3);
     this.userData.userSettings.zoomLevel = zoom;
     if (this.writerContainer) {
       this.writerContainer.style.transform = `scale(${zoom})`;
       this.writerContainer.style.transformOrigin = 'top center';
     }
-    if (this.zoomSlider && this.zoomSlider.value !== String(zoom)) {
-      this.zoomSlider.value = String(zoom);
-    }
+
     if (persist) {
       this.userData.saveToLocalStorage();
     }
   }
 
   setRewriteSpeed(value, persist = true) {
-    const speed = clamp(Number(value) || DEFAULT_SETTINGS.rewriteSpeed, 0.1, 10);
+    const speed = clamp(Number(value) || DEFAULT_SETTINGS.rewriteSpeed, 0.5, 4);
     this.userData.userSettings.rewriteSpeed = speed;
     if (this.speedSlider && this.speedSlider.value !== String(speed)) {
       this.speedSlider.value = String(speed);
+      this.speedSlider.setAttribute('aria-valuenow', String(speed));
     }
     if (persist) {
       this.userData.saveToLocalStorage();
-    }
-  }
-
-  updateButtonIcon(button, iconFileName) {
-    if (!button) {
-      return;
-    }
-
-    const image = button.querySelector('img');
-    if (image) {
-      image.src = getIconUrl(iconFileName);
     }
   }
 
@@ -671,7 +592,7 @@ export class Controls {
     const target = `${name}=`;
     const cookies = decodeURIComponent(document.cookie).split(';');
     for (let cookie of cookies) {
-      let c = cookie.trim();
+      const c = cookie.trim();
       if (c.startsWith(target)) {
         return c.substring(target.length);
       }
@@ -696,21 +617,112 @@ export class Controls {
     gtag('js', new Date());
     gtag('config', 'G-45NB3EQYGX');
   }
+
+  setUndoRedoEnabled(enabled) {
+    const disabled = !enabled;
+    [this.undoButton, this.redoButton, this.resetButton].forEach(button => {
+      if (!button) return;
+      button.disabled = disabled;
+      button.classList.toggle('is-disabled', disabled);
+    });
+  }
+
+  setTimerActiveState(isActive) {
+    if (this.timerButton) {
+      this.timerButton.classList.toggle('is-active', isActive);
+      this.timerButton.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    }
+  }
+
+  updateTimerProgress(progressRatio) {
+    if (this.timerProgress) {
+      const value = clamp(progressRatio, 0, 1) * 100;
+      this.timerProgress.style.setProperty('--progress', `${value}%`);
+    }
+  }
 }
 
-function mapButtons(config) {
-  const map = {};
-  Object.values(config).forEach(({ id }) => {
-    const element = document.getElementById(id);
-    if (element) {
-      map[id] = element;
+function clearBackground(ctx, width, height) {
+  ctx.clearRect(0, 0, width, height);
+}
+
+function withContext(ctx, drawFn) {
+  ctx.save();
+  try {
+    drawFn();
+  } finally {
+    ctx.restore();
+  }
+}
+
+function drawHorizontalLines(ctx, width, height, { spacing, colour, widthPx = 2, dash = [], offset = 0 }) {
+  withContext(ctx, () => {
+    ctx.clearRect(0, 0, width, height);
+    ctx.strokeStyle = colour;
+    ctx.lineWidth = widthPx;
+    ctx.setLineDash(dash);
+
+    for (let y = offset; y <= height; y += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
     }
   });
-  return map;
 }
 
-function updateSelectedClass(buttonMap, selectedId) {
-  Object.entries(buttonMap).forEach(([id, element]) => {
-    element.classList.toggle('option-selected', id === selectedId);
+function drawGreyDottedLines(ctx, width, height) {
+  drawHorizontalLines(ctx, width, height, {
+    spacing: 60,
+    colour: '#7a7a7a',
+    widthPx: 2,
+    dash: [10, 22],
+    offset: 40
+  });
+}
+
+function drawRedBlueGuidelines(ctx, width, height) {
+  withContext(ctx, () => {
+    ctx.clearRect(0, 0, width, height);
+    ctx.lineWidth = 2;
+
+    const spacing = 80;
+    for (let y = spacing; y <= height; y += spacing) {
+      ctx.beginPath();
+      ctx.strokeStyle = '#1e4dd8';
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+
+      const mid = y - spacing / 2;
+      ctx.beginPath();
+      ctx.strokeStyle = '#d8342c';
+      ctx.moveTo(0, mid);
+      ctx.lineTo(width, mid);
+      ctx.stroke();
+    }
+  });
+}
+
+function drawSquares(ctx, width, height) {
+  withContext(ctx, () => {
+    ctx.clearRect(0, 0, width, height);
+    const spacing = 70;
+    ctx.strokeStyle = '#1f4ea3';
+    ctx.lineWidth = 1.5;
+
+    for (let y = spacing; y <= height; y += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+
+    for (let x = spacing; x <= width; x += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
   });
 }

@@ -37,158 +37,185 @@
         <canvas id="writerMask" width="1200" height="600"></canvas>
 
         <div id="boardDate" aria-label="Date" role="button" tabindex="0">Loading date…</div>
-        <div id="retroTv" aria-hidden="true">
+        <div id="retroTv" class="tv-off" aria-hidden="true">
           <div class="tv-frame">
-            <iframe id="tvPlayer" title="Retro TV" loading="lazy"></iframe>
+            <iframe id="tvPlayer" title="Retro TV" allow="autoplay" loading="lazy"></iframe>
+            <div class="tv-overlay" aria-hidden="true"></div>
           </div>
         </div>
       </div>
+
       <div id="toolbarBottom" role="toolbar" aria-label="Handwriting controls" class="disable-select">
-        <div class="toolbar-group toolbar-left">
-          <button class="icon-only-button toolbar-button" id="zoomOutButton" type="button" aria-label="Zoom out">
-            <span aria-hidden="true">−</span>
-          </button>
-          <button class="icon-only-button toolbar-button" id="zoomInButton" type="button" aria-label="Zoom in">
-            <span aria-hidden="true">+</span>
-          </button>
-          <div class="toolbar-slider" aria-label="Write speed">
-            <label class="visually-hidden" for="speedSlider">Write speed</label>
-            <input class="slider" id="speedSlider" type="range" min="0.1" max="10" value="2" step="0.1" />
-          </div>
-        </div>
-
-        <div class="toolbar-group toolbar-centre">
-          <button class="icon-only-button toolbar-button rewrite-button" id="rewriteButton" type="button" aria-label="Rewrite">
-            <img src="assets/icons/playIcon.svg" alt="Rewrite" />
-          </button>
-        </div>
-
-        <div class="toolbar-group toolbar-right">
-          <button class="icon-only-button toolbar-button" id="undoButton" type="button" aria-label="Undo">
-            <img src="assets/icons/undoIcon.svg" alt="Undo" />
-          </button>
-          <button class="icon-only-button toolbar-button" id="redoButton" type="button" aria-label="Redo">
-            <img src="assets/icons/redoIcon.svg" alt="Redo" />
-          </button>
-          <button class="icon-only-button toolbar-button" id="resetButton" type="button" aria-label="Reset">
-            <img src="assets/icons/binIcon.svg" alt="Reset" />
-          </button>
-          <button class="icon-only-button toolbar-button" id="pageStyleButton" type="button" aria-label="Page style" aria-expanded="false" aria-haspopup="dialog">
-            <img src="assets/icons/blueDottedLinesIcon.svg" alt="Page style" />
-          </button>
-          <div class="toolbar-slider pen-size-slider" aria-label="Pen size">
-            <button class="icon-only-button toolbar-button" id="penSizeButton" type="button" aria-label="Pen size indicator">
-              <img src="assets/icons/penMediumIcon.svg" alt="Pen size" />
+        <div class="toolbar-inner">
+          <div class="toolbar-group toolbar-left" role="group" aria-label="Zoom and speed">
+            <button class="btn icon" id="btnZoomOut" type="button" aria-label="Zoom out" title="Zoom out">
+              <svg aria-hidden="true"><use href="assets/icons.svg#zoom-out"></use></svg>
             </button>
-            <label class="visually-hidden" for="penSizeSlider">Pen size</label>
-            <input class="slider" id="penSizeSlider" type="range" min="1" max="40" value="6" step="1" />
+            <button class="btn icon" id="btnZoomIn" type="button" aria-label="Zoom in" title="Zoom in">
+              <svg aria-hidden="true"><use href="assets/icons.svg#zoom-in"></use></svg>
+            </button>
+            <div class="slider-control" id="speedControl">
+              <span class="icon-leading" aria-hidden="true">
+                <svg><use href="assets/icons.svg#speed"></use></svg>
+              </span>
+              <label class="visually-hidden" for="sliderSpeed">Rewrite speed</label>
+              <input
+                id="sliderSpeed"
+                class="slider"
+                type="range"
+                min="0.5"
+                max="4"
+                step="0.1"
+                value="2"
+                aria-valuemin="0.5"
+                aria-valuemax="4"
+                aria-valuenow="2"
+                aria-label="Rewrite speed"
+              />
+            </div>
           </div>
-          <button class="icon-only-button toolbar-button" id="penColourButton" type="button" aria-label="Colour palette" aria-expanded="false" aria-haspopup="dialog">
-            <img src="assets/icons/blackPenColourIcon.svg" alt="Colour palette" />
+
+          <div class="toolbar-group toolbar-centre" role="group" aria-label="Playback">
+            <button class="btn icon btn-primary" id="btnRewrite" type="button" aria-label="Rewrite" title="Rewrite" aria-pressed="false">
+              <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
+            </button>
+          </div>
+
+          <div class="toolbar-group toolbar-right" role="group" aria-label="Drawing controls">
+            <button class="btn icon" id="btnUndo" type="button" aria-label="Undo" title="Undo">
+              <svg aria-hidden="true"><use href="assets/icons.svg#undo"></use></svg>
+            </button>
+            <button class="btn icon" id="btnRedo" type="button" aria-label="Redo" title="Redo">
+              <svg aria-hidden="true"><use href="assets/icons.svg#redo"></use></svg>
+            </button>
+            <button class="btn icon" id="btnReset" type="button" aria-label="Reset" title="Reset">
+              <svg aria-hidden="true"><use href="assets/icons.svg#reset"></use></svg>
+            </button>
+            <button
+              class="btn icon"
+              id="btnPageStyle"
+              type="button"
+              aria-label="Page style"
+              title="Page style"
+              aria-haspopup="dialog"
+              aria-expanded="false"
+            >
+              <svg aria-hidden="true"><use href="assets/icons.svg#page-lines"></use></svg>
+            </button>
+            <div class="slider-control" id="penSizeControl">
+              <span class="icon-leading" aria-hidden="true">
+                <svg><use href="assets/icons.svg#pen"></use></svg>
+              </span>
+              <label class="visually-hidden" for="sliderPenSize">Pen size</label>
+              <input
+                id="sliderPenSize"
+                class="slider"
+                type="range"
+                min="1"
+                max="40"
+                value="6"
+                step="1"
+                aria-valuemin="1"
+                aria-valuemax="40"
+                aria-valuenow="6"
+                aria-label="Pen size"
+              />
+            </div>
+            <button
+              class="btn icon"
+              id="btnPalette"
+              type="button"
+              aria-label="Pen colour"
+              title="Pen colour"
+              aria-haspopup="dialog"
+              aria-expanded="false"
+            >
+              <svg aria-hidden="true"><use href="assets/icons.svg#palette"></use></svg>
+            </button>
+            <button class="btn icon" id="btnUploadPen" type="button" aria-label="Upload pen image" title="Upload pen image">
+              <svg aria-hidden="true"><use href="assets/icons.svg#upload"></use></svg>
+            </button>
+            <button
+              class="btn icon"
+              id="btnTimer"
+              type="button"
+              aria-label="Timer"
+              title="Timer"
+              aria-haspopup="dialog"
+              aria-expanded="false"
+              aria-pressed="false"
+            >
+              <svg aria-hidden="true"><use href="assets/icons.svg#timer"></use></svg>
+            </button>
+            <button class="btn icon" id="btnFullscreen" type="button" aria-label="Fullscreen" title="Fullscreen">
+              <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
+            </button>
+          </div>
+        </div>
+        <div id="timerProgress" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <input type="file" id="inputPenImage" class="visually-hidden" accept="image/*" aria-hidden="true" />
+
+    <div id="pageStylePopover" class="popover" role="dialog" aria-label="Page style options">
+      <div class="popover-section">
+        <h2 class="popover-title">Guidelines</h2>
+        <div class="style-grid" role="list">
+          <button class="style-option" type="button" data-page-style="blank">
+            <span class="style-preview style-none" aria-hidden="true"></span>
+            <span class="style-label">None</span>
           </button>
-          <button class="icon-only-button toolbar-button" id="uploadPenImageButton" type="button" aria-label="Upload pen image">
-            <span aria-hidden="true">📷</span>
+          <button class="style-option" type="button" data-page-style="red-blue">
+            <span class="style-preview style-three-line" aria-hidden="true"></span>
+            <span class="style-label">3-line</span>
           </button>
-          <button class="icon-only-button toolbar-button" id="timerButton" type="button" aria-label="Timer">
-            <span aria-hidden="true">⏱</span>
+          <button class="style-option" type="button" data-page-style="squares">
+            <span class="style-preview style-grid" aria-hidden="true"></span>
+            <span class="style-label">Grid</span>
           </button>
-          <button class="icon-only-button toolbar-button" id="fullscreenButton" type="button" aria-label="Fullscreen mode">
-            <img src="assets/icons/fullscreenIcon.svg" alt="Fullscreen" />
+          <button class="style-option" type="button" data-page-style="grey-dotted">
+            <span class="style-preview style-dots" aria-hidden="true"></span>
+            <span class="style-label">Dots</span>
           </button>
+        </div>
+      </div>
+      <div class="popover-section">
+        <h2 class="popover-title">Page colour</h2>
+        <div class="swatch-grid" role="list">
+          <button class="swatch" type="button" data-page-colour="#ffffff" aria-label="White" style="--swatch-colour: #ffffff"></button>
+          <button class="swatch" type="button" data-page-colour="#f8f0d9" aria-label="Cream" style="--swatch-colour: #f8f0d9"></button>
+          <button class="swatch" type="button" data-page-colour="#e5f1ff" aria-label="Pale blue" style="--swatch-colour: #e5f1ff"></button>
+          <button class="swatch" type="button" data-page-colour="#dce1e8" aria-label="Grey" style="--swatch-colour: #dce1e8"></button>
         </div>
       </div>
     </div>
 
-    <div class="options-button-options" id="pageStyleOptions" role="dialog" aria-label="Page style options">
-      <div class="options-section">
-        <h2 class="options-title">Page Lines</h2>
-        <div class="options-grid" id="backgroundButtonOptions">
-          <button class="box-button icon-button option-selected" id="backgroundButton1" type="button">
-            <img src="assets/icons/blueDottedLinesIcon.svg" alt="Blue dotted lines" />
-          </button>
-          <button class="box-button icon-button" id="backgroundButton2" type="button">
-            <img src="assets/icons/greyDottedLinesIcon.svg" alt="Grey dotted lines" />
-          </button>
-          <button class="box-button icon-button" id="backgroundButton3" type="button">
-            <img src="assets/icons/redBlueLinesIcon.svg" alt="Red and blue lines" />
-          </button>
-          <button class="box-button icon-button" id="backgroundButton9" type="button">
-            <img src="assets/icons/greyDottedLines2Icon.svg" alt="Grey dotted lines" />
-          </button>
-          <button class="box-button icon-button" id="backgroundButton7" type="button">
-            <img src="assets/icons/yellowTramLinesIcon.svg" alt="Yellow tram lines" />
-          </button>
-          <button class="box-button icon-button" id="backgroundButton5" type="button">
-            <img src="assets/icons/groundIcon.svg" alt="Ground line" />
-          </button>
-          <button class="box-button icon-button" id="backgroundButton4" type="button">
-            <img src="assets/icons/greyLinesIcon.svg" alt="Grey lines" />
-          </button>
-          <button class="box-button icon-button" id="backgroundButton6" type="button">
-            <img src="assets/icons/squaresIcon.svg" alt="Squares" />
-          </button>
-          <button class="box-button icon-button" id="backgroundButton8" type="button">
-            <img src="assets/icons/blankIcon.svg" alt="Blank" />
-          </button>
-        </div>
-      </div>
-      <div class="options-section">
-        <h2 class="options-title">Page Colour</h2>
-        <div class="options-grid" id="pageColourButtonOptions">
-          <button class="box-button icon-button option-selected" id="whitePageButton" type="button">
-            <img src="assets/icons/whitePageColourIcon.svg" alt="White page" />
-          </button>
-          <button class="box-button icon-button" id="peachPageButton" type="button">
-            <img src="assets/icons/peachPageColourIcon.svg" alt="Peach page" />
-          </button>
-          <button class="box-button icon-button" id="yellowPageButton" type="button">
-            <img src="assets/icons/yellowPageColourIcon.svg" alt="Yellow page" />
-          </button>
-          <button class="box-button icon-button" id="bluePageButton" type="button">
-            <img src="assets/icons/bluePageColourIcon.svg" alt="Blue page" />
-          </button>
-          <button class="box-button icon-button" id="blueGreyPageButton" type="button">
-            <img src="assets/icons/blueGreyPageColourIcon.svg" alt="Blue grey page" />
-          </button>
-        </div>
+    <div id="palettePopover" class="popover" role="dialog" aria-label="Pen colours">
+      <div id="palette" class="swatch-grid" role="list">
+        <button class="swatch" type="button" data-colour="#111111" aria-label="Black" style="--swatch-colour: #111111"></button>
+        <button class="swatch" type="button" data-colour="#444444" aria-label="Dark grey" style="--swatch-colour: #444444"></button>
+        <button class="swatch" type="button" data-colour="#1e4dd8" aria-label="Blue" style="--swatch-colour: #1e4dd8"></button>
+        <button class="swatch" type="button" data-colour="#d8342c" aria-label="Red" style="--swatch-colour: #d8342c"></button>
+        <button class="swatch" type="button" data-colour="#0f7a3d" aria-label="Green" style="--swatch-colour: #0f7a3d"></button>
+        <button class="swatch" type="button" data-colour="#7f3f98" aria-label="Purple" style="--swatch-colour: #7f3f98"></button>
+        <button class="swatch" type="button" data-colour="#f17f1a" aria-label="Orange" style="--swatch-colour: #f17f1a"></button>
+        <button class="swatch" type="button" data-colour="#5b3a1d" aria-label="Brown" style="--swatch-colour: #5b3a1d"></button>
+        <button class="swatch" type="button" data-colour="#e969ad" aria-label="Pink" style="--swatch-colour: #e969ad"></button>
+        <button class="swatch" type="button" data-colour="#00bcd4" aria-label="Cyan" style="--swatch-colour: #00bcd4"></button>
+        <button class="swatch" type="button" data-colour="#ffffff" aria-label="White" style="--swatch-colour: #ffffff"></button>
+        <label class="custom-colour" for="colorPicker">
+          <span>Custom</span>
+          <input type="color" id="colorPicker" aria-label="Custom colour" />
+        </label>
       </div>
     </div>
 
-    <div class="options-button-options" id="penColourButtonOptions" role="dialog" aria-label="Pen colour options">
-      <div class="options-grid">
-        <button class="box-button icon-button option-selected" id="blackPenColourButton" type="button">
-          <img src="assets/icons/blackPenColourIcon.svg" alt="Black" />
-        </button>
-        <button class="box-button icon-button" id="redPenColourButton" type="button">
-          <img src="assets/icons/redPenColourIcon.svg" alt="Red" />
-        </button>
-        <button class="box-button icon-button" id="greenPenColourButton" type="button">
-          <img src="assets/icons/greenPenColourIcon.svg" alt="Green" />
-        </button>
-        <button class="box-button icon-button" id="bluePenColourButton" type="button">
-          <img src="assets/icons/bluePenColourIcon.svg" alt="Blue" />
-        </button>
-        <button class="box-button icon-button" id="yellowPenColourButton" type="button">
-          <img src="assets/icons/yellowPenColourIcon.svg" alt="Yellow" />
-        </button>
-        <button class="box-button icon-button" id="purplePenColourButton" type="button">
-          <img src="assets/icons/purplePenColourIcon.svg" alt="Purple" />
-        </button>
-        <button class="box-button icon-button" id="orangePenColourButton" type="button">
-          <img src="assets/icons/orangePenColourIcon.svg" alt="Orange" />
-        </button>
-        <button class="box-button icon-button" id="darkGreenPenColourButton" type="button">
-          <img src="assets/icons/darkGreenPenColourIcon.svg" alt="Dark green" />
-        </button>
-        <button class="box-button icon-button" id="pinkPenColourButton" type="button">
-          <img src="assets/icons/pinkPenColourIcon.svg" alt="Pink" />
-        </button>
-        <button class="box-button icon-button" id="brownPenColourButton" type="button">
-          <img src="assets/icons/brownPenColourIcon.svg" alt="Brown" />
-        </button>
-        <button class="box-button icon-button" id="greyPenColourButton" type="button">
-          <img src="assets/icons/greyPenColourIcon.svg" alt="Grey" />
-        </button>
+    <div id="timerMenu" class="popover" role="dialog" aria-label="Timer options">
+      <div class="timer-grid">
+        <button class="timer-option" type="button" data-duration="60">1 minute</button>
+        <button class="timer-option" type="button" data-duration="120">2 minutes</button>
+        <button class="timer-option" type="button" data-action="stop">Stop timer</button>
       </div>
     </div>
 
@@ -205,6 +232,8 @@
         </div>
       </div>
     </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script type="module" src="js/main.js"></script>
   </body>
 </html>

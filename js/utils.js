@@ -1,33 +1,30 @@
-const iconUrlCache = new Map();
+const imageCache = new Map();
 
-export function getIconUrl(fileName) {
-  if (!iconUrlCache.has(fileName)) {
-    const url = new URL(`../assets/icons/${fileName}`, import.meta.url).href;
-    iconUrlCache.set(fileName, url);
-  }
-  return iconUrlCache.get(fileName);
+export function getAssetUrl(fileName) {
+  return new URL(`../assets/${fileName}`, import.meta.url).href;
 }
 
-const penImageCache = new Map();
-
-function ensurePenImage(key, fileName) {
-  if (!penImageCache.has(key)) {
-    const src = getIconUrl(fileName);
-    const image = new Image();
-    image.src = src;
-    penImageCache.set(key, image);
+export function loadImage(src) {
+  if (!src) {
+    return Promise.resolve(null);
   }
-}
 
-ensurePenImage('pen', 'pen.svg');
-ensurePenImage('pencil', 'pencil.svg');
-ensurePenImage('quill', 'quill.svg');
-
-export function PenEnumToImage(key) {
-  if (key === 'none') {
-    return null;
+  if (imageCache.has(src)) {
+    const cached = imageCache.get(src);
+    if (cached.complete) {
+      return Promise.resolve(cached);
+    }
   }
-  return penImageCache.get(key) ?? null;
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      imageCache.set(src, img);
+      resolve(img);
+    };
+    img.onerror = reject;
+    img.src = src;
+  });
 }
 
 export function clamp(value, min, max) {

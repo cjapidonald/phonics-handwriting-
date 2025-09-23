@@ -1,16 +1,14 @@
 import { DrawnLine } from './DrawnLine.js';
 
 const DEFAULT_SETTINGS = {
-  selectedPenWidth: 8,
-  selectedPenColour: '#000000',
-  selectedPenImage: 'pen',
-  selectedBackground: 'blue-dotted',
+  selectedPenWidth: 6,
+  selectedPenColour: '#111111',
+  customPenImageSrc: '',
+  selectedBackground: 'red-blue',
   selectedPageColour: '#ffffff',
-  isLoopOn: false,
-  isTraceOn: false,
   rewriteSpeed: 2,
   zoomLevel: 1,
-  penType: 'marker'
+  penImageScale: 1
 };
 
 export class UserData {
