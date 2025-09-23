@@ -255,12 +255,6 @@ export class Controls {
     this.rightSidebarOptions = document.getElementById('rightSidebarOptions');
 
     this.fullscreenButton = document.getElementById('fullscreenButton');
-    this.contactButton = document.getElementById('contactButton');
-    this.helpButton = document.getElementById('helpButton');
-    this.contactFormContainer = document.getElementById('formContainer');
-    this.contactForm = document.getElementById('emailForm');
-    this.contactFormClose = document.getElementById('closeFormButton');
-    this.contactResult = document.getElementById('emailResult');
 
     this.cookiePopup = document.getElementById('cookiePopup');
     this.cookieAcceptButton = document.getElementById('cookieAcceptButton');
@@ -285,7 +279,6 @@ export class Controls {
     this.setupSliders();
     this.setupSidebarCollapses();
     this.setupAuxiliaryButtons();
-    this.setupContactForm();
     this.setupCookieBanner();
     this.setupDateDisplay();
     this.applyInitialState();
@@ -454,62 +447,6 @@ export class Controls {
         }
       });
     }
-
-    if (this.helpButton) {
-      this.helpButton.addEventListener('click', () => {
-        window.open('https://handwritingrepeater.app', '_blank');
-      });
-    }
-
-    if (this.contactButton && this.contactFormContainer) {
-      this.contactButton.addEventListener('click', () => {
-        this.contactFormContainer.style.display = 'flex';
-      });
-    }
-  }
-
-  setupContactForm() {
-    if (!this.contactForm || !this.contactFormClose || !this.contactFormContainer) {
-      return;
-    }
-
-    this.contactFormClose.addEventListener('click', event => {
-      event.preventDefault();
-      this.contactFormContainer.style.display = 'none';
-    });
-
-    this.contactForm.addEventListener('submit', async event => {
-      event.preventDefault();
-      const formData = new FormData(this.contactForm);
-      const json = JSON.stringify(Object.fromEntries(formData.entries()));
-      if (this.contactResult) {
-        this.contactResult.textContent = 'Please wait...';
-      }
-
-      try {
-        const response = await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json'
-          },
-          body: json
-        });
-
-        const result = await response.json();
-        if (this.contactResult) {
-          this.contactResult.textContent = result.message ?? 'Message sent!';
-        }
-        if (response.ok) {
-          this.contactForm.reset();
-        }
-      } catch (error) {
-        if (this.contactResult) {
-          this.contactResult.textContent = 'Something went wrong!';
-        }
-        console.error('Contact form submission failed', error);
-      }
-    });
   }
 
   setupCookieBanner() {
