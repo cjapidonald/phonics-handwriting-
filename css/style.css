@@ -321,6 +321,75 @@ body {
     pointer-events: all;
 }
 
+#palette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px;
+    background-color: rgba(65, 105, 225, 0.9);
+    border-radius: 16px;
+    pointer-events: all;
+    max-width: 360px;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+#palette .swatch {
+    --swatch-color: #000000;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+    background-color: var(--swatch-color);
+    cursor: pointer;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+    flex-shrink: 0;
+}
+
+#palette .swatch:hover,
+#palette .swatch:focus-visible {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), 0 0 0 5px rgba(30, 77, 216, 0.45);
+    outline: none;
+}
+
+#palette .swatch.swatch-selected {
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 5px rgba(30, 77, 216, 0.9);
+}
+
+#palette #colorPicker {
+    width: 48px;
+    height: 48px;
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+#palette #colorPicker:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.85);
+    outline-offset: 2px;
+}
+
+#palette #colorPicker::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+#palette #colorPicker::-webkit-color-swatch {
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+#palette #colorPicker::-moz-color-swatch {
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
 .options-button-options-show {
     /* display: grid; */
     display: flex;
@@ -383,9 +452,24 @@ body {
     opacity: 100%;
 }
 
-.icon-button span {
+.icon-button span:not(.colour-preview) {
     width: 100%;
     margin-inline: 10px;
+}
+
+#penColourButton {
+    --selected-pen-colour: #000000;
+}
+
+#penColourButton .colour-preview {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+    background-color: var(--selected-pen-colour, #000000);
+    margin-inline: 0 16px;
+    flex-shrink: 0;
 }
 
 .controls-container {

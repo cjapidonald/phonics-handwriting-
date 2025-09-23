@@ -17,19 +17,7 @@ const PEN_TYPES = {
   none: { id: 'nonePenTypeButton', imageKey: 'none', icon: 'nonePen.svg' }
 };
 
-const PEN_COLOURS = {
-  black: { id: 'blackPenColourButton', colour: '#000000', icon: 'blackPenColourIcon.svg' },
-  red: { id: 'redPenColourButton', colour: '#d8342c', icon: 'redPenColourIcon.svg' },
-  green: { id: 'greenPenColourButton', colour: '#0f7a3d', icon: 'greenPenColourIcon.svg' },
-  blue: { id: 'bluePenColourButton', colour: '#1e4dd8', icon: 'bluePenColourIcon.svg' },
-  yellow: { id: 'yellowPenColourButton', colour: '#f5c400', icon: 'yellowPenColourIcon.svg' },
-  purple: { id: 'purplePenColourButton', colour: '#7f3f98', icon: 'purplePenColourIcon.svg' },
-  orange: { id: 'orangePenColourButton', colour: '#f17f1a', icon: 'orangePenColourIcon.svg' },
-  darkGreen: { id: 'darkGreenPenColourButton', colour: '#1b5035', icon: 'darkGreenPenColourIcon.svg' },
-  pink: { id: 'pinkPenColourButton', colour: '#e969ad', icon: 'pinkPenColourIcon.svg' },
-  brown: { id: 'brownPenColourButton', colour: '#5b3a1d', icon: 'brownPenColourIcon.svg' },
-  grey: { id: 'greyPenColourButton', colour: '#5e5e5e', icon: 'greyPenColourIcon.svg' }
-};
+const DEFAULT_PEN_COLOUR = normalizeHexColour(DEFAULT_SETTINGS.selectedPenColour, '#000000');
 
 const PAGE_COLOURS = {
   white: { id: 'whitePageButton', colour: '#ffffff', icon: 'whitePageColourIcon.svg' },
@@ -241,6 +229,9 @@ export class Controls {
     this.penTypeOptions = document.getElementById('penTypeButtonOptions');
     this.penColourButton = document.getElementById('penColourButton');
     this.penColourOptions = document.getElementById('penColourButtonOptions');
+    this.paletteContainer = document.getElementById('palette');
+    this.customColourInput = document.getElementById('colorPicker');
+    this.swatchButtons = Array.from(this.paletteContainer?.querySelectorAll('.swatch') ?? []);
     this.backgroundButton = document.getElementById('backgroundButton');
     this.backgroundOptions = document.getElementById('backgroundButtonOptions');
     this.pageColourButton = document.getElementById('pageColourButton');
@@ -274,7 +265,6 @@ export class Controls {
 
     this.penSizeButtons = mapButtons(PEN_SIZES);
     this.penTypeButtons = mapButtons(PEN_TYPES);
-    this.penColourButtons = mapButtons(PEN_COLOURS);
     this.backgroundButtons = mapButtons(BACKGROUND_ICONS);
     this.pageColourButtons = mapButtons(PAGE_COLOURS);
 
@@ -374,14 +364,28 @@ export class Controls {
       });
     });
 
-    Object.entries(PEN_COLOURS).forEach(([key, config]) => {
-      const button = this.penColourButtons[config.id];
-      if (!button) return;
+    this.swatchButtons.forEach(button => {
+      if (!button) {
+        return;
+      }
+      const normalisedColour = normalizeHexColour(button.dataset?.color, DEFAULT_PEN_COLOUR);
+      button.dataset.color = normalisedColour;
+      button.style.setProperty('--swatch-color', normalisedColour);
+      button.style.backgroundColor = normalisedColour;
+      button.setAttribute('aria-pressed', 'false');
       button.addEventListener('click', () => {
-        this.setPenColour(key);
+        this.setPenColour(normalisedColour);
         this.closeOpenOptionsMenu();
       });
     });
+
+    if (this.customColourInput) {
+      this.customColourInput.value = normalizeHexColour(this.customColourInput.value, DEFAULT_PEN_COLOUR);
+      this.customColourInput.addEventListener('input', event => {
+        const { value } = event.target;
+        this.setPenColour(value);
+      });
+    }
 
     if (this.loopButton) {
       this.loopButton.addEventListener('click', () => {
@@ -557,7 +561,7 @@ export class Controls {
 
   applyInitialState() {
     this.setPenSize(this.resolvePenSizeKey(this.userData.userSettings.selectedPenWidth), false);
-    this.setPenColour(this.resolvePenColourKey(this.userData.userSettings.selectedPenColour), false);
+    this.setPenColour(this.userData.userSettings.selectedPenColour ?? DEFAULT_PEN_COLOUR, false);
     this.setPenType(this.userData.userSettings.penType ?? DEFAULT_SETTINGS.penType, false);
     this.setBackground(this.userData.userSettings.selectedBackground ?? DEFAULT_SETTINGS.selectedBackground, false);
     this.setPageColour(this.resolvePageColourKey(this.userData.userSettings.selectedPageColour), false);
@@ -599,19 +603,51 @@ export class Controls {
     }
   }
 
-  setPenColour(key, persist = true) {
-    const config = PEN_COLOURS[key] ?? PEN_COLOURS.black;
-    this.userData.userSettings.selectedPenColour = config.colour;
-    updateSelectedClass(this.penColourButtons, config.id);
-    this.updateButtonIcon(this.penColourButton, config.icon);
+  setPenColour(colour, persist = true) {
+    const normalisedColour = normalizeHexColour(colour, DEFAULT_PEN_COLOUR);
+    this.userData.userSettings.selectedPenColour = normalisedColour;
+    this.updatePaletteSelection(normalisedColour);
+    this.updatePenColourPreview(normalisedColour);
+    this.updateCustomColourPicker(normalisedColour);
     if (persist) {
       this.userData.saveToLocalStorage();
     }
   }
 
-  resolvePenColourKey(colour) {
-    const entry = Object.entries(PEN_COLOURS).find(([, cfg]) => cfg.colour.toLowerCase() === (colour ?? '').toLowerCase());
-    return entry ? entry[0] : 'black';
+  updatePaletteSelection(colour) {
+    if (!Array.isArray(this.swatchButtons) || this.swatchButtons.length === 0) {
+      return;
+    }
+
+    const matchingButton = this.swatchButtons.find(button => {
+      const swatchColour = parseHexColour(button.dataset?.color);
+      return swatchColour !== null && swatchColour === colour;
+    });
+
+    this.swatchButtons.forEach(button => {
+      const isSelected = button === matchingButton;
+      button.classList.toggle('swatch-selected', isSelected);
+      button.setAttribute('aria-pressed', String(isSelected));
+    });
+  }
+
+  updatePenColourPreview(colour) {
+    if (this.penColourButton) {
+      this.penColourButton.style.setProperty('--selected-pen-colour', colour);
+    }
+  }
+
+  updateCustomColourPicker(colour) {
+    if (!this.customColourInput) {
+      return;
+    }
+
+    const currentColour = parseHexColour(this.customColourInput.value);
+    if (currentColour === colour) {
+      return;
+    }
+
+    this.customColourInput.value = colour;
   }
 
   setBackground(key, persist = true) {
@@ -757,4 +793,32 @@ function updateSelectedClass(buttonMap, selectedId) {
   Object.entries(buttonMap).forEach(([id, element]) => {
     element.classList.toggle('option-selected', id === selectedId);
   });
+}
+
+function parseHexColour(colour) {
+  if (typeof colour !== 'string') {
+    return null;
+  }
+
+  const trimmed = colour.trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(trimmed)) {
+    return trimmed.toLowerCase();
+  }
+
+  if (/^#[0-9a-fA-F]{3}$/.test(trimmed)) {
+    const [r, g, b] = trimmed.slice(1);
+    return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
+  }
+
+  return null;
+}
+
+function normalizeHexColour(colour, fallback = '#000000') {
+  const parsed = parseHexColour(colour);
+  if (parsed) {
+    return parsed;
+  }
+
+  const fallbackParsed = parseHexColour(fallback);
+  return fallbackParsed ?? '#000000';
 }

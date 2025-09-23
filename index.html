@@ -125,41 +125,24 @@
               <button class="box-button icon-button" id="penColourButton" type="button">
                 <img src="assets/icons/blackPenColourIcon.svg" alt="Pen colour" />
                 <span>Pen Colour</span>
+                <span class="colour-preview" aria-hidden="true"></span>
               </button>
               <div class="options-button-options" id="penColourButtonOptions">
-                <button class="box-button icon-button option-selected" id="blackPenColourButton" type="button">
-                  <img src="assets/icons/blackPenColourIcon.svg" alt="Black" />
-                </button>
-                <button class="box-button icon-button" id="redPenColourButton" type="button">
-                  <img src="assets/icons/redPenColourIcon.svg" alt="Red" />
-                </button>
-                <button class="box-button icon-button" id="greenPenColourButton" type="button">
-                  <img src="assets/icons/greenPenColourIcon.svg" alt="Green" />
-                </button>
-                <button class="box-button icon-button" id="bluePenColourButton" type="button">
-                  <img src="assets/icons/bluePenColourIcon.svg" alt="Blue" />
-                </button>
-                <button class="box-button icon-button" id="yellowPenColourButton" type="button">
-                  <img src="assets/icons/yellowPenColourIcon.svg" alt="Yellow" />
-                </button>
-                <button class="box-button icon-button" id="purplePenColourButton" type="button">
-                  <img src="assets/icons/purplePenColourIcon.svg" alt="Purple" />
-                </button>
-                <button class="box-button icon-button" id="orangePenColourButton" type="button">
-                  <img src="assets/icons/orangePenColourIcon.svg" alt="Orange" />
-                </button>
-                <button class="box-button icon-button" id="darkGreenPenColourButton" type="button">
-                  <img src="assets/icons/darkGreenPenColourIcon.svg" alt="Dark green" />
-                </button>
-                <button class="box-button icon-button" id="pinkPenColourButton" type="button">
-                  <img src="assets/icons/pinkPenColourIcon.svg" alt="Pink" />
-                </button>
-                <button class="box-button icon-button" id="brownPenColourButton" type="button">
-                  <img src="assets/icons/brownPenColourIcon.svg" alt="Brown" />
-                </button>
-                <button class="box-button icon-button" id="greyPenColourButton" type="button">
-                  <img src="assets/icons/greyPenColourIcon.svg" alt="Grey" />
-                </button>
+                <div id="palette">
+                  <button class="swatch" id="swatchBlack" type="button" data-color="#000000" aria-label="Black"></button>
+                  <button class="swatch" id="swatchDarkGrey" type="button" data-color="#333333" aria-label="Dark grey"></button>
+                  <button class="swatch" id="swatchBlue" type="button" data-color="#1e4dd8" aria-label="Blue"></button>
+                  <button class="swatch" id="swatchRed" type="button" data-color="#d8342c" aria-label="Red"></button>
+                  <button class="swatch" id="swatchGreen" type="button" data-color="#0f7a3d" aria-label="Green"></button>
+                  <button class="swatch" id="swatchPurple" type="button" data-color="#7f3f98" aria-label="Purple"></button>
+                  <button class="swatch" id="swatchOrange" type="button" data-color="#f17f1a" aria-label="Orange"></button>
+                  <button class="swatch" id="swatchBrown" type="button" data-color="#5b3a1d" aria-label="Brown"></button>
+                  <button class="swatch" id="swatchPink" type="button" data-color="#e969ad" aria-label="Pink"></button>
+                  <button class="swatch" id="swatchCyan" type="button" data-color="#0bcdd6" aria-label="Cyan"></button>
+                  <button class="swatch" id="swatchYellow" type="button" data-color="#f5c400" aria-label="Yellow"></button>
+                  <button class="swatch" id="swatchWhite" type="button" data-color="#ffffff" aria-label="White"></button>
+                  <input type="color" id="colorPicker" aria-label="Custom colour" value="#000000" />
+                </div>
               </div>
 
               <button class="box-button icon-button" id="loopButton" type="button">
