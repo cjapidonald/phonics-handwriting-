@@ -422,7 +422,7 @@ body {
     flex-basis: 45%;
     justify-content: start;
     padding-left: 5vw;
-    align-items: end;
+    align-items: center;
 }
 
 .right-controls-container button {
@@ -501,6 +501,16 @@ body {
 }
 
 #resetButton img {
+    width: 3vw;
+    max-width: 50px;
+}
+
+#fullscreenButton {
+    margin-inline: 0;
+    margin-left: auto;
+}
+
+#fullscreenButton img {
     width: 3vw;
     max-width: 50px;
 }
@@ -625,93 +635,4 @@ body {
    -khtml-user-select: none; /* Konqueror HTML */
    -moz-user-select: none; /* Firefox */
    -ms-user-select: none; /* Internet Explorer/Edge */
-}
-
-#formContainer {
-    display: none;
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(10, 10, 10, 0.5);
-    z-index: 99999;
-    justify-content: center;
-    align-items: center;
-}
-
-#emailForm {
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    gap: 15px;
-    background: #a6c8ff;
-    padding: 30px;
-    border: 3px solid royalblue;
-    border-radius: 20px;
-    box-shadow: 0px 0px 10px 2px rgba(0, 0, 255, 0.3);
-    font-family: "ABeeZee", Verdana, Geneva, Tahoma, sans-serif;
-    max-width: 90vw;
-    width: 500px;
-    color: blue;
-    text-shadow: 0.05em 0.05em white;
-    font-weight: 1000;
-}
-
-#emailForm h1 {
-    color: blue;
-}
-
-#emailForm input,
-#emailForm textarea {
-    border: 2px solid royalblue;
-    border-radius: 10px;
-    padding: 10px;
-    font-size: 1em;
-    font-family: inherit;
-    resize: none;
-    background-color: white;
-    color: black;
-    box-shadow: inset 0 0 5px rgba(0, 0, 255, 0.1);
-}
-
-#emailForm textarea {
-    height: 120px;
-}
-
-#contactHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-#submitButton {
-    align-self: center;
-    padding: 20px;
-}
-
-#closeFormButton {
-    top: 10px;
-    right: 10px;
-    height: 60px;
-    width: 60px;
-    font-size: 40px;
-    text-shadow: none;
-    background-color: rgb(129, 11, 11);
-    text-align: center;
-}
-
-#closeFormButton:hover {
-    background-color: red;
-}
-
-#emailResult {
-    font-size: 20px;
-}
-
-#emailForm a {
-    color: #000000;
-    text-decoration: none;
-}
-
-#emailForm a:hover {
-    text-decoration: underline;
 }

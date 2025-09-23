@@ -72,6 +72,9 @@
                     <img src="assets/icons/redoIcon.svg" alt="Redo" />
                   </button>
                 </div>
+                <button class="icon-only-button" id="fullscreenButton" type="button">
+                  <img src="assets/icons/fullscreenIcon.svg" alt="Fullscreen mode" />
+                </button>
               </div>
             </div>
           </div>
@@ -234,18 +237,6 @@
                 </button>
               </div>
 
-              <button class="box-button icon-button" id="fullscreenButton" type="button">
-                <img src="assets/icons/fullscreenIcon.svg" alt="Fullscreen mode" />
-                <span>Fullscreen Mode</span>
-              </button>
-              <button class="box-button icon-button" id="helpButton" type="button">
-                <img src="assets/icons/helpIcon.svg" alt="Help" />
-                <span>Help</span>
-              </button>
-              <button class="box-button icon-button" id="contactButton" type="button">
-                <img src="assets/icons/contactIcon.svg" alt="Contact us" />
-                <span>Contact Us</span>
-              </button>
             </div>
             <button class="collapse-tab" id="collapseRightSidebar" type="button">
               <img src="assets/icons/arrowIconLeft.svg" alt="Collapse right sidebar" />
@@ -273,32 +264,6 @@
           <button class="box-button" id="cookieAcceptButton" type="button" style="padding: 5px 15px;">Accept</button>
         </div>
       </div>
-    </div>
-
-    <div id="formContainer">
-      <form id="emailForm" action="https://api.web3forms.com/submit" method="POST">
-        <div id="contactHeader">
-          <p>We'd love to hear from you!</p>
-          <button class="box-button" id="closeFormButton" type="button">✖</button>
-        </div>
-        <p>
-          Feel free to send us a message if you run into any issues, have suggestions for any improvements, or just enjoy using our app.
-          <br /><br />
-          You can email us directly at
-          <a href="mailto:handwritingrepeater.app@gmail.com">handwritingrepeater.app@gmail.com</a> or use the form below!
-        </p>
-        <input type="hidden" name="access_key" value="6c156268-b0f1-4482-a239-f568722bfb0b" />
-
-        <h1>Name</h1>
-        <input type="text" name="name" required placeholder="e.g. Bob" />
-        <h1>Email</h1>
-        <input type="email" name="email" required placeholder="e.g. bob@example.com" />
-        <h1>Message</h1>
-        <textarea name="message" required placeholder="Write your message here..."></textarea>
-        <input type="checkbox" name="botcheck" class="hidden" style="display: none;" />
-        <button class="box-button" id="submitButton" type="submit">Submit</button>
-        <p id="emailResult"></p>
-      </form>
     </div>
 
     <script type="module" src="js/main.js"></script>
