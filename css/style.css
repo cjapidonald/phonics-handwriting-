@@ -26,6 +26,10 @@ body {
   color: var(--color-crosstik);
 }
 
+body.is-fullscreen {
+  overflow: hidden;
+}
+
 .title-container {
   position: relative;
   width: 100%;
@@ -84,19 +88,14 @@ body {
   color: var(--color-smoky-black);
 }
 
-.lesson-controls {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  padding: 0 16px 16px;
-}
-
 .lesson-title-field {
-  width: min(100%, 380px);
+  width: 100%;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   color: var(--color-smoky-black);
+  margin: 0 auto;
 }
 
 .lesson-title-input-row {
@@ -222,6 +221,31 @@ body {
   transform: scale(var(--zoom-level, 1));
   transform-origin: center;
   will-change: transform;
+}
+
+body.is-fullscreen .writer-container {
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+body.is-fullscreen .writer-board {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  flex: 1 1 auto;
 }
 
 .writer-board canvas {
@@ -403,6 +427,8 @@ body.is-fullscreen #boardLessonTitle {
   color: var(--color-smoky-black);
   z-index: 20;
   --toolbar-toggle-visible: 56px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
 }
 
 .toolbar-drag-handle {
@@ -432,13 +458,24 @@ body.is-fullscreen #boardLessonTitle {
 
 .toolbar-inner {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
   width: 100%;
-  overflow-x: auto;
-  scrollbar-width: thin;
+}
+
+.toolbar-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.toolbar-details {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .toolbar-group {
@@ -464,15 +501,24 @@ body.is-fullscreen #boardLessonTitle {
   justify-content: center;
 }
 
-.toolbar-group.toolbar-teach {
-  flex: 1 1 100%;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
+.toolbar-lesson,
+.toolbar-teach {
   background: rgba(255, 255, 255, 0.74);
   border-radius: 16px;
-  padding: 12px 16px 16px;
+  padding: 16px 18px 18px;
   box-shadow: inset 0 0 0 1px rgba(10, 9, 3, 0.08);
+}
+
+.toolbar-lesson {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 20px;
+}
+
+.toolbar-teach {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .teach-field {
@@ -770,8 +816,9 @@ body.is-fullscreen #boardLessonTitle {
 }
 .toolbar-group.toolbar-left,
 .toolbar-group.toolbar-right {
-  flex: 1 1 auto;
-  justify-content: flex-start;
+  flex: 1 1 220px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .btn.icon {
@@ -889,6 +936,7 @@ body.is-fullscreen #toolbarBottom {
   margin: 0;
   padding: 62px 24px 28px;
   z-index: 1000;
+  max-height: calc(100vh - 32px);
   transition: transform 0.3s ease;
 }
 
@@ -1420,6 +1468,10 @@ body.is-fullscreen #toolbarBottom.is-collapsed .toolbar-toggle__icon {
     width: auto;
   }
 
+  .toolbar-controls {
+    flex-direction: column;
+  }
+
   .toolbar-group.toolbar-left,
   .toolbar-group.toolbar-right,
   .toolbar-group.toolbar-centre,
@@ -1430,8 +1482,9 @@ body.is-fullscreen #toolbarBottom.is-collapsed .toolbar-toggle__icon {
     justify-content: center;
   }
 
-  .toolbar-group.toolbar-teach {
-    padding: 10px 12px 14px;
+  .toolbar-lesson,
+  .toolbar-teach {
+    padding: 14px 12px 16px;
   }
 
   .teach-input-row {
