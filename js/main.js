@@ -259,13 +259,12 @@ function drawStart(event) {
     return;
   }
 
-  const bound = controls.rewriterCanvas.getBoundingClientRect();
-  const mousePos = new Point(
-    event.clientX - bound.left - controls.rewriterCanvas.clientLeft,
-    event.clientY - bound.top - controls.rewriterCanvas.clientTop
-  );
+  const mousePos = getCanvasCoordinates(event);
+  if (!mousePos) {
+    return;
+  }
 
-  if (mousePos.x > 0 && mousePos.x < controls.rewriterCanvas.width && mousePos.y > 0 && mousePos.y < controls.rewriterCanvas.height) {
+  if (isWithinCanvas(mousePos)) {
     userData.deletedLines = [];
 
     rewriterContext.strokeStyle = userData.userSettings.selectedPenColour;
@@ -283,25 +282,39 @@ function drawStart(event) {
 }
 
 function drawMove(event) {
+  if (!penDown) {
+    return;
+  }
+
   rewriterContext.strokeStyle = userData.userSettings.selectedPenColour;
   rewriterContext.beginPath();
   rewriterContext.lineWidth = userData.userSettings.selectedPenWidth;
   rewriterContext.moveTo(previousDrawPosition.x, previousDrawPosition.y);
 
-  const bound = controls.rewriterCanvas.getBoundingClientRect();
-  const mousePos = new Point(
-    event.clientX - bound.left - controls.rewriterCanvas.clientLeft,
-    event.clientY - bound.top - controls.rewriterCanvas.clientTop
+  const mousePos = getCanvasCoordinates(event);
+  if (!mousePos) {
+    return;
+  }
+
+  const constrainedPos = new Point(
+    clamp(mousePos.x, 0, controls.rewriterCanvas.width),
+    clamp(mousePos.y, 0, controls.rewriterCanvas.height)
   );
 
-  currentLine.push(new DrawnLine(previousDrawPosition, mousePos, new PenOptions(userData.userSettings.selectedPenColour, userData.userSettings.selectedPenWidth)));
+  currentLine.push(
+    new DrawnLine(
+      previousDrawPosition,
+      constrainedPos,
+      new PenOptions(userData.userSettings.selectedPenColour, userData.userSettings.selectedPenWidth)
+    )
+  );
 
-  rewriterContext.lineTo(mousePos.x, mousePos.y);
+  rewriterContext.lineTo(constrainedPos.x, constrainedPos.y);
   rewriterContext.stroke();
 
-  drawPenIndicator(mousePos.x, mousePos.y, userData.userSettings.selectedPenWidth);
+  drawPenIndicator(constrainedPos.x, constrainedPos.y, userData.userSettings.selectedPenWidth);
 
-  previousDrawPosition = mousePos;
+  previousDrawPosition = constrainedPos;
 }
 
 function drawEnd() {
@@ -371,4 +384,44 @@ function setRewriteButtonState(isPlaying) {
   rewriteIconUse.setAttribute('href', `${ICON_SPRITE_PATH}#${iconId}`);
   rewriteIconUse.setAttribute('xlink:href', `${ICON_SPRITE_PATH}#${iconId}`);
   controls.rewriteButton?.setAttribute('aria-pressed', isPlaying ? 'true' : 'false');
+}
+
+function getCanvasCoordinates(positionEvent) {
+  const canvas = controls.rewriterCanvas;
+  if (!canvas) {
+    return null;
+  }
+
+  const rect = canvas.getBoundingClientRect();
+  const width = rect.width || canvas.width;
+  const height = rect.height || canvas.height;
+
+  const scaleX = width !== 0 ? canvas.width / width : 1;
+  const scaleY = height !== 0 ? canvas.height / height : 1;
+
+  if (typeof positionEvent.clientX !== 'number' || typeof positionEvent.clientY !== 'number') {
+    return null;
+  }
+
+  const x = (positionEvent.clientX - rect.left) * scaleX;
+  const y = (positionEvent.clientY - rect.top) * scaleY;
+
+  if (!Number.isFinite(x) || !Number.isFinite(y)) {
+    return null;
+  }
+
+  return new Point(x, y);
+}
+
+function isWithinCanvas(point) {
+  if (!controls.rewriterCanvas) {
+    return false;
+  }
+
+  return (
+    point.x >= 0 &&
+    point.x <= controls.rewriterCanvas.width &&
+    point.y >= 0 &&
+    point.y <= controls.rewriterCanvas.height
+  );
 }

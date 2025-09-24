@@ -30,16 +30,18 @@
 
     <div class="main-container disable-select">
       <div id="writerContainer" class="writer-container">
-        <canvas id="writerPage" width="1200" height="600"></canvas>
-        <canvas id="writerTrace" width="1200" height="600"></canvas>
-        <canvas id="writerLines" width="1200" height="600"></canvas>
-        <canvas id="writer" width="1200" height="600"></canvas>
-        <canvas id="writerMask" width="1200" height="600"></canvas>
+        <div id="writerBoard" class="writer-board">
+          <canvas id="writerPage" width="1200" height="600"></canvas>
+          <canvas id="writerTrace" width="1200" height="600"></canvas>
+          <canvas id="writerLines" width="1200" height="600"></canvas>
+          <canvas id="writer" width="1200" height="600"></canvas>
+          <canvas id="writerMask" width="1200" height="600"></canvas>
+        </div>
 
         <div id="boardDate" aria-label="Date" role="button" tabindex="0">Loading date…</div>
         <div id="retroTv" class="tv-off" aria-hidden="true">
           <div class="tv-frame">
-            <iframe id="tvPlayer" title="Retro TV" allow="autoplay" loading="lazy"></iframe>
+            <div id="tvPlayer" class="tv-screen" title="Retro TV" role="presentation"></div>
             <div class="tv-overlay" aria-hidden="true"></div>
           </div>
         </div>

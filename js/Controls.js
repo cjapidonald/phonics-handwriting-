@@ -33,6 +33,7 @@ export class Controls {
     this.userData = userData;
 
     this.writerContainer = document.getElementById('writerContainer');
+    this.writerBoard = document.getElementById('writerBoard');
     this.rewriterCanvas = document.getElementById('writer');
     this.rewriterTraceCanvas = document.getElementById('writerTrace');
     this.rewriterLinesCanvas = document.getElementById('writerLines');
@@ -546,6 +547,7 @@ export class Controls {
     if (this.writerContainer) {
       this.writerContainer.style.transform = `scale(${zoom})`;
       this.writerContainer.style.transformOrigin = 'top center';
+      this.writerContainer.style.setProperty('--zoom-level', String(zoom));
     }
 
     if (persist) {
