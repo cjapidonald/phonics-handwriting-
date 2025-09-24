@@ -118,6 +118,7 @@ export class Controls {
     this.openPopoverButton = null;
     this.toolbarHasCustomPosition = false;
     this.fullscreenToolbarResizeObserver = null;
+    this.boardWidthResizeObserver = null;
 
     this.migrateSettings();
     this.initialiseCanvases();
@@ -134,6 +135,7 @@ export class Controls {
     this.setupDateDisplay();
     this.setupLessonTitle();
     this.setupFullscreenBehaviour();
+    this.setupToolbarWidthSync();
     this.applyToolbarLayoutVersion();
     this.applyInitialState();
   }
@@ -579,7 +581,10 @@ export class Controls {
       return;
     }
 
-    const setCollapsedState = collapsed => {
+    const applyCollapsedState = collapsed => {
+      if (this.toolbarBottom) {
+        this.toolbarBottom.classList.toggle('is-collapsed', collapsed);
+      }
       if (this.toolbarToggleButton) {
         const expanded = !collapsed;
         this.toolbarToggleButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
@@ -588,7 +593,7 @@ export class Controls {
       this.scheduleFullscreenToolbarOffsetUpdate();
     };
 
-    setCollapsedState(false);
+    applyCollapsedState(this.toolbarBottom.classList.contains('is-collapsed'));
 
     const handleFullscreenChange = () => {
       const fullscreenElement = document.fullscreenElement ?? document.webkitFullscreenElement ?? null;
@@ -604,23 +609,16 @@ export class Controls {
 
       if (this.toolbarBottom) {
         this.toolbarBottom.classList.toggle('is-fullscreen-active', isAppFullscreen);
-
-        if (!isAppFullscreen) {
-          this.toolbarBottom.classList.remove('is-collapsed');
-          setCollapsedState(false);
-        }
       }
 
-      this.scheduleFullscreenToolbarOffsetUpdate();
+      applyCollapsedState(this.toolbarBottom.classList.contains('is-collapsed'));
+      this.updateToolbarWidthFromBoard();
     };
 
     if (this.toolbarToggleButton) {
       this.toolbarToggleButton.addEventListener('click', () => {
-        if (!this.toolbarBottom.classList.contains('is-fullscreen-active')) {
-          return;
-        }
-        const isCollapsed = this.toolbarBottom.classList.toggle('is-collapsed');
-        setCollapsedState(isCollapsed);
+        const shouldCollapse = !this.toolbarBottom.classList.contains('is-collapsed');
+        applyCollapsedState(shouldCollapse);
       });
     }
 
@@ -642,6 +640,40 @@ export class Controls {
     }
 
     handleFullscreenChange();
+  }
+
+  setupToolbarWidthSync() {
+    if (!this.toolbarBottom || !this.writerBoard) {
+      return;
+    }
+
+    const updateWidth = () => {
+      this.updateToolbarWidthFromBoard();
+    };
+
+    updateWidth();
+
+    if (typeof ResizeObserver === 'function') {
+      this.boardWidthResizeObserver = new ResizeObserver(updateWidth);
+      this.boardWidthResizeObserver.observe(this.writerBoard);
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', updateWidth);
+    }
+  }
+
+  updateToolbarWidthFromBoard() {
+    if (!this.toolbarBottom || !this.writerBoard) {
+      return;
+    }
+
+    const rect = this.writerBoard.getBoundingClientRect();
+    if (!rect || !Number.isFinite(rect.width) || rect.width <= 0) {
+      return;
+    }
+
+    this.toolbarBottom.style.setProperty('--board-width', `${rect.width}px`);
   }
 
   setupCookieBanner() {
@@ -902,6 +934,8 @@ export class Controls {
     if (this.writerBoard) {
       this.writerBoard.style.setProperty('--zoom-level', String(zoom));
     }
+
+    this.updateToolbarWidthFromBoard();
 
     if (persist) {
       this.userData.saveToLocalStorage();
