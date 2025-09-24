@@ -70,7 +70,6 @@
       title="Teach Handwriting information and feedback"
     >
       <span aria-hidden="true" class="info-panel-toggle__icon">i</span>
-      <span class="info-panel-toggle__label">Teach Handwriting</span>
     </button>
 
     <div id="infoPanelBackdrop" class="info-panel-backdrop" hidden></div>
@@ -161,153 +160,31 @@
           </form>
         </section>
       </div>
-    </section>
+      </section>
 
-codex/refactor-handwriting-feature-layout
-    <main class="main-container" role="main">
+    <main class="main-container disable-select" role="main">
       <div class="app-shell disable-select">
         <section
           id="toolbarTop"
           class="toolbar toolbar--top"
-
-    <header class="title-container" role="banner">
-      <div class="title-texts">
-        <h1 class="title-text">Master handwriting</h1>
-      </div>
-    </header>
-
-    <main class="main-container disable-select" role="main">
-      <div id="writerContainer" class="writer-container">
-        <div class="board-layout">
-          <aside class="side-panel side-panel--left" aria-label="Drawing controls">
-            <button class="btn icon side-panel__button" id="btnUndo" type="button" aria-label="Undo" title="Undo">
-              <svg aria-hidden="true"><use href="assets/icons.svg#undo"></use></svg>
-            </button>
-            <button class="btn icon side-panel__button" id="btnRedo" type="button" aria-label="Redo" title="Redo">
-              <svg aria-hidden="true"><use href="assets/icons.svg#redo"></use></svg>
-            </button>
-            <button class="btn icon side-panel__button" id="btnZoomOut" type="button" aria-label="Zoom out" title="Zoom out">
-              <svg aria-hidden="true"><use href="assets/icons.svg#zoom-out"></use></svg>
-            </button>
-            <button class="btn icon side-panel__button" id="btnZoomIn" type="button" aria-label="Zoom in" title="Zoom in">
-              <svg aria-hidden="true"><use href="assets/icons.svg#zoom-in"></use></svg>
-            </button>
-            <button
-              class="btn icon side-panel__button"
-              id="btnTimer"
-              type="button"
-              aria-label="Timer"
-              title="Timer"
-              aria-haspopup="dialog"
-              aria-expanded="false"
-              aria-pressed="false"
-            >
-              <svg aria-hidden="true"><use href="assets/icons.svg#timer"></use></svg>
-            </button>
-            <button
-              class="btn icon side-panel__button"
-              id="btnFullscreenLeft"
-              type="button"
-              data-action="fullscreen"
-              aria-label="Fullscreen"
-              title="Fullscreen"
-            >
-              <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
-            </button>
-          </aside>
-
-          <div class="board-wrapper">
-            <div id="writerBoard" class="writer-board">
-              <canvas id="writerPage" width="1200" height="600"></canvas>
-              <canvas id="writerTrace" width="1200" height="600"></canvas>
-              <canvas id="writerLines" width="1200" height="600"></canvas>
-              <canvas id="writer" width="1200" height="600"></canvas>
-              <canvas id="writerMask" width="1200" height="600"></canvas>
-              <div id="teachOverlay" class="teach-overlay" aria-live="polite"></div>
-            </div>
-
-            <div id="boardHeader" class="board-header">
-              <div class="board-header__title">
-                <div
-                  id="boardLessonTitle"
-                  class="board-lesson-title is-hidden"
-                  aria-live="polite"
-                  aria-hidden="true"
-                ></div>
-              </div>
-              <div class="board-header__date">
-                <div id="boardDate" aria-label="Date" role="button" tabindex="0">Loading date…</div>
-              </div>
-            </div>
-            <div id="retroTv" class="tv-off" aria-hidden="true">
-              <div class="tv-frame">
-                <div id="tvPlayer" class="tv-screen" title="Retro TV" role="presentation"></div>
-                <div class="tv-overlay" aria-hidden="true"></div>
-              </div>
-            </div>
-
-            <div id="timerProgress" aria-hidden="true"></div>
-          </div>
-
-          <aside class="side-panel side-panel--right" aria-label="Playback controls">
-            <button class="teach-button side-panel__action" id="btnTeachNext" type="button" disabled>
-              Next
-              <span aria-hidden="true" class="teach-button__arrow">➜</span>
-            </button>
-            <button
-              class="btn icon side-panel__button"
-              id="btnPalette"
-              type="button"
-              aria-label="Pen colour"
-              title="Pen colour"
-              aria-haspopup="dialog"
-              aria-expanded="false"
-            >
-              <svg aria-hidden="true"><use href="assets/icons.svg#palette"></use></svg>
-            </button>
-            <button class="btn icon btn-primary side-panel__button" id="btnRewrite" type="button" aria-label="Rewrite" title="Rewrite" aria-pressed="false">
-              <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
-            </button>
-            <button class="btn icon side-panel__button" id="btnUploadPen" type="button" aria-label="Upload pen image" title="Upload pen image">
-              <svg aria-hidden="true"><use href="assets/icons.svg#upload"></use></svg>
-            </button>
-            <button class="btn icon side-panel__button is-disabled" id="btnRemovePenImage" type="button" aria-label="Remove custom pen image" title="Remove custom pen image" disabled>
-              <svg aria-hidden="true"><use href="assets/icons.svg#close"></use></svg>
-            </button>
-            <button
-              class="btn icon side-panel__button"
-              id="btnFullscreen"
-              type="button"
-              data-action="fullscreen"
-              aria-label="Fullscreen"
-              title="Fullscreen"
-            >
-              <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
-            </button>
-          </aside>
-        </div>
-
-        <div
-          id="toolbarBottom"
-main
           role="region"
-          aria-label="Lesson and practice settings"
+          aria-label="Lesson setup"
         >
           <div class="toolbar-top__inner">
-            <div class="lesson-title-field">
+            <div class="lesson-title-field toolbar-top__lesson">
               <label class="lesson-title-label" for="inputLessonTitle">Lesson title</label>
               <div class="lesson-title-input-row">
                 <input
                   type="text"
                   id="inputLessonTitle"
                   class="lesson-title-input"
-                  placeholder="Lesson title here"
+                  placeholder="Put the lesson title"
                   autocomplete="off"
                 />
                 <button
                   type="button"
                   id="btnLessonTitleApply"
-                  class="lesson-title-apply is-disabled"
+                  class="lesson-title-apply teach-button is-disabled"
                   disabled
                 >
                   Display
@@ -322,7 +199,7 @@ main
                   id="teachTextInput"
                   class="teach-input"
                   type="text"
-                  placeholder="Type a sentence for the board"
+                  placeholder="Put the practice text"
                   autocomplete="off"
                 />
                 <button class="teach-button" id="btnTeach" type="button">Teach</button>
@@ -331,119 +208,144 @@ main
           </div>
         </section>
 
-        <div id="writerContainer" class="writer-container">
-          <div class="board-layout">
-            <aside class="side-panel side-panel--left" aria-label="Drawing controls">
-              <button class="btn icon side-panel__button" id="btnZoomOut" type="button" aria-label="Zoom out" title="Zoom out">
-                <svg aria-hidden="true"><use href="assets/icons.svg#zoom-out"></use></svg>
-              </button>
-              <button class="btn icon side-panel__button" id="btnZoomIn" type="button" aria-label="Zoom in" title="Zoom in">
-                <svg aria-hidden="true"><use href="assets/icons.svg#zoom-in"></use></svg>
-              </button>
-              <button
-                class="btn icon side-panel__button"
-                id="btnTimer"
-                type="button"
-                aria-label="Timer"
-                title="Timer"
-                aria-haspopup="dialog"
-                aria-expanded="false"
-                aria-pressed="false"
-              >
-                <svg aria-hidden="true"><use href="assets/icons.svg#timer"></use></svg>
-              </button>
-              <button
-                class="btn icon side-panel__button"
-                id="btnFullscreenLeft"
-                type="button"
-                data-action="fullscreen"
-                aria-label="Fullscreen"
-                title="Fullscreen"
-              >
-                <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
-              </button>
-            </aside>
-
-            <div class="board-wrapper">
-              <div id="writerBoard" class="writer-board">
-                <canvas id="writerPage" width="1200" height="600"></canvas>
-                <canvas id="writerTrace" width="1200" height="600"></canvas>
-                <canvas id="writerLines" width="1200" height="600"></canvas>
-                <canvas id="writer" width="1200" height="600"></canvas>
-                <canvas id="writerMask" width="1200" height="600"></canvas>
-                <div id="teachOverlay" class="teach-overlay" aria-live="polite"></div>
-              </div>
-
-              <div id="boardHeader" class="board-header">
-                <div id="boardDate" aria-label="Date" role="button" tabindex="0">Loading date…</div>
-                <div
-                  id="boardLessonTitle"
-                  class="board-lesson-title is-hidden"
-                  aria-live="polite"
-                  aria-hidden="true"
-                ></div>
-              </div>
-              <div id="retroTv" class="tv-off" aria-hidden="true">
-                <div class="tv-frame">
-                  <div id="tvPlayer" class="tv-screen" title="Retro TV" role="presentation"></div>
-                  <div class="tv-overlay" aria-hidden="true"></div>
-                </div>
-              </div>
-
-              <div id="timerProgress" aria-hidden="true"></div>
-
-              <button class="board-fab board-fab--undo" id="btnUndo" type="button" aria-label="Undo" title="Undo">
-                <svg aria-hidden="true"><use href="assets/icons.svg#undo"></use></svg>
-              </button>
-
-              <button
-                class="board-fab board-fab--next"
-                id="btnTeachNext"
-                type="button"
-                aria-label="Redo (top) or Next (bottom)"
-                title="Tap top for redo, bottom for next"
-                disabled
-              >
-                <span class="board-fab__segment board-fab__segment--redo" aria-hidden="true">
-                  <svg aria-hidden="true"><use href="assets/icons.svg#redo"></use></svg>
-                  <span class="board-fab__label">Redo</span>
-                </span>
-                <span class="board-fab__segment board-fab__segment--next">
-                  <span class="board-fab__label">Next</span>
-                  <span aria-hidden="true" class="teach-button__arrow">➜</span>
-                </span>
-              </button>
+        <div class="board-region">
+          <div id="boardHeader" class="board-header" role="presentation">
+            <div class="board-header__title">
+              <div
+                id="boardLessonTitle"
+                class="board-lesson-title is-hidden"
+                aria-live="polite"
+                aria-hidden="true"
+              ></div>
             </div>
+            <div class="board-header__date">
+              <div id="boardDate" aria-label="Date" role="button" tabindex="0">Loading date…</div>
+            </div>
+          </div>
 
-            <aside class="side-panel side-panel--right" aria-label="Playback controls">
-              <button
-                class="btn icon side-panel__button"
-                id="btnPalette"
-                type="button"
-                aria-label="Pen colour"
-                title="Pen colour"
-                aria-haspopup="dialog"
-                aria-expanded="false"
-              >
-                <svg aria-hidden="true"><use href="assets/icons.svg#palette"></use></svg>
-              </button>
-              <button class="btn icon side-panel__button" id="btnUploadPen" type="button" aria-label="Upload pen image" title="Upload pen image">
-                <svg aria-hidden="true"><use href="assets/icons.svg#upload"></use></svg>
-              </button>
-              <button class="btn icon side-panel__button is-disabled" id="btnRemovePenImage" type="button" aria-label="Remove custom pen image" title="Remove custom pen image" disabled>
-                <svg aria-hidden="true"><use href="assets/icons.svg#close"></use></svg>
-              </button>
-              <button
-                class="btn icon side-panel__button"
-                id="btnFullscreen"
-                type="button"
-                data-action="fullscreen"
-                aria-label="Fullscreen"
-                title="Fullscreen"
-              >
-                <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
-              </button>
-            </aside>
+          <div id="writerContainer" class="writer-container">
+            <div class="board-layout">
+              <aside class="side-panel side-panel--left" aria-label="Drawing controls">
+                <button class="btn icon side-panel__button" id="btnUndo" type="button" aria-label="Undo" title="Undo">
+                  <svg aria-hidden="true"><use href="assets/icons.svg#undo"></use></svg>
+                </button>
+                <button class="btn icon side-panel__button" id="btnRedo" type="button" aria-label="Redo" title="Redo">
+                  <svg aria-hidden="true"><use href="assets/icons.svg#redo"></use></svg>
+                </button>
+                <button class="btn icon side-panel__button" id="btnZoomOut" type="button" aria-label="Zoom out" title="Zoom out">
+                  <svg aria-hidden="true"><use href="assets/icons.svg#zoom-out"></use></svg>
+                </button>
+                <button class="btn icon side-panel__button" id="btnZoomIn" type="button" aria-label="Zoom in" title="Zoom in">
+                  <svg aria-hidden="true"><use href="assets/icons.svg#zoom-in"></use></svg>
+                </button>
+                <button
+                  class="btn icon side-panel__button"
+                  id="btnBackgroundWhite"
+                  type="button"
+                  aria-label="White background"
+                  title="White background"
+                  aria-pressed="false"
+                >
+                  <svg aria-hidden="true"><use href="assets/icons.svg#page-blank"></use></svg>
+                </button>
+                <button
+                  class="btn icon side-panel__button"
+                  id="btnBackgroundLines"
+                  type="button"
+                  aria-label="Lines background"
+                  title="Lines background"
+                  aria-pressed="false"
+                >
+                  <svg aria-hidden="true"><use href="assets/icons.svg#page-lines"></use></svg>
+                </button>
+                <button
+                  class="btn icon side-panel__button"
+                  id="btnTimer"
+                  type="button"
+                  aria-label="Timer"
+                  title="Timer"
+                  aria-haspopup="dialog"
+                  aria-expanded="false"
+                  aria-pressed="false"
+                >
+                  <svg aria-hidden="true"><use href="assets/icons.svg#timer"></use></svg>
+                </button>
+                <button
+                  class="btn icon side-panel__button"
+                  id="btnFullscreenLeft"
+                  type="button"
+                  data-action="fullscreen"
+                  aria-label="Fullscreen"
+                  title="Fullscreen"
+                >
+                  <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
+                </button>
+              </aside>
+
+              <div class="board-wrapper">
+                <div class="board-frame">
+                  <div id="writerBoard" class="writer-board">
+                    <div class="writer-board__content">
+                      <canvas id="writerPage" width="1200" height="600"></canvas>
+                      <canvas id="writerTrace" width="1200" height="600"></canvas>
+                      <canvas id="writerLines" width="1200" height="600"></canvas>
+                      <canvas id="writer" width="1200" height="600"></canvas>
+                      <canvas id="writerMask" width="1200" height="600"></canvas>
+                      <div id="teachOverlay" class="teach-overlay" aria-live="polite"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="retroTv" class="tv-off" aria-hidden="true">
+                  <div class="tv-frame">
+                    <div id="tvPlayer" class="tv-screen" title="Retro TV" role="presentation"></div>
+                    <div class="tv-overlay" aria-hidden="true"></div>
+                  </div>
+                </div>
+
+                <div id="timerProgress" aria-hidden="true"></div>
+              </div>
+
+              <aside class="side-panel side-panel--right" aria-label="Playback controls">
+                <button class="teach-button side-panel__action" id="btnTeachNext" type="button" disabled>
+                  Next
+                  <span aria-hidden="true" class="teach-button__arrow">➜</span>
+                </button>
+                <button
+                  class="btn icon side-panel__button"
+                  id="btnPalette"
+                  type="button"
+                  aria-label="Pen colour"
+                  title="Pen colour"
+                  aria-haspopup="dialog"
+                  aria-expanded="false"
+                >
+                  <svg aria-hidden="true"><use href="assets/icons.svg#palette"></use></svg>
+                </button>
+                <button class="btn icon btn-primary side-panel__button" id="btnRewrite" type="button" aria-label="Rewrite" title="Rewrite" aria-pressed="false">
+                  <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
+                </button>
+                <button class="btn icon side-panel__button" id="btnSpeedQuick" type="button" aria-label="Rewrite speed" title="Rewrite speed">
+                  <svg aria-hidden="true"><use href="assets/icons.svg#speed"></use></svg>
+                </button>
+                <button class="btn icon side-panel__button" id="btnUploadPen" type="button" aria-label="Upload pen image" title="Upload pen image">
+                  <svg aria-hidden="true"><use href="assets/icons.svg#upload"></use></svg>
+                </button>
+                <button class="btn icon side-panel__button is-disabled" id="btnRemovePenImage" type="button" aria-label="Remove custom pen image" title="Remove custom pen image" disabled>
+                  <svg aria-hidden="true"><use href="assets/icons.svg#close"></use></svg>
+                </button>
+                <button
+                  class="btn icon side-panel__button"
+                  id="btnFullscreen"
+                  type="button"
+                  data-action="fullscreen"
+                  aria-label="Fullscreen"
+                  title="Fullscreen"
+                >
+                  <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
+                </button>
+              </aside>
+            </div>
           </div>
         </div>
 
@@ -451,14 +353,24 @@ main
           id="toolbarBottom"
           class="toolbar toolbar--bottom"
           role="region"
-          aria-label="Drawing speed and playback controls"
+          aria-label="Drawing adjustments"
         >
           <div class="bottom-toolbar__inner">
-            <div class="bottom-toolbar__sliders" aria-label="Drawing speed and pen size controls">
-              <div class="slider-control slider-control--stacked bottom-toolbar__slider" id="penSizeControl">
-                <span class="icon-leading" aria-hidden="true">
+            <div class="control-popover" data-control="pen">
+              <button
+                class="control-popover__toggle"
+                id="btnPenSizeToggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="penSizePanel"
+              >
+                <span class="control-popover__icon" aria-hidden="true">
                   <svg><use href="assets/icons.svg#pen"></use></svg>
                 </span>
+                <span class="control-popover__label">Pen size</span>
+                <span class="control-popover__value" id="penSizeValue">6</span>
+              </button>
+              <div class="control-popover__panel" id="penSizePanel" hidden>
                 <label class="visually-hidden" for="sliderPenSize">Pen size</label>
                 <input
                   id="sliderPenSize"
@@ -474,10 +386,23 @@ main
                   aria-label="Pen size"
                 />
               </div>
-              <div class="slider-control slider-control--compact bottom-toolbar__slider" id="speedControl">
-                <span class="icon-leading" aria-hidden="true">
-                  <svg><use href="assets/icons.svg#turtle"></use></svg>
+            </div>
+
+            <div class="control-popover" data-control="speed">
+              <button
+                class="control-popover__toggle"
+                id="btnSpeedToggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="speedPanel"
+              >
+                <span class="control-popover__icon" aria-hidden="true">
+                  <svg><use href="assets/icons.svg#speed"></use></svg>
                 </span>
+                <span class="control-popover__label">Rewrite speed</span>
+                <span class="control-popover__value" id="speedValue">2×</span>
+              </button>
+              <div class="control-popover__panel" id="speedPanel" hidden>
                 <label class="visually-hidden" for="sliderSpeed">Rewrite speed</label>
                 <input
                   id="sliderSpeed"
@@ -494,9 +419,6 @@ main
                 />
               </div>
             </div>
-            <button class="btn icon btn-primary bottom-toolbar__play" id="btnRewrite" type="button" aria-label="Rewrite" title="Rewrite" aria-pressed="false">
-              <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
-            </button>
           </div>
         </section>
       </div>
