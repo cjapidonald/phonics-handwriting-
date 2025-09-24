@@ -232,6 +232,9 @@
                 <button class="btn icon side-panel__button" id="btnRedo" type="button" aria-label="Redo" title="Redo">
                   <svg aria-hidden="true"><use href="assets/icons.svg#redo"></use></svg>
                 </button>
+                <button class="btn icon side-panel__button" id="btnReset" type="button" aria-label="Clean writing" title="Clean writing">
+                  <svg aria-hidden="true"><use href="assets/icons.svg#reset"></use></svg>
+                </button>
                 <button class="btn icon side-panel__button" id="btnZoomOut" type="button" aria-label="Zoom out" title="Zoom out">
                   <svg aria-hidden="true"><use href="assets/icons.svg#zoom-out"></use></svg>
                 </button>
@@ -313,6 +316,9 @@
                 <button class="teach-button side-panel__action" id="btnPracticeTextPrompt" type="button">
                   Practice text
                 </button>
+                <button class="teach-button side-panel__action" id="btnClearPracticeText" type="button">
+                  Clean practice
+                </button>
                 <button
                   class="teach-button side-panel__action"
                   id="btnHideLetters"
@@ -320,7 +326,16 @@
                   aria-pressed="false"
                   disabled
                 >
-                  Hide letters
+                  Show letters
+                </button>
+                <button
+                  class="teach-button side-panel__action"
+                  id="btnTeachPrevious"
+                  type="button"
+                  aria-label="Show previous letter"
+                  disabled
+                >
+                  Before
                 </button>
                 <button class="teach-button side-panel__action" id="btnTeachNext" type="button" disabled>
                   Next

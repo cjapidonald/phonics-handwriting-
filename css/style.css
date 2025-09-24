@@ -9,8 +9,8 @@
   --color-ut-orange: #ff8200;
   --color-sunglow: #ffc929;
   --color-crosstik: #fff4d5;
-  --app-fixed-width: 1440px;
-  --board-fixed-width: 1200px;
+  --app-fixed-width: min(100vw, 1440px);
+  --board-fixed-width: min(100vw, 1200px);
 }
 
 body {
@@ -21,9 +21,10 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  min-width: var(--app-fixed-width);
-  overflow-x: auto;
-  background: var(--color-aerospace-blue);
+  min-width: 320px;
+  width: 100%;
+  overflow-x: hidden;
+  background: var(--color-aerospace-orange);
   color: var(--color-crosstik);
   --fullscreen-toolbar-offset: 0px;
 }
@@ -193,17 +194,23 @@ body {
   flex: 1;
   display: flex;
   justify-content: center;
-  padding: 0;
+  align-items: stretch;
+  padding: clamp(16px, 4vw, 32px);
+  box-sizing: border-box;
 }
 
 .app-shell {
-  width: var(--app-fixed-width);
-  max-width: var(--app-fixed-width);
+  width: min(100%, 1400px);
+  max-width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: clamp(20px, 2.4vw, 32px);
-  padding: clamp(24px, 3vw, 40px);
+  align-items: stretch;
+  gap: clamp(20px, 2.6vw, 36px);
+  padding: clamp(20px, 3vw, 36px);
+  border-radius: 36px;
+  border: 6px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 30px 60px rgba(10, 9, 3, 0.28);
   box-sizing: border-box;
 }
 
@@ -214,21 +221,22 @@ body {
   align-items: center;
   gap: clamp(24px, 3vw, 32px);
   touch-action: none;
-  background: transparent;
+  background: rgba(10, 9, 3, 0.15);
   border-radius: 28px;
-  border: none;
-  padding: 0;
-  box-shadow: none;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: clamp(16px, 3vw, 28px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
   overflow: visible;
   --zoom-level: 1;
   width: 100%;
   max-width: 100%;
+  flex: 1;
 }
 
 .board-frame {
   position: relative;
-  flex: 0 0 var(--board-fixed-width);
-  width: var(--board-fixed-width);
+  width: 100%;
+  max-width: var(--board-fixed-width);
   border-radius: 28px;
   border: 5px solid #000000;
   background: #ffffff;
@@ -244,7 +252,7 @@ body {
   align-items: stretch;
   min-width: 0;
   width: 100%;
-  aspect-ratio: 2 / 1;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
   background: transparent;
   border-radius: inherit;
@@ -269,18 +277,19 @@ body {
   width: 100%;
   display: flex;
   align-items: stretch;
-  justify-content: space-between;
+  justify-content: center;
   gap: clamp(20px, 2.6vw, 32px);
   flex-wrap: nowrap;
 }
 
 .board-wrapper {
   position: relative;
-  flex: 0 0 var(--board-fixed-width);
+  flex: 1 1 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: var(--board-fixed-width);
+  min-width: 0;
+  width: 100%;
   order: 2;
 }
 
@@ -474,33 +483,37 @@ body {
   align-items: center;
   gap: clamp(16px, 3vw, 28px);
   width: 100%;
+  flex: 1;
 }
 
 .board-header {
-  width: min(100%, var(--board-fixed-width));
+  width: 100%;
+  max-width: var(--board-fixed-width);
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: clamp(12px, 2.6vw, 36px);
-  padding: 0 clamp(8px, 2vw, 24px);
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(18px, 3vw, 40px);
+  padding: 0 clamp(12px, 3vw, 28px);
   box-sizing: border-box;
 }
 
 .board-header__title,
 .board-header__date {
   display: flex;
-  align-items: flex-start;
-  flex: 1 1 0;
+  align-items: flex-end;
+  flex: 0 1 auto;
   min-width: 0;
 }
 
 .board-header__title {
-  max-width: 100%;
+  max-width: min(100%, 720px);
+  justify-content: center;
+  flex: 1 1 auto;
 }
 
 .board-header__date {
-  flex: 0 1 clamp(180px, 32%, 320px);
-  justify-content: flex-end;
+  flex: 0 0 auto;
+  justify-content: center;
 }
 
 #boardDate {
@@ -510,7 +523,7 @@ body {
   font-size: clamp(1.1rem, 1.2vw + 0.85rem, 2rem);
   font-weight: 700;
   letter-spacing: 0.05em;
-  padding: 4px 0;
+  padding: 4px 12px;
   text-shadow: none;
   background: transparent;
   border: none;
@@ -541,11 +554,11 @@ body {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-shadow: none;
-  padding: 0;
+  padding: 0 12px;
   min-height: 1.2em;
   width: 100%;
   max-width: 100%;
-  text-align: left;
+  text-align: center;
   transition: opacity 0.2s ease;
 }
 
@@ -566,21 +579,29 @@ body.is-fullscreen .feedback-section {
 body.is-fullscreen .main-container {
   flex: 1;
   width: 100vw;
-  padding: 0;
+  padding: clamp(12px, 3vw, 32px);
   gap: 0;
-  align-items: stretch;
+  align-items: center;
+}
+
+body.is-fullscreen .app-shell {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  padding: clamp(20px, 4vw, 40px);
+  border-radius: 42px;
 }
 
 body.is-fullscreen .writer-container {
-  background: var(--color-aerospace-blue);
-  border: none;
-  box-shadow: none;
-  border-radius: 0;
-  padding: clamp(20px, 5vh, 40px) clamp(28px, 6vw, 56px) clamp(28px, 5vh, 48px);
-  width: 100vw;
+  background: rgba(10, 9, 3, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  border-radius: 32px;
+  padding: clamp(20px, 4vh, 40px) clamp(24px, 6vw, 48px);
+  width: 100%;
   max-width: none;
-  min-height: 100vh;
-  height: 100vh;
+  min-height: 0;
+  height: auto;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -590,7 +611,7 @@ body.is-fullscreen .writer-container {
 }
 
 body.is-fullscreen .board-frame {
-  width: min(100vw, calc((100vh - var(--fullscreen-toolbar-offset, 0px)) * 2));
+  width: min(100vw, calc((100vh - var(--fullscreen-toolbar-offset, 0px)) * 1.5));
   max-width: none;
   border-radius: 0;
   box-shadow: none;
@@ -603,10 +624,10 @@ body.is-fullscreen .writer-board {
 
 body.is-fullscreen .board-header {
   width: 100%;
-  max-width: min(100vw, calc((100vh - var(--fullscreen-toolbar-offset, 0px)) * 2));
+  max-width: min(100vw, calc((100vh - var(--fullscreen-toolbar-offset, 0px)) * 1.5));
   margin: 0 auto;
   padding: clamp(16px, 4vw, 36px) clamp(28px, 6vw, 56px) 0;
-  justify-content: space-between;
+  justify-content: center;
   gap: clamp(20px, 4vw, 48px);
   box-sizing: border-box;
 }
@@ -1608,7 +1629,7 @@ body.is-fullscreen #toolbarBottom {
 
 @media (max-width: 900px) {
   .writer-container {
-    padding: clamp(16px, 6vw, 24px) 0;
+    padding: clamp(16px, 6vw, 24px) clamp(12px, 4vw, 24px);
     gap: clamp(20px, 7vw, 32px);
   }
 

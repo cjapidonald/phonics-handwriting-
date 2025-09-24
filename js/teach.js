@@ -11,6 +11,7 @@ export class TeachController {
     textInput,
     teachButton,
     nextButton,
+    previousButton,
     previewContainer,
     previewToggleButton,
     hideLettersButton,
@@ -20,6 +21,7 @@ export class TeachController {
     this.textInput = textInput ?? null;
     this.teachButton = teachButton ?? null;
     this.nextButton = nextButton ?? null;
+    this.previousButton = previousButton ?? null;
     this.previewContainer = previewContainer ?? null;
     this.previewToggleButton = previewToggleButton ?? null;
     this.hideLettersButton = hideLettersButton ?? null;
@@ -33,11 +35,15 @@ export class TeachController {
     this.nextPointer = 0;
     this.isPreviewHidden = false;
     this.isHideMode = false;
-    this.hideLettersButtonInitialLabel = (this.hideLettersButton?.textContent ?? 'Hide letters').trim();
+    this.hideLettersButtonInitialLabel = (this.hideLettersButton?.textContent ?? 'Show letters').trim();
     this.currentRawText = '';
+    this.revealHistory = [];
+    this.hiddenLettersPromptValue = '';
+    this.hiddenLetterFilter = new Set();
 
     this.handleTeach = this.handleTeach.bind(this);
     this.handleNext = this.handleNext.bind(this);
+    this.handlePrevious = this.handlePrevious.bind(this);
     this.handlePreviewClick = this.handlePreviewClick.bind(this);
     this.handleTogglePreview = this.handleTogglePreview.bind(this);
     this.handleHideLetters = this.handleHideLetters.bind(this);
@@ -47,6 +53,9 @@ export class TeachController {
     this.teachButton?.addEventListener('click', this.handleTeach);
     if (this.nextButton && this.enableDefaultNextHandler) {
       this.nextButton.addEventListener('click', this.handleNext);
+    }
+    if (this.previousButton && this.enableDefaultNextHandler) {
+      this.previousButton.addEventListener('click', this.handlePrevious);
     }
     this.previewContainer?.addEventListener('click', this.handlePreviewClick);
     this.previewToggleButton?.addEventListener('click', this.handleTogglePreview);
@@ -86,6 +95,10 @@ export class TeachController {
     this.revealNextLetter();
   }
 
+  handlePrevious() {
+    this.revealPreviousLetter();
+  }
+
   handlePreviewClick(event) {
     const target = event.target.closest('[data-letter-index]');
     if (!target) {
@@ -114,7 +127,47 @@ export class TeachController {
     if (!this.hasPreviewLetters()) {
       return;
     }
-    this.setHideMode(!this.isHideMode);
+
+    const promptValue = this.hiddenLettersPromptValue ?? '';
+    const result = window.prompt('Enter letters to hide (leave blank to show all letters)', promptValue);
+    if (result === null) {
+      return;
+    }
+
+    const nextValue = typeof result === 'string' ? result : '';
+    this.hiddenLettersPromptValue = nextValue;
+    this.applyHiddenLetterFilter(nextValue);
+    this.setHideMode(false);
+  }
+
+  applyHiddenLetterFilter(rawValue) {
+    const value = typeof rawValue === 'string' ? rawValue : '';
+    const cleaned = value.replace(/\s+/g, '').toLowerCase();
+    const uniqueCharacters = Array.from(new Set(cleaned));
+    this.hiddenLetterFilter = new Set(uniqueCharacters);
+    this.hiddenLettersPromptValue = uniqueCharacters.join('');
+
+    this.revealedByNext.clear();
+    this.manualFrozenIndices.clear();
+    this.revealHistory = [];
+    this.nextPointer = 0;
+
+    const hasFilter = this.hiddenLetterFilter.size > 0;
+
+    this.letters.forEach(letter => {
+      if (!letter || !letter.isRevealable) {
+        return;
+      }
+
+      const letterChar = letter.char?.toLowerCase?.() ?? '';
+      const shouldHide = hasFilter && this.hiddenLetterFilter.has(letterChar);
+      if (!shouldHide) {
+        this.manualFrozenIndices.add(letter.index);
+      }
+    });
+
+    this.updateAllLetterStates();
+    this.updateButtonStates();
   }
 
   handleOverlayClick(event) {
@@ -228,6 +281,9 @@ export class TeachController {
     this.manualFrozenIndices.clear();
     this.revealedByNext.clear();
     this.nextPointer = 0;
+    this.revealHistory = [];
+    this.hiddenLettersPromptValue = '';
+    this.hiddenLetterFilter.clear();
     this.setHideMode(false);
 
     if (!text.trim()) {
@@ -421,6 +477,9 @@ export class TeachController {
     this.revealedByNext.clear();
     this.nextPointer = 0;
     this.currentRawText = '';
+    this.revealHistory = [];
+    this.hiddenLettersPromptValue = '';
+    this.hiddenLetterFilter.clear();
     this.setHideMode(false);
     this.updatePreviewVisibility();
   }
@@ -441,8 +500,38 @@ export class TeachController {
         continue;
       }
       this.revealedByNext.add(letter.index);
+      this.revealHistory.push(letter.index);
       this.nextPointer = index + 1;
       this.updateLetterState(letter);
+      this.updateButtonStates();
+      return;
+    }
+
+    this.updateButtonStates();
+  }
+
+  revealPreviousLetter() {
+    if (!this.letters.length) {
+      this.updateButtonStates();
+      return;
+    }
+
+    while (this.revealHistory.length > 0) {
+      const lastIndex = this.revealHistory.pop();
+      if (typeof lastIndex !== 'number') {
+        continue;
+      }
+      const letter = this.letters[lastIndex];
+      if (!letter || !letter.isRevealable) {
+        continue;
+      }
+      if (!this.revealedByNext.has(lastIndex)) {
+        continue;
+      }
+
+      this.revealedByNext.delete(lastIndex);
+      this.updateLetterState(letter);
+      this.nextPointer = lastIndex;
       this.updateButtonStates();
       return;
     }
@@ -567,6 +656,21 @@ export class TeachController {
       }
       if (shouldDisable) {
         this.setHideMode(false);
+      }
+      const label = this.hideLettersButtonInitialLabel || 'Show letters';
+      this.hideLettersButton.textContent = label;
+      this.hideLettersButton.setAttribute('aria-pressed', 'false');
+      this.hideLettersButton.classList.remove('is-active');
+    }
+
+    if (this.previousButton) {
+      const hasHistory = this.revealHistory.length > 0;
+      const shouldDisablePrev = !hasRevealableLetters || !hasHistory;
+      this.previousButton.disabled = shouldDisablePrev;
+      if (shouldDisablePrev) {
+        this.previousButton.setAttribute('aria-disabled', 'true');
+      } else {
+        this.previousButton.removeAttribute('aria-disabled');
       }
     }
   }
