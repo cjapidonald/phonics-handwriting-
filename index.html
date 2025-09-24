@@ -310,36 +310,69 @@
               </div>
 
               <aside class="side-panel side-panel--right" aria-label="Playback controls">
-                <button class="teach-button side-panel__action" id="btnLessonTitlePrompt" type="button">
-                  Lesson title
-                </button>
-                <button class="teach-button side-panel__action" id="btnPracticeTextPrompt" type="button">
-                  Practice text
-                </button>
-                <button class="teach-button side-panel__action" id="btnClearPracticeText" type="button">
-                  Clean practice
+                <button
+                  class="btn icon side-panel__button"
+                  id="btnLessonTitlePrompt"
+                  type="button"
+                  aria-label="Lesson title"
+                  title="Lesson title"
+                >
+                  <svg aria-hidden="true"><use href="assets/icons.svg#title"></use></svg>
+                  <span class="visually-hidden">Lesson title</span>
                 </button>
                 <button
-                  class="teach-button side-panel__action"
+                  class="btn icon side-panel__button"
+                  id="btnPracticeTextPrompt"
+                  type="button"
+                  aria-label="Practice text"
+                  title="Practice text"
+                >
+                  <svg aria-hidden="true"><use href="assets/icons.svg#practice"></use></svg>
+                  <span class="visually-hidden">Practice text</span>
+                </button>
+                <button
+                  class="btn icon side-panel__button"
+                  id="btnClearPracticeText"
+                  type="button"
+                  aria-label="Clean practice"
+                  title="Clean practice"
+                >
+                  <svg aria-hidden="true"><use href="assets/icons.svg#trash"></use></svg>
+                  <span class="visually-hidden">Clean practice</span>
+                </button>
+                <button
+                  class="btn icon side-panel__button"
                   id="btnHideLetters"
                   type="button"
                   aria-pressed="false"
+                  aria-label="Show letters"
+                  title="Show letters"
                   disabled
                 >
-                  Show letters
+                  <svg aria-hidden="true"><use href="assets/icons.svg#view"></use></svg>
+                  <span class="visually-hidden" data-button-label>Show letters</span>
                 </button>
                 <button
-                  class="teach-button side-panel__action"
+                  class="btn icon side-panel__button"
                   id="btnTeachPrevious"
                   type="button"
                   aria-label="Show previous letter"
+                  title="Previous letter"
                   disabled
                 >
-                  Before
+                  <svg aria-hidden="true"><use href="assets/icons.svg#arrow-left"></use></svg>
+                  <span class="visually-hidden">Previous letter</span>
                 </button>
-                <button class="teach-button side-panel__action" id="btnTeachNext" type="button" disabled>
-                  Next
-                  <span aria-hidden="true" class="teach-button__arrow">➜</span>
+                <button
+                  class="btn icon side-panel__button"
+                  id="btnTeachNext"
+                  type="button"
+                  aria-label="Show next letter"
+                  title="Next letter"
+                  disabled
+                >
+                  <svg aria-hidden="true"><use href="assets/icons.svg#arrow-right"></use></svg>
+                  <span class="visually-hidden">Next letter</span>
                 </button>
                 <button
                   class="btn icon side-panel__button"
@@ -351,9 +384,6 @@
                   aria-expanded="false"
                 >
                   <svg aria-hidden="true"><use href="assets/icons.svg#palette"></use></svg>
-                </button>
-                <button class="btn icon btn-primary side-panel__button" id="btnRewrite" type="button" aria-label="Rewrite" title="Rewrite" aria-pressed="false">
-                  <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
                 </button>
                 <button class="btn icon side-panel__button" id="btnSpeedQuick" type="button" aria-label="Rewrite speed" title="Rewrite speed">
                   <svg aria-hidden="true"><use href="assets/icons.svg#speed"></use></svg>
@@ -449,6 +479,79 @@
                 />
               </div>
             </div>
+
+            <div class="fullscreen-toolbar" id="fullscreenToolbar">
+              <div class="fullscreen-toolbar__sliders">
+                <div class="fullscreen-slider" id="fullscreenPenSizeControl">
+                  <label class="fullscreen-slider__label" for="sliderPenSizeFullscreen">Pen size</label>
+                  <input
+                    id="sliderPenSizeFullscreen"
+                    class="slider"
+                    type="range"
+                    min="1"
+                    max="40"
+                    value="6"
+                    step="1"
+                    aria-valuemin="1"
+                    aria-valuemax="40"
+                    aria-valuenow="6"
+                    aria-label="Pen size"
+                  />
+                  <span class="fullscreen-slider__value" id="penSizeValueFullscreen">6</span>
+                </div>
+
+                <button
+                  class="btn icon btn-primary fullscreen-toolbar__action"
+                  id="btnRewrite"
+                  type="button"
+                  aria-label="Rewrite"
+                  title="Rewrite"
+                  aria-pressed="false"
+                >
+                  <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
+                </button>
+
+                <div class="fullscreen-slider" id="fullscreenSpeedControl">
+                  <label class="fullscreen-slider__label" for="sliderSpeedFullscreen">Rewrite speed</label>
+                  <input
+                    id="sliderSpeedFullscreen"
+                    class="slider"
+                    type="range"
+                    min="0.5"
+                    max="8"
+                    step="0.1"
+                    value="2"
+                    aria-valuemin="0.5"
+                    aria-valuemax="8"
+                    aria-valuenow="2"
+                    aria-label="Rewrite speed"
+                  />
+                  <span class="fullscreen-slider__value" id="speedValueFullscreen">2×</span>
+                </div>
+              </div>
+
+              <div class="fullscreen-palette" id="fullscreenPalette" role="list">
+                <button class="swatch" type="button" data-colour="#111111" aria-label="Black" style="--swatch-colour: #111111"></button>
+                <button class="swatch" type="button" data-colour="#444444" aria-label="Dark grey" style="--swatch-colour: #444444"></button>
+                <button class="swatch" type="button" data-colour="#1e4dd8" aria-label="Blue" style="--swatch-colour: #1e4dd8"></button>
+                <button class="swatch" type="button" data-colour="#d8342c" aria-label="Red" style="--swatch-colour: #d8342c"></button>
+                <button class="swatch" type="button" data-colour="#0f7a3d" aria-label="Green" style="--swatch-colour: #0f7a3d"></button>
+                <button class="swatch" type="button" data-colour="#7f3f98" aria-label="Purple" style="--swatch-colour: #7f3f98"></button>
+                <button class="swatch" type="button" data-colour="#f17f1a" aria-label="Orange" style="--swatch-colour: #f17f1a"></button>
+                <button class="swatch" type="button" data-colour="#5b3a1d" aria-label="Brown" style="--swatch-colour: #5b3a1d"></button>
+                <button class="swatch" type="button" data-colour="#e969ad" aria-label="Pink" style="--swatch-colour: #e969ad"></button>
+                <button class="swatch" type="button" data-colour="#00bcd4" aria-label="Cyan" style="--swatch-colour: #00bcd4"></button>
+                <button class="swatch" type="button" data-colour="#ffffff" aria-label="White" style="--swatch-colour: #ffffff"></button>
+                <button class="swatch" type="button" data-colour="#ffd700" aria-label="Yellow" style="--swatch-colour: #ffd700"></button>
+                <button
+                  class="swatch swatch--rainbow"
+                  type="button"
+                  data-colour="rainbow"
+                  aria-label="Rainbow"
+                  style="--swatch-colour: conic-gradient(from 0deg, #ff004d, #ffa500, #ffee00, #00d084, #1e4dd8, #7f3f98, #ff004d)"
+                ></button>
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -494,6 +597,14 @@
         <button class="swatch" type="button" data-colour="#e969ad" aria-label="Pink" style="--swatch-colour: #e969ad"></button>
         <button class="swatch" type="button" data-colour="#00bcd4" aria-label="Cyan" style="--swatch-colour: #00bcd4"></button>
         <button class="swatch" type="button" data-colour="#ffffff" aria-label="White" style="--swatch-colour: #ffffff"></button>
+        <button class="swatch" type="button" data-colour="#ffd700" aria-label="Yellow" style="--swatch-colour: #ffd700"></button>
+        <button
+          class="swatch swatch--rainbow"
+          type="button"
+          data-colour="rainbow"
+          aria-label="Rainbow"
+          style="--swatch-colour: conic-gradient(from 0deg, #ff004d, #ffa500, #ffee00, #00d084, #1e4dd8, #7f3f98, #ff004d)"
+        ></button>
         <label class="custom-colour" for="colorPicker">
           <span>Custom</span>
           <input type="color" id="colorPicker" aria-label="Custom colour" />

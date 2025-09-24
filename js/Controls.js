@@ -23,11 +23,19 @@ const PEN_COLOUR_SWATCHES = [
   '#5b3a1d',
   '#e969ad',
   '#00bcd4',
-  '#ffffff'
+  '#ffffff',
+  '#ffd700',
+  'rainbow'
 ];
 
+codex/update-full-screen-mode-ui-elements
+const RAINBOW_INDICATOR = 'conic-gradient(from 0deg, #ff004d, #ffa500, #ffee00, #00d084, #1e4dd8, #7f3f98, #ff004d)';
+
+const PHONICS_LINES_IMAGE_SRC = getAssetUrl('icons/Phonics lines.png');
+=======
 const PHONICS_LINES_ASSET_PATH = 'icons/Phonics lines.png';
 const PHONICS_LINES_IMAGE_SRC = getAssetUrl(PHONICS_LINES_ASSET_PATH);
+ main
 let phonicsLinesImage = null;
 let phonicsLinesImagePromise = null;
 
@@ -69,6 +77,10 @@ export class Controls {
 
     this.speedSlider = document.getElementById('sliderSpeed');
     this.penSizeSlider = document.getElementById('sliderPenSize');
+    this.penSizeSliderFullscreen = document.getElementById('sliderPenSizeFullscreen');
+    this.penSizeValueDisplay = document.getElementById('penSizeValueFullscreen');
+    this.speedSliderFullscreen = document.getElementById('sliderSpeedFullscreen');
+    this.speedValueDisplay = document.getElementById('speedValueFullscreen');
 
     this.penSizeToggleButton = document.getElementById('btnPenSizeToggle');
     this.penSizePanel = document.getElementById('penSizePanel');
@@ -93,6 +105,11 @@ export class Controls {
     this.paletteSwatches = this.palettePopover
       ? Array.from(this.palettePopover.querySelectorAll('.swatch[data-colour]'))
       : [];
+    this.fullscreenPalette = document.getElementById('fullscreenPalette');
+    this.fullscreenPaletteSwatches = this.fullscreenPalette
+      ? Array.from(this.fullscreenPalette.querySelectorAll('.swatch[data-colour]'))
+      : [];
+    this.allPaletteSwatches = [...this.paletteSwatches, ...this.fullscreenPaletteSwatches];
     this.customColourInput = document.getElementById('colorPicker');
 
     this.timerButton = document.getElementById('btnTimer');
@@ -128,6 +145,7 @@ export class Controls {
 
     this.storage = getLocalStorage();
     this.toolbarLayoutVersion = this.getStorageItem?.('ui.toolbarLayoutVersion') ?? null;
+    this.currentZoom = this.userData?.userSettings?.zoomLevel ?? DEFAULT_SETTINGS.zoomLevel;
 
     this.openPopover = null;
     this.openPopoverButton = null;
@@ -430,12 +448,14 @@ export class Controls {
       });
     }
 
-    this.paletteSwatches.forEach(button => {
+    this.allPaletteSwatches.forEach(button => {
       button.addEventListener('click', () => {
         const colour = button.dataset.colour;
         this.highlightPaletteSwatch(colour);
         this.setPenColour(colour, true);
-        this.closeOpenPopover();
+        if (this.palettePopover?.contains(button)) {
+          this.closeOpenPopover();
+        }
       });
     });
 
@@ -497,6 +517,36 @@ export class Controls {
       this.speedSlider.addEventListener('input', () => {
         const speed = clamp(
           Number(this.speedSlider.value) || DEFAULT_SETTINGS.rewriteSpeed,
+          REWRITE_SPEED_MIN,
+          REWRITE_SPEED_MAX
+        );
+        this.setRewriteSpeed(speed, true);
+      });
+    }
+
+    if (this.penSizeSliderFullscreen) {
+      this.penSizeSliderFullscreen.min = String(PEN_SIZE_MIN);
+      this.penSizeSliderFullscreen.max = String(PEN_SIZE_MAX);
+      this.penSizeSliderFullscreen.setAttribute('aria-valuemin', String(PEN_SIZE_MIN));
+      this.penSizeSliderFullscreen.setAttribute('aria-valuemax', String(PEN_SIZE_MAX));
+      this.penSizeSliderFullscreen.addEventListener('input', () => {
+        const value = clamp(
+          Number(this.penSizeSliderFullscreen.value) || DEFAULT_SETTINGS.selectedPenWidth,
+          PEN_SIZE_MIN,
+          PEN_SIZE_MAX
+        );
+        this.setPenSize(value, true);
+      });
+    }
+
+    if (this.speedSliderFullscreen) {
+      this.speedSliderFullscreen.min = String(REWRITE_SPEED_MIN);
+      this.speedSliderFullscreen.max = String(REWRITE_SPEED_MAX);
+      this.speedSliderFullscreen.setAttribute('aria-valuemin', String(REWRITE_SPEED_MIN));
+      this.speedSliderFullscreen.setAttribute('aria-valuemax', String(REWRITE_SPEED_MAX));
+      this.speedSliderFullscreen.addEventListener('input', () => {
+        const speed = clamp(
+          Number(this.speedSliderFullscreen.value) || DEFAULT_SETTINGS.rewriteSpeed,
           REWRITE_SPEED_MIN,
           REWRITE_SPEED_MAX
         );
@@ -1130,8 +1180,17 @@ export class Controls {
       this.penSizeSlider.setAttribute('aria-valuenow', String(size));
     }
 
+    if (this.penSizeSliderFullscreen && this.penSizeSliderFullscreen.value !== String(size)) {
+      this.penSizeSliderFullscreen.value = String(size);
+      this.penSizeSliderFullscreen.setAttribute('aria-valuenow', String(size));
+    }
+
     if (this.penSizeValueLabel) {
       this.penSizeValueLabel.textContent = String(size);
+    }
+
+    if (this.penSizeValueDisplay) {
+      this.penSizeValueDisplay.textContent = String(size);
     }
 
     this.setStorageItem('pen.size', String(size));
@@ -1150,12 +1209,14 @@ export class Controls {
   }
 
   clearPaletteSelection() {
-    this.paletteSwatches.forEach(button => button.classList.remove('is-selected'));
+    this.allPaletteSwatches.forEach(button => button.classList.remove('is-selected'));
   }
 
   highlightPaletteSwatch(colour) {
-    this.paletteSwatches.forEach(button => {
-      const isSelected = button.dataset.colour.toLowerCase() === (colour ?? '').toLowerCase();
+    const targetColour = typeof colour === 'string' ? colour.toLowerCase() : '';
+    this.allPaletteSwatches.forEach(button => {
+      const value = button.dataset.colour ? button.dataset.colour.toLowerCase() : '';
+      const isSelected = value === targetColour;
       button.classList.toggle('is-selected', isSelected);
     });
   }
@@ -1168,7 +1229,9 @@ export class Controls {
     this.highlightPaletteSwatch(nextColour);
 
     if (this.paletteButton) {
-      this.paletteButton.style.setProperty('--active-colour', nextColour);
+      const isRainbow = nextColour.toLowerCase() === 'rainbow';
+      this.paletteButton.style.setProperty('--active-colour', isRainbow ? RAINBOW_INDICATOR : nextColour);
+      this.paletteButton.classList.toggle('is-rainbow', isRainbow);
     }
 
     if (this.customColourInput && this.customColourInput.value !== nextColour) {
@@ -1188,10 +1251,7 @@ export class Controls {
     const normalisedKey = key === 'red-blue' ? 'phonics-lines' : key;
     const styleKey = PAGE_STYLE_DRAWERS[normalisedKey] ? normalisedKey : 'phonics-lines';
     this.userData.userSettings.selectedBackground = styleKey;
-    if (this.linesContext) {
-      const drawer = PAGE_STYLE_DRAWERS[styleKey] ?? clearBackground;
-      drawer(this.linesContext, CANVAS_WIDTH, CANVAS_HEIGHT);
-    }
+    this.drawBackground(styleKey);
 
     this.pageStyleButtons.forEach(button => {
       button.classList.toggle('is-selected', button.dataset.pageStyle === styleKey);
@@ -1214,6 +1274,16 @@ export class Controls {
     if (persist) {
       this.userData.saveToLocalStorage();
     }
+  }
+
+  drawBackground(styleKey = this.userData.userSettings.selectedBackground ?? DEFAULT_SETTINGS.selectedBackground) {
+    if (!this.linesContext) {
+      return;
+    }
+
+    const drawer = PAGE_STYLE_DRAWERS[styleKey] ?? clearBackground;
+    const zoom = this.currentZoom ?? 1;
+    drawer(this.linesContext, CANVAS_WIDTH, CANVAS_HEIGHT, zoom);
   }
 
   setPageColour(colour, persist = true) {
@@ -1241,13 +1311,9 @@ export class Controls {
   setZoom(value, persist = true) {
     const zoom = clamp(Number(value) || DEFAULT_SETTINGS.zoomLevel, 0.5, 3);
     this.userData.userSettings.zoomLevel = zoom;
-    if (this.writerContainer) {
-      this.writerContainer.style.setProperty('--zoom-level', String(zoom));
-    }
+    this.currentZoom = zoom;
 
-    if (this.writerBoard) {
-      this.writerBoard.style.setProperty('--zoom-level', String(zoom));
-    }
+    this.drawBackground();
 
     this.updateToolbarWidthFromBoard();
 
@@ -1264,10 +1330,20 @@ export class Controls {
       this.speedSlider.setAttribute('aria-valuenow', String(speed));
     }
 
+    if (this.speedSliderFullscreen && this.speedSliderFullscreen.value !== String(speed)) {
+      this.speedSliderFullscreen.value = String(speed);
+      this.speedSliderFullscreen.setAttribute('aria-valuenow', String(speed));
+    }
+
+    const formatted = Number(speed).toFixed(1);
+    const display = formatted.endsWith('.0') ? String(Number(formatted)) : formatted;
+
     if (this.speedValueLabel) {
-      const formatted = Number(speed).toFixed(1);
-      const display = formatted.endsWith('.0') ? String(Number(formatted)) : formatted;
       this.speedValueLabel.textContent = `${display}×`;
+    }
+
+    if (this.speedValueDisplay) {
+      this.speedValueDisplay.textContent = `${display}×`;
     }
     if (persist) {
       this.userData.saveToLocalStorage();
@@ -1485,11 +1561,26 @@ function clearBackground(ctx, width, height) {
   ctx.clearRect(0, 0, width, height);
 }
 
-function drawPhonicsLinesGuidelines(ctx, width, height) {
+function drawPhonicsLinesGuidelines(ctx, width, height, zoom = 1) {
   ctx.clearRect(0, 0, width, height);
 
+  const drawImage = image => {
+    if (!image) {
+      return;
+    }
+
+    const scale = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
+    const drawWidth = width * scale;
+    const drawHeight = height * scale;
+    const offsetX = (width - drawWidth) / 2;
+    const offsetY = (height - drawHeight) / 2;
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+  };
+
   if (phonicsLinesImage) {
-    ctx.drawImage(phonicsLinesImage, 0, 0, width, height);
+    drawImage(phonicsLinesImage);
     return;
   }
 
@@ -1507,10 +1598,6 @@ function drawPhonicsLinesGuidelines(ctx, width, height) {
   }
 
   phonicsLinesImagePromise.then(image => {
-    if (!image) {
-      return;
-    }
-    ctx.clearRect(0, 0, width, height);
-    ctx.drawImage(image, 0, 0, width, height);
+    drawImage(image);
   });
 }
