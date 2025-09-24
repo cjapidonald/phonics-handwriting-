@@ -1,6 +1,8 @@
 import { DEFAULT_SETTINGS } from './UserData.js';
 import { formatDateWithOrdinal, clamp, getAssetUrl, loadImage } from './utils.js';
 
+const ICON_SPRITE_PATH = 'assets/icons.svg';
+
 const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 600;
 
@@ -35,7 +37,11 @@ export class Controls {
     this.userData = userData;
 
     this.writerContainer = document.getElementById('writerContainer');
+codex/add-cursor-removal-and-image-size-limit
+    this.fullscreenTarget = document.getElementById('appContainer') ?? this.writerContainer ?? document.documentElement;
+
     this.writerBoard = document.getElementById('writerBoard');
+ main
     this.rewriterCanvas = document.getElementById('writer');
     this.rewriterTraceCanvas = document.getElementById('writerTrace');
     this.rewriterLinesCanvas = document.getElementById('writerLines');
@@ -50,6 +56,7 @@ export class Controls {
     this.redoButton = document.getElementById('btnRedo');
     this.resetButton = document.getElementById('btnReset');
     this.fullscreenButton = document.getElementById('btnFullscreen');
+    this.fullscreenIconUse = this.fullscreenButton?.querySelector('use') ?? null;
 
     this.zoomOutButton = document.getElementById('btnZoomOut');
     this.zoomInButton = document.getElementById('btnZoomIn');
@@ -83,6 +90,7 @@ export class Controls {
 
     this.uploadPenButton = document.getElementById('btnUploadPen');
     this.penImageInput = document.getElementById('inputPenImage');
+    this.removePenImageButton = document.getElementById('btnRemovePenImage');
 
     this.cookiePopup = document.getElementById('cookiePopup');
     this.cookieAcceptButton = document.getElementById('cookieAcceptButton');
@@ -305,6 +313,8 @@ export class Controls {
         this.penImageInput.click();
       });
     }
+
+    this.setCustomPenImageActive(Boolean(this.userData.userSettings.customPenImageSrc));
   }
 
   setupPageControls() {
@@ -355,12 +365,19 @@ export class Controls {
   setupAuxiliaryButtons() {
     if (this.fullscreenButton) {
       this.fullscreenButton.addEventListener('click', () => {
-        if (document.fullscreenElement) {
+        if (document.fullscreenElement === this.fullscreenTarget) {
           document.exitFullscreen();
         } else {
-          (this.writerContainer ?? document.documentElement).requestFullscreen().catch(() => {});
+          (this.fullscreenTarget ?? document.documentElement).requestFullscreen().catch(() => {});
         }
       });
+
+      document.addEventListener('fullscreenchange', () => {
+        const isFullscreen = document.fullscreenElement === this.fullscreenTarget;
+        this.updateFullscreenButtonState(isFullscreen);
+      });
+
+      this.updateFullscreenButtonState(document.fullscreenElement === this.fullscreenTarget);
     }
   }
 
@@ -495,6 +512,40 @@ export class Controls {
 
     if (persist) {
       this.userData.saveToLocalStorage();
+    }
+  }
+
+  setCustomPenImageActive(hasCustomImage) {
+    if (!this.removePenImageButton) {
+      return;
+    }
+
+    if (hasCustomImage) {
+      this.removePenImageButton.disabled = false;
+      this.removePenImageButton.removeAttribute('aria-disabled');
+      this.removePenImageButton.classList.remove('is-disabled');
+    } else {
+      this.removePenImageButton.disabled = true;
+      this.removePenImageButton.setAttribute('aria-disabled', 'true');
+      this.removePenImageButton.classList.add('is-disabled');
+    }
+  }
+
+  updateFullscreenButtonState(isFullscreen) {
+    if (!this.fullscreenButton) {
+      return;
+    }
+
+    const iconId = isFullscreen ? 'fullscreen-exit' : 'fullscreen';
+    this.fullscreenButton.classList.toggle('is-active', isFullscreen);
+    this.fullscreenButton.setAttribute('aria-pressed', isFullscreen ? 'true' : 'false');
+    this.fullscreenButton.setAttribute('aria-label', isFullscreen ? 'Exit fullscreen' : 'Fullscreen');
+    this.fullscreenButton.setAttribute('title', isFullscreen ? 'Exit fullscreen' : 'Fullscreen');
+
+    if (this.fullscreenIconUse) {
+      const href = `${ICON_SPRITE_PATH}#${iconId}`;
+      this.fullscreenIconUse.setAttribute('href', href);
+      this.fullscreenIconUse.setAttribute('xlink:href', href);
     }
   }
 

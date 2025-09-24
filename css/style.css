@@ -245,10 +245,28 @@ body {
   scrollbar-width: thin;
 }
 
-.toolbar-group {
+.toolbar-group { 
   display: inline-flex;
   align-items: center;
   gap: 12px;
+}
+
+#appContainer:fullscreen,
+#appContainer:-webkit-full-screen {
+  width: 100%;
+  min-height: 100%;
+  justify-content: flex-start;
+  padding-bottom: 24px;
+}
+
+#appContainer:fullscreen .writer-container,
+#appContainer:-webkit-full-screen .writer-container {
+  max-width: 100%;
+}
+
+#appContainer:fullscreen #toolbarBottom,
+#appContainer:-webkit-full-screen #toolbarBottom {
+  margin-top: auto;
 }
 
 .toolbar-group.toolbar-centre {

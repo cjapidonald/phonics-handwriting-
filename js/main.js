@@ -51,9 +51,15 @@ async function loadInitialPenImage() {
   const storedSrc = userData.userSettings.customPenImageSrc;
   const initialSrc = storedSrc || DEFAULT_PEN_IMAGE_SRC;
   currentPenImage = await safeLoadPenImage(initialSrc);
-  if (!currentPenImage) {
+
+  let hasCustomImage = false;
+  if (!currentPenImage || initialSrc === DEFAULT_PEN_IMAGE_SRC) {
     currentPenImage = await safeLoadPenImage(DEFAULT_PEN_IMAGE_SRC);
+  } else {
+    hasCustomImage = true;
   }
+
+  controls.setCustomPenImageActive(hasCustomImage);
 }
 
 function setupEventListeners() {
@@ -116,16 +122,24 @@ function setupEventListeners() {
       if (image) {
         currentPenImage = image;
         userData.userSettings.customPenImageSrc = dataUrl;
+        userData.userSettings.penImageScale = 1;
+        customPenScale = 1;
         if (typeof window !== 'undefined' && window.localStorage) {
           window.localStorage.setItem('pen.imageSrc', dataUrl);
+          window.localStorage.setItem('pen.imageScale', '1');
         }
         userData.saveToLocalStorage();
+        controls.setCustomPenImageActive(true);
       }
     } catch (error) {
       console.warn('Unable to load custom pen image.', error);
     } finally {
       event.target.value = '';
     }
+  });
+
+  controls.removePenImageButton?.addEventListener('click', async () => {
+    await resetPenImage();
   });
 
   controls.rewriterCanvas.addEventListener('touchstart', event => {
@@ -341,8 +355,16 @@ function drawPenIndicator(x, y, penSize) {
   }
 
   const scale = computePenScale(penSize);
-  const drawWidth = width * scale;
-  const drawHeight = height * scale;
+  const maxDimension = Math.max(penSize * 4, penSize + 8);
+
+  let drawWidth = width * scale;
+  let drawHeight = height * scale;
+
+  if (drawWidth > maxDimension || drawHeight > maxDimension) {
+    const limiter = Math.min(maxDimension / drawWidth, maxDimension / drawHeight);
+    drawWidth = width * limiter;
+    drawHeight = height * limiter;
+  }
 
   rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
   rewriterMaskContext.drawImage(currentPenImage, x, y - drawHeight, drawWidth, drawHeight);
@@ -386,6 +408,22 @@ function setRewriteButtonState(isPlaying) {
   controls.rewriteButton?.setAttribute('aria-pressed', isPlaying ? 'true' : 'false');
 }
 
+ codex/add-cursor-removal-and-image-size-limit
+async function resetPenImage() {
+  currentPenImage = await safeLoadPenImage(DEFAULT_PEN_IMAGE_SRC);
+  customPenScale = 1;
+  userData.userSettings.customPenImageSrc = '';
+  userData.userSettings.penImageScale = 1;
+
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.removeItem('pen.imageSrc');
+    window.localStorage.setItem('pen.imageScale', '1');
+  }
+
+  userData.saveToLocalStorage();
+  controls.setCustomPenImageActive(false);
+  rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
+
 function getCanvasCoordinates(positionEvent) {
   const canvas = controls.rewriterCanvas;
   if (!canvas) {
@@ -424,4 +462,5 @@ function isWithinCanvas(point) {
     point.y >= 0 &&
     point.y <= controls.rewriterCanvas.height
   );
+main
 }
