@@ -232,6 +232,7 @@ body {
   margin: 6px clamp(16px, 6vw, 48px) 0 auto;
   align-self: flex-end;
   color: var(--color-smoky-black);
+  --toolbar-toggle-visible: 56px;
 }
 
 .toolbar-inner {
@@ -319,6 +320,77 @@ body {
   cursor: not-allowed;
   pointer-events: none;
   box-shadow: none;
+}
+
+.toolbar-toggle__icon {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  transition: transform 0.3s ease;
+}
+
+#toolbarToggle {
+  display: none;
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 52px;
+  height: 36px;
+  border-radius: 20px;
+  border: 2px solid rgba(10, 9, 3, 0.15);
+  background: #ffffff;
+  color: var(--color-smoky-black);
+  box-shadow: 0 6px 14px rgba(10, 9, 3, 0.18);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  z-index: 2;
+}
+
+#toolbarToggle svg {
+  display: block;
+}
+
+#toolbarToggle:hover,
+#toolbarToggle:focus-visible {
+  transform: translate(-50%, -2px);
+  box-shadow: 0 10px 20px rgba(10, 9, 3, 0.24);
+  outline: none;
+  background: var(--color-smoky-black);
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+#toolbarToggle:active {
+  transform: translate(-50%, 0);
+  box-shadow: 0 4px 8px rgba(10, 9, 3, 0.24);
+}
+
+body.is-fullscreen #toolbarBottom {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translate(-50%, 0);
+  width: min(92vw, 920px);
+  margin: 0;
+  padding: 62px 24px 28px;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+body.is-fullscreen #toolbarToggle {
+  display: inline-flex;
+}
+
+body.is-fullscreen #toolbarBottom.is-collapsed {
+  transform: translate(-50%, calc(100% - var(--toolbar-toggle-visible)));
+}
+
+body.is-fullscreen #toolbarBottom.is-collapsed .toolbar-toggle__icon {
+  transform: rotate(180deg);
 }
 
 .btn.icon.is-active {
@@ -697,6 +769,11 @@ body {
 }
 
 @media (max-width: 640px) {
+  body.is-fullscreen #toolbarBottom {
+    width: min(96vw, 920px);
+    padding: 56px 16px 24px;
+  }
+
   #toolbarBottom {
     padding: 18px 16px 26px;
   }
@@ -722,5 +799,14 @@ body {
   .title-texts::before,
   .title-texts::after {
     animation: none;
+  }
+
+  body.is-fullscreen #toolbarBottom {
+    transition: none;
+  }
+
+  #toolbarToggle,
+  .toolbar-toggle__icon {
+    transition: none;
   }
 }
