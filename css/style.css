@@ -227,13 +227,13 @@ body {
   display: flex;
   align-items: stretch;
   justify-content: center;
-  gap: clamp(16px, 4vw, 32px);
+  gap: clamp(12px, 3vw, 24px);
   flex-wrap: wrap;
 }
 
 .board-wrapper {
   position: relative;
-  flex: 1 1 720px;
+  flex: 1 1 840px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -245,11 +245,12 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(12px, 3vw, 20px);
-  padding: clamp(12px, 2vw, 18px);
-  border-radius: 24px;
-  background: rgba(255, 244, 213, 0.25);
-  box-shadow: 0 16px 32px rgba(10, 9, 3, 0.18);
+  gap: clamp(8px, 2.2vw, 16px);
+  padding: clamp(8px, 1.8vw, 14px);
+  border-radius: 20px;
+  border: 2px solid #000000;
+  background: rgba(255, 244, 213, 0.2);
+  box-shadow: 0 14px 24px rgba(10, 9, 3, 0.16);
   backdrop-filter: blur(6px);
   flex: 0 0 auto;
 }
@@ -262,13 +263,13 @@ body {
 }
 
 .side-panel__button {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
 }
 
 .side-panel__button.btn-primary {
-  width: 72px;
-  height: 72px;
+  width: 68px;
+  height: 68px;
 }
 
 .side-panel__action {
@@ -541,6 +542,24 @@ body.is-fullscreen #timerProgress {
   gap: clamp(16px, 4vw, 24px);
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   align-items: start;
+}
+
+.bottom-panel__sliders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(12px, 3vw, 20px);
+  align-items: center;
+  justify-content: center;
+  grid-column: 1 / -1;
+}
+
+.bottom-panel__slider {
+  flex: 1 1 clamp(220px, 28vw, 320px);
+  justify-content: center;
+}
+
+.bottom-panel__slider .slider {
+  width: min(100%, clamp(200px, 24vw, 280px));
 }
 
 .bottom-panel__practice .teach-input-row {
@@ -1301,12 +1320,13 @@ body.is-fullscreen #toolbarBottom {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    gap: clamp(10px, 5vw, 18px);
+    gap: clamp(8px, 4vw, 16px);
+    padding: clamp(10px, 5vw, 16px);
   }
 
   .side-panel__button {
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
   }
 
   .side-panel__button.btn-primary {
@@ -1314,13 +1334,15 @@ body.is-fullscreen #toolbarBottom {
     height: 64px;
   }
 
-  .slider-control--stacked,
-  .slider-control--compact {
-    max-width: min(100%, 320px);
+  .bottom-panel__sliders {
+    justify-content: flex-start;
   }
 
-  .slider-control--stacked .slider,
-  .slider-control--compact .slider {
+  .bottom-panel__slider {
+    flex: 1 1 min(100%, 320px);
+  }
+
+  .bottom-panel__slider .slider {
     width: clamp(160px, 60vw, 240px);
   }
 
