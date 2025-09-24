@@ -5,6 +5,7 @@ import { DrawnLine } from './DrawnLine.js';
 import { PenOptions } from './PenOptions.js';
 import { clamp, getAssetUrl, loadImage } from './utils.js';
 import { TimerController } from './timer.js';
+import { TeachController } from './teach.js';
 
 const ICON_SPRITE_PATH = 'assets/icons.svg';
 const DEFAULT_PEN_IMAGE_SRC = getAssetUrl('icons/pen.svg');
@@ -46,6 +47,15 @@ await loadInitialPenImage();
 await drawStoredLines(rewriterContext, true);
 
 setupEventListeners();
+
+new TeachController({
+  overlay: document.getElementById('teachOverlay'),
+  textInput: document.getElementById('teachTextInput'),
+  teachButton: document.getElementById('btnTeach'),
+  nextButton: document.getElementById('btnTeachNext'),
+  freezeInput: document.getElementById('freezeLettersInput'),
+  previewContainer: document.getElementById('teachPreview')
+});
 
 async function loadInitialPenImage() {
   const storedSrc = userData.userSettings.customPenImageSrc;

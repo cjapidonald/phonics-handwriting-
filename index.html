@@ -73,6 +73,7 @@
           <canvas id="writerLines" width="1200" height="600"></canvas>
           <canvas id="writer" width="1200" height="600"></canvas>
           <canvas id="writerMask" width="1200" height="600"></canvas>
+          <div id="teachOverlay" class="teach-overlay" aria-live="polite"></div>
         </div>
 
         <div id="boardDate" aria-label="Date" role="button" tabindex="0">Loading date…</div>
@@ -129,6 +130,37 @@
             <button class="btn icon btn-primary" id="btnRewrite" type="button" aria-label="Rewrite" title="Rewrite" aria-pressed="false">
               <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
             </button>
+          </div>
+
+          <div class="toolbar-group toolbar-teach" role="group" aria-label="Teaching text controls">
+            <div class="teach-field">
+              <label class="teach-label" for="teachTextInput">Practice text</label>
+              <div class="teach-input-row">
+                <input
+                  id="teachTextInput"
+                  class="teach-input"
+                  type="text"
+                  placeholder="Type a sentence for the board"
+                  autocomplete="off"
+                />
+                <button class="teach-button" id="btnTeach" type="button">Teach</button>
+                <button class="teach-button" id="btnTeachNext" type="button" disabled>
+                  Next
+                  <span aria-hidden="true" class="teach-button__arrow">➜</span>
+                </button>
+              </div>
+            </div>
+            <div class="teach-field">
+              <label class="teach-label" for="freezeLettersInput">Freeze letters</label>
+              <input
+                id="freezeLettersInput"
+                class="teach-input"
+                type="text"
+                placeholder="Enter letters to keep visible"
+                autocomplete="off"
+              />
+            </div>
+            <div class="teach-preview" id="teachPreview" aria-label="Sentence letter controls"></div>
           </div>
 
           <div class="toolbar-group toolbar-right" role="group" aria-label="Drawing controls">
