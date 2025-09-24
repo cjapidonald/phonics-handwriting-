@@ -85,6 +85,15 @@
       </div>
 
       <div id="toolbarBottom" role="toolbar" aria-label="Handwriting controls" class="disable-select">
+        <div
+          class="toolbar-drag-handle"
+          id="toolbarDragHandle"
+          role="presentation"
+          aria-hidden="true"
+          title="Drag toolbar"
+        >
+          <span class="toolbar-drag-grip" aria-hidden="true"></span>
+        </div>
         <div class="toolbar-inner">
           <div class="toolbar-group toolbar-left" role="group" aria-label="Zoom and speed">
             <button class="btn icon" id="btnZoomOut" type="button" aria-label="Zoom out" title="Zoom out">
@@ -103,11 +112,11 @@
                 class="slider"
                 type="range"
                 min="0.5"
-                max="4"
+                max="8"
                 step="0.1"
                 value="2"
                 aria-valuemin="0.5"
-                aria-valuemax="4"
+                aria-valuemax="8"
                 aria-valuenow="2"
                 aria-label="Rewrite speed"
               />

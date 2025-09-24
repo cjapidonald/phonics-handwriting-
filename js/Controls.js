@@ -7,6 +7,11 @@ const CANVAS_HEIGHT = 600;
 const PEN_SIZE_MIN = 1;
 const PEN_SIZE_MAX = 40;
 
+const REWRITE_SPEED_MIN = 0.5;
+const REWRITE_SPEED_MAX = 8;
+
+const TOOLBAR_POSITION_KEY = 'ui.toolbarPosition';
+
 const PEN_COLOUR_SWATCHES = [
   '#111111',
   '#444444',
@@ -44,6 +49,9 @@ export class Controls {
 
     this.linesContext = this.rewriterLinesCanvas?.getContext('2d') ?? null;
     this.pageContext = this.rewriterPageCanvas?.getContext('2d') ?? null;
+
+    this.toolbar = document.getElementById('toolbarBottom');
+    this.toolbarHandle = document.getElementById('toolbarDragHandle');
 
     this.rewriteButton = document.getElementById('btnRewrite');
     this.undoButton = document.getElementById('btnUndo');
@@ -93,6 +101,7 @@ export class Controls {
 
     this.openPopover = null;
     this.openPopoverButton = null;
+    this.toolbarHasCustomPosition = false;
 
     this.migrateSettings();
     this.initialiseCanvases();
@@ -103,6 +112,7 @@ export class Controls {
     this.setupSliders();
     this.setupZoomButtons();
     this.setupAuxiliaryButtons();
+    this.setupToolbarDragging();
     this.setupCookieBanner();
     this.setupDateDisplay();
     this.applyToolbarLayoutVersion();
@@ -326,8 +336,16 @@ export class Controls {
 
   setupSliders() {
     if (this.speedSlider) {
+      this.speedSlider.min = String(REWRITE_SPEED_MIN);
+      this.speedSlider.max = String(REWRITE_SPEED_MAX);
+      this.speedSlider.setAttribute('aria-valuemin', String(REWRITE_SPEED_MIN));
+      this.speedSlider.setAttribute('aria-valuemax', String(REWRITE_SPEED_MAX));
       this.speedSlider.addEventListener('input', () => {
-        const speed = clamp(Number(this.speedSlider.value) || DEFAULT_SETTINGS.rewriteSpeed, 0.5, 4);
+        const speed = clamp(
+          Number(this.speedSlider.value) || DEFAULT_SETTINGS.rewriteSpeed,
+          REWRITE_SPEED_MIN,
+          REWRITE_SPEED_MAX
+        );
         this.setRewriteSpeed(speed, true);
       });
     }
@@ -362,6 +380,84 @@ export class Controls {
         }
       });
     }
+  }
+
+  setupToolbarDragging() {
+    if (!this.toolbar || typeof window === 'undefined') {
+      return;
+    }
+
+    const handle = this.toolbarHandle ?? this.toolbar;
+    const storedPosition = this.loadStoredToolbarPosition();
+    if (storedPosition) {
+      this.positionToolbar(storedPosition.x, storedPosition.y);
+      this.toolbarHasCustomPosition = true;
+    }
+
+    let pointerId = null;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    const handlePointerDown = event => {
+      if (event.pointerType === 'mouse' && event.button !== 0) {
+        return;
+      }
+
+      const rect = this.toolbar.getBoundingClientRect();
+      pointerId = event.pointerId;
+      offsetX = event.clientX - rect.left;
+      offsetY = event.clientY - rect.top;
+      this.toolbar.classList.add('is-dragging');
+
+      try {
+        handle.setPointerCapture(pointerId);
+      } catch (error) {
+        // Ignore inability to capture pointer.
+      }
+
+      event.stopPropagation();
+      event.preventDefault();
+    };
+
+    const handlePointerMove = event => {
+      if (pointerId === null || event.pointerId !== pointerId) {
+        return;
+      }
+
+      this.positionToolbar(event.clientX - offsetX, event.clientY - offsetY);
+      event.preventDefault();
+    };
+
+    const endDrag = () => {
+      if (pointerId === null) {
+        return;
+      }
+
+      const activePointerId = pointerId;
+      pointerId = null;
+      this.toolbar.classList.remove('is-dragging');
+      try {
+        handle.releasePointerCapture(activePointerId);
+      } catch (error) {
+        // Ignore inability to release pointer.
+      }
+
+      const rect = this.toolbar.getBoundingClientRect();
+      this.saveToolbarPosition(rect.left, rect.top);
+    };
+
+    handle.addEventListener('pointerdown', handlePointerDown);
+    handle.addEventListener('pointermove', handlePointerMove);
+    handle.addEventListener('pointerup', endDrag);
+    handle.addEventListener('pointercancel', endDrag);
+    handle.addEventListener('lostpointercapture', () => {
+      pointerId = null;
+      this.toolbar.classList.remove('is-dragging');
+    });
+
+    window.addEventListener('resize', () => {
+      this.ensureToolbarWithinViewport();
+    });
   }
 
   setupCookieBanner() {
@@ -559,7 +655,7 @@ export class Controls {
   }
 
   setRewriteSpeed(value, persist = true) {
-    const speed = clamp(Number(value) || DEFAULT_SETTINGS.rewriteSpeed, 0.5, 4);
+    const speed = clamp(Number(value) || DEFAULT_SETTINGS.rewriteSpeed, REWRITE_SPEED_MIN, REWRITE_SPEED_MAX);
     this.userData.userSettings.rewriteSpeed = speed;
     if (this.speedSlider && this.speedSlider.value !== String(speed)) {
       this.speedSlider.value = String(speed);
@@ -567,6 +663,86 @@ export class Controls {
     }
     if (persist) {
       this.userData.saveToLocalStorage();
+    }
+  }
+
+  positionToolbar(left, top) {
+    if (!this.toolbar || typeof window === 'undefined') {
+      return { left, top };
+    }
+
+    const rect = this.toolbar.getBoundingClientRect();
+    const padding = 12;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const availableWidth = viewportWidth - rect.width - padding;
+    const availableHeight = viewportHeight - rect.height - padding;
+
+    const minLeft = padding;
+    const minTop = padding;
+    const maxLeft = availableWidth >= minLeft ? availableWidth : minLeft;
+    const maxTop = availableHeight >= minTop ? availableHeight : minTop;
+
+    const safeLeft = clamp(left, minLeft, maxLeft);
+    const safeTop = clamp(top, minTop, maxTop);
+
+    this.toolbar.style.left = `${safeLeft}px`;
+    this.toolbar.style.top = `${safeTop}px`;
+    this.toolbar.style.right = 'auto';
+    this.toolbar.style.bottom = 'auto';
+    this.toolbar.style.transform = 'none';
+    this.toolbarHasCustomPosition = true;
+
+    return { left: safeLeft, top: safeTop };
+  }
+
+  ensureToolbarWithinViewport() {
+    if (!this.toolbarHasCustomPosition || !this.toolbar || typeof window === 'undefined') {
+      return;
+    }
+
+    const rect = this.toolbar.getBoundingClientRect();
+    const position = this.positionToolbar(rect.left, rect.top);
+    this.saveToolbarPosition(position.left, position.top);
+  }
+
+  loadStoredToolbarPosition() {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return null;
+    }
+
+    try {
+      const raw = window.localStorage.getItem(TOOLBAR_POSITION_KEY);
+      if (!raw) {
+        return null;
+      }
+      const parsed = JSON.parse(raw);
+      if (
+        parsed &&
+        typeof parsed === 'object' &&
+        Number.isFinite(parsed.x) &&
+        Number.isFinite(parsed.y)
+      ) {
+        return { x: Number(parsed.x), y: Number(parsed.y) };
+      }
+    } catch (error) {
+      console.warn('Unable to load toolbar position from localStorage.', error);
+    }
+
+    return null;
+  }
+
+  saveToolbarPosition(left, top) {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return;
+    }
+
+    try {
+      const payload = JSON.stringify({ x: left, y: top });
+      window.localStorage.setItem(TOOLBAR_POSITION_KEY, payload);
+      this.toolbarHasCustomPosition = true;
+    } catch (error) {
+      console.warn('Unable to save toolbar position to localStorage.', error);
     }
   }
 
