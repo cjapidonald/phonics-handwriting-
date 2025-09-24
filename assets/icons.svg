@@ -57,6 +57,10 @@
     <path d="M8 9l4-4 4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
     <path d="M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
   </symbol>
+  <symbol id="close" viewBox="0 0 24 24">
+    <line x1="7" y1="7" x2="17" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    <line x1="17" y1="7" x2="7" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+  </symbol>
   <symbol id="timer" viewBox="0 0 24 24">
     <circle cx="12" cy="13" r="7" fill="none" stroke="currentColor" stroke-width="2" />
     <line x1="12" y1="13" x2="12" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
