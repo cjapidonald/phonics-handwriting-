@@ -82,6 +82,7 @@ export class Controls {
     this.timerProgress = document.getElementById('timerProgress');
 
     this.uploadPenButton = document.getElementById('btnUploadPen');
+    this.removePenImageButton = document.getElementById('btnRemovePenImage');
     this.penImageInput = document.getElementById('inputPenImage');
 
     this.cookiePopup = document.getElementById('cookiePopup');
@@ -273,6 +274,8 @@ export class Controls {
     if (storedPageColour) {
       this.userData.userSettings.selectedPageColour = storedPageColour;
     }
+
+    this.setCustomPenImageState(Boolean(this.userData.userSettings.customPenImageSrc));
   }
 
   setupPenControls() {
@@ -305,6 +308,8 @@ export class Controls {
         this.penImageInput.click();
       });
     }
+
+    this.setCustomPenImageState(Boolean(this.userData.userSettings.customPenImageSrc));
   }
 
   setupPageControls() {
@@ -458,6 +463,14 @@ export class Controls {
 
     if (persist) {
       this.userData.saveToLocalStorage();
+    }
+  }
+
+  setCustomPenImageState(hasCustomImage) {
+    const isEnabled = Boolean(hasCustomImage);
+    if (this.removePenImageButton) {
+      this.removePenImageButton.disabled = !isEnabled;
+      this.removePenImageButton.classList.toggle('is-disabled', !isEnabled);
     }
   }
 

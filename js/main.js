@@ -1,4 +1,4 @@
-import { UserData } from './UserData.js';
+import { UserData, DEFAULT_SETTINGS } from './UserData.js';
 import { Controls } from './Controls.js';
 import { Point } from './Point.js';
 import { DrawnLine } from './DrawnLine.js';
@@ -120,12 +120,17 @@ function setupEventListeners() {
           window.localStorage.setItem('pen.imageSrc', dataUrl);
         }
         userData.saveToLocalStorage();
+        controls.setCustomPenImageState(true);
       }
     } catch (error) {
       console.warn('Unable to load custom pen image.', error);
     } finally {
       event.target.value = '';
     }
+  });
+
+  controls.removePenImageButton?.addEventListener('click', async () => {
+    await resetPenImageToDefault();
   });
 
   controls.rewriterCanvas.addEventListener('touchstart', event => {
@@ -355,6 +360,27 @@ function computePenScale(penSize) {
 
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function resetPenImageToDefault() {
+  const defaultImage = await safeLoadPenImage(DEFAULT_PEN_IMAGE_SRC);
+  if (!defaultImage) {
+    return;
+  }
+
+  currentPenImage = defaultImage;
+  userData.userSettings.customPenImageSrc = '';
+  userData.userSettings.penImageScale = DEFAULT_SETTINGS.penImageScale;
+
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.setItem('pen.imageSrc', '');
+    window.localStorage.setItem('pen.imageScale', String(DEFAULT_SETTINGS.penImageScale));
+  }
+
+  customPenScale = clamp(userData.userSettings.penImageScale ?? DEFAULT_SETTINGS.penImageScale, 0.1, 5);
+  userData.saveToLocalStorage();
+  controls.setCustomPenImageState(false);
+  rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
 }
 
 async function safeLoadPenImage(src) {
