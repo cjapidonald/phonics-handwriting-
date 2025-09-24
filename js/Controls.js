@@ -1,5 +1,5 @@
 import { DEFAULT_SETTINGS } from './UserData.js';
-import { formatDateWithOrdinal, clamp, getAssetUrl, loadImage } from './utils.js';
+import { formatDateWithOrdinal, clamp, getAssetUrl, loadImage, getLocalStorage } from './utils.js';
 
 const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 600;
@@ -106,6 +106,9 @@ export class Controls {
     this.boardDate = document.getElementById('boardDate');
     this.boardLessonTitle = document.getElementById('boardLessonTitle');
     this.lessonTitleInput = document.getElementById('inputLessonTitle');
+    this.lessonTitleSubmitButton = document.getElementById('btnLessonTitleApply');
+
+    this.storage = getLocalStorage();
 
     this.openPopover = null;
     this.openPopoverButton = null;
@@ -129,8 +132,42 @@ export class Controls {
     this.applyInitialState();
   }
 
+  getStorageItem(key) {
+    if (!this.storage) {
+      return null;
+    }
+    try {
+      return this.storage.getItem(key);
+    } catch (error) {
+      console.warn(`Unable to read "${key}" from localStorage.`, error);
+      return null;
+    }
+  }
+
+  setStorageItem(key, value) {
+    if (!this.storage) {
+      return;
+    }
+    try {
+      this.storage.setItem(key, value);
+    } catch (error) {
+      console.warn(`Unable to write "${key}" to localStorage.`, error);
+    }
+  }
+
+  removeStorageItem(key) {
+    if (!this.storage) {
+      return;
+    }
+    try {
+      this.storage.removeItem(key);
+    } catch (error) {
+      console.warn(`Unable to remove "${key}" from localStorage.`, error);
+    }
+  }
+
   migrateSettings() {
-    if (typeof window === 'undefined' || !window.localStorage) {
+    if (!this.storage) {
       return;
     }
 
@@ -142,21 +179,21 @@ export class Controls {
       ['pen.imageScale', storedData.penImageScale ?? DEFAULT_SETTINGS.penImageScale],
       ['page.style', storedData.selectedBackground ?? DEFAULT_SETTINGS.selectedBackground],
       ['page.color', storedData.selectedPageColour ?? DEFAULT_SETTINGS.selectedPageColour],
-      ['timer.durationLastUsed', window.localStorage.getItem('timer.durationLastUsed') ?? '60'],
-      ['tv.enabled', window.localStorage.getItem('tv.enabled') ?? 'true']
+      ['timer.durationLastUsed', this.getStorageItem('timer.durationLastUsed') ?? '60'],
+      ['tv.enabled', this.getStorageItem('tv.enabled') ?? 'true']
     ]);
 
     map.forEach((value, key) => {
       if (value === undefined || value === null) {
         return;
       }
-      if (window.localStorage.getItem(key) === null) {
-        window.localStorage.setItem(key, String(value));
+      if (this.getStorageItem(key) === null) {
+        this.setStorageItem(key, String(value));
       }
     });
 
     ['pen.type', 'pen.mode', 'pen.selected', 'ui.sidebarLayoutVersion'].forEach(key => {
-      window.localStorage.removeItem(key);
+      this.removeStorageItem(key);
     });
   }
 
@@ -260,36 +297,36 @@ export class Controls {
   }
 
   loadStoredPreferences() {
-    if (typeof window === 'undefined' || !window.localStorage) {
+    if (!this.storage) {
       return;
     }
 
-    const storedSize = Number(window.localStorage.getItem('pen.size'));
+    const storedSize = Number(this.getStorageItem('pen.size'));
     if (Number.isFinite(storedSize)) {
       this.userData.userSettings.selectedPenWidth = clamp(storedSize, PEN_SIZE_MIN, PEN_SIZE_MAX);
     }
 
-    const storedColour = window.localStorage.getItem('pen.color');
+    const storedColour = this.getStorageItem('pen.color');
     if (typeof storedColour === 'string' && storedColour) {
       this.userData.userSettings.selectedPenColour = storedColour;
     }
 
-    const storedImage = window.localStorage.getItem('pen.imageSrc');
+    const storedImage = this.getStorageItem('pen.imageSrc');
     if (typeof storedImage === 'string') {
       this.userData.userSettings.customPenImageSrc = storedImage;
     }
 
-    const storedScale = Number(window.localStorage.getItem('pen.imageScale'));
+    const storedScale = Number(this.getStorageItem('pen.imageScale'));
     if (Number.isFinite(storedScale) && storedScale > 0) {
       this.userData.userSettings.penImageScale = storedScale;
     }
 
-    const storedBackground = window.localStorage.getItem('page.style');
+    const storedBackground = this.getStorageItem('page.style');
     if (storedBackground && PAGE_STYLE_DRAWERS[storedBackground]) {
       this.userData.userSettings.selectedBackground = storedBackground;
     }
 
-    const storedPageColour = window.localStorage.getItem('page.color');
+    const storedPageColour = this.getStorageItem('page.color');
     if (storedPageColour) {
       this.userData.userSettings.selectedPageColour = storedPageColour;
     }
@@ -583,14 +620,13 @@ codex/increase-speed-of-repeater-and-make-toolbar-movable
     const applyDate = () => {
       const formatted = formatDateWithOrdinal(new Date());
       this.boardDate.textContent = formatted;
-      if (typeof window !== 'undefined' && window.localStorage) {
-        window.localStorage.setItem('ui.dateText', formatted);
-      }
+      this.setStorageItem('ui.dateText', formatted);
     };
 
     let storedDate = '';
-    if (typeof window !== 'undefined' && window.localStorage) {
-      storedDate = window.localStorage.getItem('ui.dateText') ?? '';
+    const savedDate = this.getStorageItem('ui.dateText');
+    if (typeof savedDate === 'string') {
+      storedDate = savedDate;
     }
 
     if (storedDate) {
@@ -621,27 +657,49 @@ codex/increase-speed-of-repeater-and-make-toolbar-movable
       return;
     }
 
-    let storedTitle = '';
-    if (typeof window !== 'undefined' && window.localStorage) {
-      storedTitle = window.localStorage.getItem('ui.lessonTitle') ?? '';
-    }
-
+    const storedTitle = this.getStorageItem('ui.lessonTitle') ?? '';
     const initialTitle = storedTitle.trim();
     this.lessonTitleInput.value = storedTitle;
     this.applyLessonTitle(initialTitle);
 
-    this.lessonTitleInput.addEventListener('input', event => {
-      const rawValue = event.target.value ?? '';
+    const updateButtonState = () => {
+      if (!this.lessonTitleSubmitButton) {
+        return;
+      }
+      const trimmedValue = (this.lessonTitleInput.value ?? '').trim();
+      this.lessonTitleSubmitButton.disabled = trimmedValue.length === 0;
+      this.lessonTitleSubmitButton.classList.toggle('is-disabled', trimmedValue.length === 0);
+    };
+
+    const applyInputValue = () => {
+      const rawValue = this.lessonTitleInput.value ?? '';
       const trimmedValue = rawValue.trim();
       this.applyLessonTitle(trimmedValue);
 
-      if (typeof window !== 'undefined' && window.localStorage) {
-        if (trimmedValue) {
-          window.localStorage.setItem('ui.lessonTitle', trimmedValue);
-        } else {
-          window.localStorage.removeItem('ui.lessonTitle');
-        }
+      if (trimmedValue) {
+        this.setStorageItem('ui.lessonTitle', trimmedValue);
+      } else {
+        this.removeStorageItem('ui.lessonTitle');
       }
+
+      updateButtonState();
+    };
+
+    updateButtonState();
+
+    this.lessonTitleInput.addEventListener('input', () => {
+      updateButtonState();
+    });
+
+    this.lessonTitleInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        applyInputValue();
+      }
+    });
+
+    this.lessonTitleSubmitButton?.addEventListener('click', () => {
+      applyInputValue();
     });
   }
 
@@ -662,10 +720,7 @@ codex/increase-speed-of-repeater-and-make-toolbar-movable
   }
 
   applyToolbarLayoutVersion() {
-    if (typeof window === 'undefined' || !window.localStorage) {
-      return;
-    }
-    window.localStorage.setItem('ui.toolbarLayoutVersion', '2');
+    this.setStorageItem('ui.toolbarLayoutVersion', '2');
   }
 
   applyInitialState() {
@@ -685,9 +740,7 @@ codex/increase-speed-of-repeater-and-make-toolbar-movable
       this.penSizeSlider.setAttribute('aria-valuenow', String(size));
     }
 
-    if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem('pen.size', String(size));
-    }
+    this.setStorageItem('pen.size', String(size));
 
     if (persist) {
       this.userData.saveToLocalStorage();
@@ -730,9 +783,7 @@ codex/increase-speed-of-repeater-and-make-toolbar-movable
       }
     }
 
-    if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem('pen.color', nextColour);
-    }
+    this.setStorageItem('pen.color', nextColour);
 
     if (persist) {
       this.userData.saveToLocalStorage();
@@ -752,9 +803,7 @@ codex/increase-speed-of-repeater-and-make-toolbar-movable
       button.classList.toggle('is-selected', button.dataset.pageStyle === styleKey);
     });
 
-    if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem('page.style', styleKey);
-    }
+    this.setStorageItem('page.style', styleKey);
 
     if (persist) {
       this.userData.saveToLocalStorage();
@@ -776,9 +825,7 @@ codex/increase-speed-of-repeater-and-make-toolbar-movable
       button.classList.toggle('is-selected', button.dataset.pageColour?.toLowerCase() === value.toLowerCase());
     });
 
-    if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem('page.color', value);
-    }
+    this.setStorageItem('page.color', value);
 
     if (persist) {
       this.userData.saveToLocalStorage();
@@ -852,12 +899,12 @@ codex/increase-speed-of-repeater-and-make-toolbar-movable
   }
 
   loadStoredToolbarPosition() {
-    if (typeof window === 'undefined' || !window.localStorage) {
+    if (!this.storage) {
       return null;
     }
 
     try {
-      const raw = window.localStorage.getItem(TOOLBAR_POSITION_KEY);
+      const raw = this.storage.getItem(TOOLBAR_POSITION_KEY);
       if (!raw) {
         return null;
       }
@@ -878,13 +925,13 @@ codex/increase-speed-of-repeater-and-make-toolbar-movable
   }
 
   saveToolbarPosition(left, top) {
-    if (typeof window === 'undefined' || !window.localStorage) {
+    if (!this.storage) {
       return;
     }
 
     try {
       const payload = JSON.stringify({ x: left, y: top });
-      window.localStorage.setItem(TOOLBAR_POSITION_KEY, payload);
+      this.storage.setItem(TOOLBAR_POSITION_KEY, payload);
       this.toolbarHasCustomPosition = true;
     } catch (error) {
       console.warn('Unable to save toolbar position to localStorage.', error);

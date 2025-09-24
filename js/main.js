@@ -3,7 +3,7 @@ import { Controls } from './Controls.js';
 import { Point } from './Point.js';
 import { DrawnLine } from './DrawnLine.js';
 import { PenOptions } from './PenOptions.js';
-import { clamp, getAssetUrl, loadImage } from './utils.js';
+import { clamp, getAssetUrl, loadImage, getLocalStorage } from './utils.js';
 import { TimerController } from './timer.js';
 import { TeachController } from './teach.js';
 
@@ -14,6 +14,7 @@ const userData = new UserData();
 userData.loadFromLocalStorage();
 
 const controls = new Controls(userData);
+const storage = getLocalStorage();
 
 const rewriterLinesContext = controls.rewriterLinesCanvas.getContext('2d');
 rewriterLinesContext.imageSmoothingEnabled = false;
@@ -125,8 +126,12 @@ function setupEventListeners() {
       if (image) {
         currentPenImage = image;
         userData.userSettings.customPenImageSrc = dataUrl;
-        if (typeof window !== 'undefined' && window.localStorage) {
-          window.localStorage.setItem('pen.imageSrc', dataUrl);
+        if (storage) {
+          try {
+            storage.setItem('pen.imageSrc', dataUrl);
+          } catch (storageError) {
+            console.warn('Unable to save custom pen image to localStorage.', storageError);
+          }
         }
         userData.saveToLocalStorage();
         controls.setCustomPenImageState(true);
@@ -381,9 +386,13 @@ async function resetPenImageToDefault() {
   userData.userSettings.customPenImageSrc = '';
   userData.userSettings.penImageScale = DEFAULT_SETTINGS.penImageScale;
 
-  if (typeof window !== 'undefined' && window.localStorage) {
-    window.localStorage.setItem('pen.imageSrc', '');
-    window.localStorage.setItem('pen.imageScale', String(DEFAULT_SETTINGS.penImageScale));
+  if (storage) {
+    try {
+      storage.setItem('pen.imageSrc', '');
+      storage.setItem('pen.imageScale', String(DEFAULT_SETTINGS.penImageScale));
+    } catch (error) {
+      console.warn('Unable to reset pen preferences in localStorage.', error);
+    }
   }
 
   customPenScale = clamp(userData.userSettings.penImageScale ?? DEFAULT_SETTINGS.penImageScale, 0.1, 5);
