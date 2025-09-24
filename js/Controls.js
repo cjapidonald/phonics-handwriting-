@@ -28,14 +28,10 @@ const PEN_COLOUR_SWATCHES = [
   'rainbow'
 ];
 
-codex/update-full-screen-mode-ui-elements
 const RAINBOW_INDICATOR = 'conic-gradient(from 0deg, #ff004d, #ffa500, #ffee00, #00d084, #1e4dd8, #7f3f98, #ff004d)';
 
-const PHONICS_LINES_IMAGE_SRC = getAssetUrl('icons/Phonics lines.png');
-=======
 const PHONICS_LINES_ASSET_PATH = 'icons/Phonics lines.png';
 const PHONICS_LINES_IMAGE_SRC = getAssetUrl(PHONICS_LINES_ASSET_PATH);
- main
 let phonicsLinesImage = null;
 let phonicsLinesImagePromise = null;
 
@@ -49,6 +45,8 @@ export class Controls {
     this.userData = userData;
 
     this.writerContainer = document.getElementById('writerContainer');
+    this.appShell = document.getElementById('appShell');
+    this.boardRegion = document.getElementById('boardRegion');
     this.writerBoard = document.getElementById('writerBoard');
     this.rewriterCanvas = document.getElementById('writer');
     this.rewriterTraceCanvas = document.getElementById('writerTrace');
@@ -636,10 +634,38 @@ export class Controls {
   setupAuxiliaryButtons() {
     if (this.fullscreenButtons.length > 0) {
       const toggleFullscreen = () => {
-        if (document.fullscreenElement) {
-          document.exitFullscreen();
-        } else {
-          (this.writerContainer ?? document.documentElement).requestFullscreen().catch(() => {});
+        const activeElement = document.fullscreenElement ?? document.webkitFullscreenElement ?? null;
+        if (activeElement) {
+          if (typeof document.exitFullscreen === 'function') {
+            const exitResult = document.exitFullscreen();
+            if (exitResult?.catch) {
+              exitResult.catch(() => {});
+            }
+          } else if (typeof document.webkitExitFullscreen === 'function') {
+            document.webkitExitFullscreen();
+          }
+          return;
+        }
+
+        const target = this.getFullscreenTarget();
+        if (!target) {
+          return;
+        }
+
+        const request =
+          target.requestFullscreen?.bind(target) ??
+          target.webkitRequestFullscreen?.bind(target) ??
+          null;
+
+        if (typeof request === 'function') {
+          try {
+            const requestResult = request();
+            if (requestResult?.catch) {
+              requestResult.catch(() => {});
+            }
+          } catch (error) {
+            // Ignore inability to enter fullscreen.
+          }
         }
       };
 
@@ -813,10 +839,12 @@ export class Controls {
 
     const handleFullscreenChange = () => {
       const fullscreenElement = document.fullscreenElement ?? document.webkitFullscreenElement ?? null;
+      const target = this.getFullscreenTarget();
+      const isTargetFullscreen = fullscreenElement === target;
       const isWriterFullscreen = fullscreenElement === this.writerContainer;
       const isDocumentFullscreen =
         fullscreenElement === document.documentElement || fullscreenElement === document.body;
-      const isAppFullscreen = isWriterFullscreen || isDocumentFullscreen;
+      const isAppFullscreen = isTargetFullscreen || isWriterFullscreen || isDocumentFullscreen;
       const body = document.body;
 
       if (body) {
@@ -894,6 +922,26 @@ export class Controls {
     }
 
     this.toolbarBottom.style.setProperty('--board-width', `${rect.width}px`);
+  }
+
+  getFullscreenTarget() {
+    if (this.appShell) {
+      return this.appShell;
+    }
+
+    if (this.boardRegion) {
+      return this.boardRegion;
+    }
+
+    if (this.writerContainer) {
+      return this.writerContainer;
+    }
+
+    if (typeof document !== 'undefined') {
+      return document.documentElement;
+    }
+
+    return null;
   }
 
   setupCookieBanner() {
@@ -1423,15 +1471,24 @@ export class Controls {
       }
     }
 
-    if (this.writerContainer && typeof window !== 'undefined') {
-      try {
-        const styles = window.getComputedStyle(this.writerContainer);
-        const paddingBottom = parseFloat(styles.paddingBottom) || 0;
-        const gap = parseFloat(styles.rowGap || styles.gap) || 0;
-        offset += paddingBottom + gap;
-      } catch (error) {
-        // Ignore inability to read computed styles.
-      }
+    if (typeof window !== 'undefined') {
+      const containers = [this.getFullscreenTarget(), this.writerContainer].filter(
+        (element, index, array) => element && array.indexOf(element) === index
+      );
+
+      containers.forEach(element => {
+        if (!element) {
+          return;
+        }
+        try {
+          const styles = window.getComputedStyle(element);
+          const paddingBottom = parseFloat(styles.paddingBottom) || 0;
+          const gap = parseFloat(styles.rowGap || styles.gap) || 0;
+          offset += paddingBottom + gap;
+        } catch (error) {
+          // Ignore inability to read computed styles.
+        }
+      });
     }
 
     body.style.setProperty('--fullscreen-toolbar-offset', `${Math.max(offset, baseSpacing)}px`);

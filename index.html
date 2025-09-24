@@ -73,6 +73,7 @@
         <svg class="info-panel-toggle__pin" viewBox="0 0 24 24" focusable="false" role="img" aria-hidden="true">
           <path
             fill="#d7263d"
+codex/change-info-icon-to-red-pin-884q79
             d="M8 2h8a1 1 0 0 1 1 1v1.3a1 1 0 0 1-1 1h-1.12l.85 6.35H18a1 1 0 0 1 .76 1.65l-2.46 2.94h-2.9l-.34 5.04-1.06-.4-1.06-.4.34-4.24H7.7l-2.46-2.94A1 1 0 0 1 6 10.65h2.27l.85-6.35H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"
           />
           <path
@@ -83,6 +84,11 @@
             fill="#f7c8d1"
             d="M9.2 3.2V3h5.6v.2c0 .44-.36.8-.8.8h-4c-.44 0-.8-.36-.8-.8Z"
           />
+
+            d="M12 2C8.134 2 5 5.134 5 9c0 5.387 7 13 7 13s7-7.613 7-13c0-3.866-3.134-7-7-7Zm0 10.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"
+          />
+          <circle cx="12" cy="9" r="2" fill="#fff" opacity="0.65" />
+main
         </svg>
       </span>
     </button>
@@ -178,7 +184,7 @@
       </section>
 
     <main class="main-container disable-select" role="main">
-      <div class="app-shell disable-select">
+      <div id="appShell" class="app-shell disable-select">
         <section
           id="toolbarTop"
           class="toolbar toolbar--top"
@@ -223,7 +229,7 @@
           </div>
         </section>
 
-        <div class="board-region">
+        <div id="boardRegion" class="board-region">
           <div id="boardHeader" class="board-header" role="presentation">
             <div class="board-header__title">
               <div
