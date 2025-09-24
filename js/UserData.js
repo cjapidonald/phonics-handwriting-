@@ -1,4 +1,5 @@
 import { DrawnLine } from './DrawnLine.js';
+import { getLocalStorage } from './utils.js';
 
 const DEFAULT_SETTINGS = {
   selectedPenWidth: 6,
@@ -17,15 +18,16 @@ export class UserData {
     this.userSettings = { ...DEFAULT_SETTINGS };
     this.storedLines = [];
     this.deletedLines = [];
+    this.storage = getLocalStorage();
   }
 
   loadFromLocalStorage() {
-    if (typeof window === 'undefined' || !window.localStorage) {
+    if (!this.storage) {
       return;
     }
 
     try {
-      const raw = window.localStorage.getItem(this.storageKey);
+      const raw = this.storage.getItem(this.storageKey);
       if (!raw) {
         return;
       }
@@ -60,7 +62,7 @@ export class UserData {
   }
 
   saveToLocalStorage() {
-    if (typeof window === 'undefined' || !window.localStorage) {
+    if (!this.storage) {
       return;
     }
 
@@ -70,7 +72,7 @@ export class UserData {
         storedLines: this.storedLines.map(line => line.map(segment => segment.toJSON())),
         deletedLines: this.deletedLines.map(line => line.map(segment => segment.toJSON()))
       };
-      window.localStorage.setItem(this.storageKey, JSON.stringify(payload));
+      this.storage.setItem(this.storageKey, JSON.stringify(payload));
     } catch (error) {
       console.warn('Unable to save handwriting data to localStorage.', error);
     }

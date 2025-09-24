@@ -1,3 +1,5 @@
+import { getLocalStorage } from './utils.js';
+
 const YT_VIDEO_MAP = {
   60: '6H8jMHyvDbk',
   120: 'zKTNXUA7lWI'
@@ -21,15 +23,40 @@ export class TimerController {
 
     this.lastDuration = 60;
     this.enabled = true;
+
+    this.storage = getLocalStorage();
+  }
+
+  getStorageItem(key) {
+    if (!this.storage) {
+      return null;
+    }
+    try {
+      return this.storage.getItem(key);
+    } catch (error) {
+      console.warn(`Unable to read "${key}" from localStorage.`, error);
+      return null;
+    }
+  }
+
+  setStorageItem(key, value) {
+    if (!this.storage) {
+      return;
+    }
+    try {
+      this.storage.setItem(key, value);
+    } catch (error) {
+      console.warn(`Unable to write "${key}" to localStorage.`, error);
+    }
   }
 
   init() {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const storedDuration = Number(window.localStorage.getItem('timer.durationLastUsed'));
+    if (this.storage) {
+      const storedDuration = Number(this.getStorageItem('timer.durationLastUsed'));
       if (Number.isFinite(storedDuration) && storedDuration > 0) {
         this.lastDuration = storedDuration;
       }
-      const tvEnabled = window.localStorage.getItem('tv.enabled');
+      const tvEnabled = this.getStorageItem('tv.enabled');
       this.enabled = tvEnabled !== 'false';
     }
 
@@ -134,9 +161,7 @@ export class TimerController {
     this.isActive = true;
     this.pendingVideoId = null;
 
-    if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem('timer.durationLastUsed', String(durationSeconds));
-    }
+    this.setStorageItem('timer.durationLastUsed', String(durationSeconds));
     this.lastDuration = durationSeconds;
 
     this.highlightDuration(durationSeconds);

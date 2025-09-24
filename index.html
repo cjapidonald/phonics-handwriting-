@@ -68,13 +68,23 @@
     <section class="lesson-controls" aria-label="Lesson details">
       <div class="lesson-title-field">
         <label class="lesson-title-label" for="inputLessonTitle">Lesson title</label>
-        <input
-          type="text"
-          id="inputLessonTitle"
-          class="lesson-title-input"
-          placeholder="Lesson title here"
-          autocomplete="off"
-        />
+        <div class="lesson-title-input-row">
+          <input
+            type="text"
+            id="inputLessonTitle"
+            class="lesson-title-input"
+            placeholder="Lesson title here"
+            autocomplete="off"
+          />
+          <button
+            type="button"
+            id="btnLessonTitleApply"
+            class="lesson-title-apply is-disabled"
+            disabled
+          >
+            Display
+          </button>
+        </div>
       </div>
     </section>
 
