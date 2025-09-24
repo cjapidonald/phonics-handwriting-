@@ -54,7 +54,8 @@ new TeachController({
   textInput: document.getElementById('teachTextInput'),
   teachButton: document.getElementById('btnTeach'),
   nextButton: document.getElementById('btnTeachNext'),
-  previewContainer: document.getElementById('teachPreview')
+  previewContainer: document.getElementById('teachPreview'),
+  previewToggleButton: document.getElementById('btnToggleFreezePreview')
 });
 
 async function loadInitialPenImage() {

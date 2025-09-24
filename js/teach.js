@@ -1,13 +1,18 @@
 const DESCENDER_CHARACTERS = new Set(['g', 'j', 'p', 'q', 'y']);
 const PUNCTUATION_REGEX = /^[!?;:,]$/;
+const LETTER_COLLATOR =
+  typeof Intl !== 'undefined' && typeof Intl.Collator === 'function'
+    ? new Intl.Collator(undefined, { sensitivity: 'base' })
+    : null;
 
 export class TeachController {
-  constructor({ overlay, textInput, teachButton, nextButton, previewContainer }) {
+  constructor({ overlay, textInput, teachButton, nextButton, previewContainer, previewToggleButton }) {
     this.overlay = overlay ?? null;
     this.textInput = textInput ?? null;
     this.teachButton = teachButton ?? null;
     this.nextButton = nextButton ?? null;
     this.previewContainer = previewContainer ?? null;
+    this.previewToggleButton = previewToggleButton ?? null;
 
     this.overlayContent = null;
     this.lines = [];
@@ -15,14 +20,17 @@ export class TeachController {
     this.manualFrozenIndices = new Set();
     this.revealedByNext = new Set();
     this.nextPointer = 0;
+    this.isPreviewHidden = false;
 
     this.handleTeach = this.handleTeach.bind(this);
     this.handleNext = this.handleNext.bind(this);
     this.handlePreviewClick = this.handlePreviewClick.bind(this);
+    this.handleTogglePreview = this.handleTogglePreview.bind(this);
 
     this.teachButton?.addEventListener('click', this.handleTeach);
     this.nextButton?.addEventListener('click', this.handleNext);
     this.previewContainer?.addEventListener('click', this.handlePreviewClick);
+    this.previewToggleButton?.addEventListener('click', this.handleTogglePreview);
     this.textInput?.addEventListener('keydown', event => {
       if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
@@ -39,6 +47,7 @@ export class TeachController {
 
     this.setOverlayHidden(true);
     this.updateButtonStates();
+    this.updatePreviewVisibility();
   }
 
   handleTeach() {
@@ -80,6 +89,11 @@ export class TeachController {
     this.updateButtonStates();
   }
 
+  handleTogglePreview() {
+    this.isPreviewHidden = !this.isPreviewHidden;
+    this.updatePreviewVisibility();
+  }
+
   applyText(rawText) {
     const text = typeof rawText === 'string' ? rawText : '';
     this.lines = [];
@@ -112,6 +126,7 @@ export class TeachController {
     this.renderOverlay();
     this.updateAllLetterStates();
     this.updateButtonStates();
+    this.updatePreviewVisibility();
 
     if (typeof requestAnimationFrame === 'function') {
       requestAnimationFrame(() => this.fitOverlay());
@@ -192,17 +207,12 @@ export class TeachController {
       this.previewContainer.innerHTML = '';
     }
 
+    const previewLetters = [];
+
     this.lines.forEach(line => {
       const lineElement = document.createElement('div');
       lineElement.className = 'teach-line';
       this.overlayContent.appendChild(lineElement);
-
-      let previewLine = null;
-      if (this.previewContainer) {
-        previewLine = document.createElement('div');
-        previewLine.className = 'teach-preview__line';
-        this.previewContainer.appendChild(previewLine);
-      }
 
       line.forEach(letter => {
         const letterElement = document.createElement('div');
@@ -228,31 +238,33 @@ export class TeachController {
         letter.placeholderElement = placeholder;
         letter.charElement = charElement;
 
-        if (this.previewContainer && previewLine) {
-          if (letter.isSpace) {
-            const space = document.createElement('span');
-            space.className = 'teach-preview__space';
-            space.setAttribute('aria-hidden', 'true');
-            previewLine.appendChild(space);
-          } else {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'teach-preview__letter';
-            button.dataset.letterIndex = String(letter.index);
-            button.textContent = letter.char;
-            button.setAttribute('aria-pressed', 'false');
-            button.setAttribute('aria-label', `Freeze letter ${letter.char}`);
-            button.setAttribute('title', 'Click to freeze or unfreeze this letter');
-            const previewClass = this.getLetterClass(letter.classification);
-            if (previewClass) {
-              button.classList.add(previewClass);
-            }
-            previewLine.appendChild(button);
-            letter.previewElement = button;
-          }
+        if (letter.isRevealable) {
+          previewLetters.push(letter);
         }
       });
     });
+
+    if (this.previewContainer && previewLetters.length) {
+      const fragment = document.createDocumentFragment();
+      const sortedLetters = this.sortPreviewLetters(previewLetters);
+      sortedLetters.forEach(letter => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'teach-preview__letter';
+        button.dataset.letterIndex = String(letter.index);
+        button.textContent = letter.char;
+        button.setAttribute('aria-pressed', 'false');
+        button.setAttribute('aria-label', `Freeze letter ${letter.char}`);
+        button.setAttribute('title', 'Click to freeze or unfreeze this letter');
+        const previewClass = this.getLetterClass(letter.classification);
+        if (previewClass) {
+          button.classList.add(previewClass);
+        }
+        fragment.appendChild(button);
+        letter.previewElement = button;
+      });
+      this.previewContainer.appendChild(fragment);
+    }
   }
 
   clearOverlay() {
@@ -269,6 +281,7 @@ export class TeachController {
     this.manualFrozenIndices.clear();
     this.revealedByNext.clear();
     this.nextPointer = 0;
+    this.updatePreviewVisibility();
   }
 
   revealNextLetter() {
@@ -333,6 +346,60 @@ export class TeachController {
       letter.previewElement.classList.toggle('is-revealed', isRevealed);
       letter.previewElement.classList.toggle('is-frozen', isFrozen);
       letter.previewElement.setAttribute('aria-pressed', isFrozen ? 'true' : 'false');
+    }
+  }
+
+  hasPreviewLetters() {
+    return this.letters.some(letter => letter?.isRevealable);
+  }
+
+  sortPreviewLetters(letters) {
+    const sorted = [...letters];
+    sorted.sort((a, b) => {
+      if (LETTER_COLLATOR) {
+        const compareResult = LETTER_COLLATOR.compare(a.char, b.char);
+        if (compareResult !== 0) {
+          return compareResult;
+        }
+      } else {
+        const aLower = a.char.toLowerCase();
+        const bLower = b.char.toLowerCase();
+        if (aLower < bLower) {
+          return -1;
+        }
+        if (aLower > bLower) {
+          return 1;
+        }
+      }
+
+      const directCompare = a.char.localeCompare(b.char);
+      if (directCompare !== 0) {
+        return directCompare;
+      }
+
+      return a.index - b.index;
+    });
+    return sorted;
+  }
+
+  updatePreviewVisibility() {
+    const hasLetters = this.hasPreviewLetters();
+    const shouldHide = this.isPreviewHidden || !hasLetters;
+
+    if (this.previewContainer) {
+      this.previewContainer.classList.toggle('is-hidden', shouldHide);
+      this.previewContainer.setAttribute('aria-hidden', shouldHide ? 'true' : 'false');
+    }
+
+    if (this.previewToggleButton) {
+      this.previewToggleButton.disabled = !hasLetters;
+      const expanded = hasLetters && !this.isPreviewHidden;
+      const labelText = expanded ? 'Hide letters' : 'Show letters';
+      const ariaLabel = expanded ? 'Hide freeze letters' : 'Show freeze letters';
+      this.previewToggleButton.textContent = labelText;
+      this.previewToggleButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      this.previewToggleButton.setAttribute('aria-label', ariaLabel);
+      this.previewToggleButton.setAttribute('title', ariaLabel);
     }
   }
 

@@ -208,8 +208,8 @@ export class Controls {
       if (!canvas) return;
       canvas.width = CANVAS_WIDTH;
       canvas.height = CANVAS_HEIGHT;
-      canvas.style.width = `${CANVAS_WIDTH}px`;
-      canvas.style.height = `${CANVAS_HEIGHT}px`;
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
     });
   }
 
@@ -833,10 +833,16 @@ export class Controls {
   setZoom(value, persist = true) {
     const zoom = clamp(Number(value) || DEFAULT_SETTINGS.zoomLevel, 0.5, 3);
     this.userData.userSettings.zoomLevel = zoom;
+    const boardWidth = CANVAS_WIDTH * zoom;
     if (this.writerContainer) {
-      this.writerContainer.style.transform = `scale(${zoom})`;
-      this.writerContainer.style.transformOrigin = 'top center';
+      this.writerContainer.style.transform = '';
+      this.writerContainer.style.transformOrigin = '';
       this.writerContainer.style.setProperty('--zoom-level', String(zoom));
+      this.writerContainer.style.setProperty('--board-width', `${boardWidth}px`);
+    }
+
+    if (this.writerBoard) {
+      this.writerBoard.style.setProperty('--board-width', `${boardWidth}px`);
     }
 
     if (persist) {
