@@ -28,7 +28,7 @@
       </div>
     </div>
 
-    <div class="main-container disable-select">
+    <div class="main-container disable-select" id="appContainer">
       <div id="writerContainer" class="writer-container">
         <canvas id="writerPage" width="1200" height="600"></canvas>
         <canvas id="writerTrace" width="1200" height="600"></canvas>
@@ -134,6 +134,15 @@
             </button>
             <button class="btn icon" id="btnUploadPen" type="button" aria-label="Upload pen image" title="Upload pen image">
               <svg aria-hidden="true"><use href="assets/icons.svg#upload"></use></svg>
+            </button>
+            <button
+              class="btn icon"
+              id="btnRemovePenImage"
+              type="button"
+              aria-label="Remove custom pen image"
+              title="Remove custom pen image"
+            >
+              <svg aria-hidden="true"><use href="assets/icons.svg#cursor-remove"></use></svg>
             </button>
             <button
               class="btn icon"
