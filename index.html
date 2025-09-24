@@ -326,6 +326,57 @@
       </div>
     </section>
 
+    <section class="feedback-section" aria-labelledby="feedbackHeading">
+      <div class="feedback-section__inner">
+        <h2 id="feedbackHeading">Send Feedback</h2>
+        <p class="feedback-description">
+          Have suggestions or want to share how you use Handwriting Repeater? Drop a quick note below and we&rsquo;ll get back to you.
+        </p>
+        <form
+          class="feedback-form"
+          action="mailto:dcjapi@gmail.com"
+          method="post"
+          enctype="text/plain"
+        >
+          <div class="feedback-field">
+            <label class="feedback-label" for="feedbackName">Name</label>
+            <input
+              class="feedback-input"
+              type="text"
+              id="feedbackName"
+              name="name"
+              placeholder="Your name"
+              autocomplete="name"
+            />
+          </div>
+          <div class="feedback-field">
+            <label class="feedback-label" for="feedbackEmail">Email</label>
+            <input
+              class="feedback-input"
+              type="email"
+              id="feedbackEmail"
+              name="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <div class="feedback-field">
+            <label class="feedback-label" for="feedbackMessage">Message</label>
+            <textarea
+              class="feedback-textarea"
+              id="feedbackMessage"
+              name="message"
+              placeholder="Share your thoughts, ideas, or questions"
+              rows="5"
+              required
+            ></textarea>
+          </div>
+          <button class="feedback-submit" type="submit">Send Email</button>
+        </form>
+      </div>
+    </section>
+
     <input type="file" id="inputPenImage" class="visually-hidden" accept="image/*" aria-hidden="true" />
 
     <div id="pageStylePopover" class="popover" role="dialog" aria-label="Page style options">
