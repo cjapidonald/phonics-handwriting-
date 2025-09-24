@@ -307,8 +307,8 @@ body {
   backdrop-filter: blur(8px);
   margin: 0;
   color: var(--color-smoky-black);
-codex/increase-speed-of-repeater-and-make-toolbar-movable
   z-index: 20;
+  --toolbar-toggle-visible: 56px;
 }
 
 .toolbar-drag-handle {
@@ -334,9 +334,6 @@ codex/increase-speed-of-repeater-and-make-toolbar-movable
 
 #toolbarBottom.is-dragging .toolbar-drag-grip {
   background: rgba(10, 9, 3, 0.45);
-
-  --toolbar-toggle-visible: 56px;
-main
 }
 
 .toolbar-inner {

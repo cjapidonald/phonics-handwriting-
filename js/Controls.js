@@ -395,8 +395,6 @@ export class Controls {
       });
     }
   }
-
-codex/increase-speed-of-repeater-and-make-toolbar-movable
   setupToolbarDragging() {
     if (!this.toolbar || typeof window === 'undefined') {
       return;
@@ -473,6 +471,7 @@ codex/increase-speed-of-repeater-and-make-toolbar-movable
     window.addEventListener('resize', () => {
       this.ensureToolbarWithinViewport();
     });
+  }
 
   setupFullscreenBehaviour() {
     if (typeof document === 'undefined' || !this.toolbarBottom) {
@@ -544,7 +543,6 @@ codex/increase-speed-of-repeater-and-make-toolbar-movable
     });
 
     handleFullscreenChange();
- main
   }
 
   setupCookieBanner() {
