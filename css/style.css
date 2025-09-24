@@ -9,6 +9,7 @@
   --color-ut-orange: #ff8200;
   --color-sunglow: #ffc929;
   --color-crosstik: #fff4d5;
+  --color-board-surround: #ff4f14;
   --app-fixed-width: min(100vw, 1440px);
   --board-fixed-width: min(100vw, 1200px);
 }
@@ -221,7 +222,7 @@ body {
   align-items: center;
   gap: clamp(24px, 3vw, 32px);
   touch-action: none;
-  background: rgba(10, 9, 3, 0.15);
+  background: var(--color-board-surround);
   border-radius: 28px;
   border: 2px solid rgba(255, 255, 255, 0.2);
   padding: clamp(16px, 3vw, 28px);
@@ -606,7 +607,7 @@ body.is-fullscreen .app-shell {
 }
 
 body.is-fullscreen .writer-container {
-  background: rgba(10, 9, 3, 0.15);
+  background: var(--color-board-surround);
   border: 2px solid rgba(255, 255, 255, 0.2);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
   border-radius: 32px;
