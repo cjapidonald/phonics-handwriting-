@@ -113,6 +113,7 @@ export class Controls {
     this.lessonTitleSubmitButton = document.getElementById('btnLessonTitleApply');
 
     this.storage = getLocalStorage();
+    this.toolbarLayoutVersion = this.getStorageItem?.('ui.toolbarLayoutVersion') ?? null;
 
     this.openPopover = null;
     this.openPopoverButton = null;
@@ -130,13 +131,13 @@ export class Controls {
     this.setupZoomButtons();
     this.setupAuxiliaryButtons();
     this.setupBookmarkDock();
+    this.applyToolbarLayoutVersion();
     this.setupToolbarDragging();
     this.setupCookieBanner();
     this.setupDateDisplay();
     this.setupLessonTitle();
     this.setupFullscreenBehaviour();
     this.setupToolbarWidthSync();
-    this.applyToolbarLayoutVersion();
     this.applyInitialState();
   }
 
@@ -503,6 +504,11 @@ export class Controls {
       return;
     }
 
+    if (this.toolbarLayoutVersion === '3') {
+      this.toolbar.classList.remove('is-dragging');
+      return;
+    }
+
     const handle = this.toolbarHandle ?? this.toolbar;
     const storedPosition = this.loadStoredToolbarPosition();
     if (storedPosition) {
@@ -582,18 +588,21 @@ export class Controls {
     }
 
     const applyCollapsedState = collapsed => {
+      const isFullscreen = this.toolbarBottom?.classList.contains('is-fullscreen-active') ?? false;
+      const effectiveCollapsed = isFullscreen && collapsed;
       if (this.toolbarBottom) {
-        this.toolbarBottom.classList.toggle('is-collapsed', collapsed);
+        this.toolbarBottom.classList.toggle('is-collapsed', effectiveCollapsed);
       }
       if (this.toolbarToggleButton) {
-        const expanded = !collapsed;
+        const expanded = !effectiveCollapsed;
         this.toolbarToggleButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
         this.toolbarToggleButton.setAttribute('aria-label', expanded ? 'Hide controls' : 'Show controls');
+        this.toolbarToggleButton.setAttribute('aria-hidden', isFullscreen ? 'false' : 'true');
       }
       this.scheduleFullscreenToolbarOffsetUpdate();
     };
 
-    applyCollapsedState(this.toolbarBottom.classList.contains('is-collapsed'));
+    applyCollapsedState(false);
 
     const handleFullscreenChange = () => {
       const fullscreenElement = document.fullscreenElement ?? document.webkitFullscreenElement ?? null;
@@ -607,16 +616,20 @@ export class Controls {
         body.classList.toggle('is-fullscreen', isAppFullscreen);
       }
 
+      const wasCollapsed = this.toolbarBottom?.classList.contains('is-collapsed') ?? false;
       if (this.toolbarBottom) {
         this.toolbarBottom.classList.toggle('is-fullscreen-active', isAppFullscreen);
       }
 
-      applyCollapsedState(this.toolbarBottom.classList.contains('is-collapsed'));
+      applyCollapsedState(isAppFullscreen && wasCollapsed);
       this.updateToolbarWidthFromBoard();
     };
 
     if (this.toolbarToggleButton) {
       this.toolbarToggleButton.addEventListener('click', () => {
+        if (!this.toolbarBottom?.classList.contains('is-fullscreen-active')) {
+          return;
+        }
         const shouldCollapse = !this.toolbarBottom.classList.contains('is-collapsed');
         applyCollapsedState(shouldCollapse);
       });
@@ -812,7 +825,20 @@ export class Controls {
   }
 
   applyToolbarLayoutVersion() {
-    this.setStorageItem('ui.toolbarLayoutVersion', '2');
+    const nextVersion = '3';
+    if (this.toolbarLayoutVersion !== nextVersion) {
+      this.removeStorageItem(TOOLBAR_POSITION_KEY);
+      this.toolbarHasCustomPosition = false;
+      if (this.toolbar) {
+        this.toolbar.style.left = '';
+        this.toolbar.style.top = '';
+        this.toolbar.style.right = '';
+        this.toolbar.style.bottom = '';
+        this.toolbar.style.transform = '';
+      }
+    }
+    this.setStorageItem('ui.toolbarLayoutVersion', nextVersion);
+    this.toolbarLayoutVersion = nextVersion;
   }
 
   applyInitialState() {
@@ -1013,7 +1039,7 @@ export class Controls {
     }
 
     if (!body.classList.contains('is-fullscreen')) {
-      body.style.removeProperty('--fullscreen-toolbar-offset');
+      body.style.setProperty('--fullscreen-toolbar-offset', '0px');
       return;
     }
 
@@ -1021,16 +1047,20 @@ export class Controls {
     let offset = baseSpacing;
 
     if (this.toolbarBottom) {
-      const isCollapsed = this.toolbarBottom.classList.contains('is-collapsed');
+      const toolbarHeight = this.toolbarBottom.offsetHeight || 0;
+      if (toolbarHeight > 0) {
+        offset += toolbarHeight;
+      }
+    }
 
-      if (isCollapsed && this.toolbarToggleButton) {
-        const toggleHeight = this.toolbarToggleButton.offsetHeight || 0;
-        offset = toggleHeight + baseSpacing;
-      } else {
-        const toolbarHeight = this.toolbarBottom.offsetHeight || 0;
-        if (toolbarHeight > 0) {
-          offset = toolbarHeight + baseSpacing;
-        }
+    if (this.writerContainer && typeof window !== 'undefined') {
+      try {
+        const styles = window.getComputedStyle(this.writerContainer);
+        const paddingBottom = parseFloat(styles.paddingBottom) || 0;
+        const gap = parseFloat(styles.rowGap || styles.gap) || 0;
+        offset += paddingBottom + gap;
+      } catch (error) {
+        // Ignore inability to read computed styles.
       }
     }
 
