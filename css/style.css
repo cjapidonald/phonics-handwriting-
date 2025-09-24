@@ -221,18 +221,50 @@ body {
 }
 
 #toolbarBottom {
-  position: relative;
-  width: min(100%, 920px);
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  left: auto;
+  top: auto;
+  width: min(92vw, 920px);
   background: rgba(255, 244, 213, 0.94);
   border-radius: 24px;
   padding: 18px 20px 24px;
   box-shadow: 0 20px 36px rgba(10, 9, 3, 0.18);
   border: 1px solid rgba(10, 9, 3, 0.12);
   backdrop-filter: blur(8px);
-  margin: 6px clamp(16px, 6vw, 48px) 0 auto;
-  align-self: flex-end;
+  margin: 0;
   color: var(--color-smoky-black);
+codex/increase-speed-of-repeater-and-make-toolbar-movable
+  z-index: 20;
+}
+
+.toolbar-drag-handle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 8px;
+  cursor: grab;
+  touch-action: none;
+}
+
+.toolbar-drag-handle:active {
+  cursor: grabbing;
+}
+
+.toolbar-drag-grip {
+  width: 64px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(10, 9, 3, 0.28);
+  box-shadow: 0 2px 6px rgba(10, 9, 3, 0.15);
+}
+
+#toolbarBottom.is-dragging .toolbar-drag-grip {
+  background: rgba(10, 9, 3, 0.45);
+
   --toolbar-toggle-visible: 56px;
+main
 }
 
 .toolbar-inner {
@@ -1035,6 +1067,10 @@ body.is-fullscreen #toolbarBottom.is-collapsed .toolbar-toggle__icon {
 
   #toolbarBottom {
     padding: 18px 16px 26px;
+    right: 12px;
+    left: 12px;
+    bottom: 12px;
+    width: auto;
   }
 
   .toolbar-group.toolbar-left,
