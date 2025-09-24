@@ -4,7 +4,7 @@ const DEFAULT_SETTINGS = {
   selectedPenWidth: 6,
   selectedPenColour: '#111111',
   customPenImageSrc: '',
-  selectedBackground: 'red-blue',
+  selectedBackground: 'phonics-lines',
   selectedPageColour: '#ffffff',
   rewriteSpeed: 2,
   zoomLevel: 1,

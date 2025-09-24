@@ -1,5 +1,5 @@
 import { DEFAULT_SETTINGS } from './UserData.js';
-import { formatDateWithOrdinal, clamp } from './utils.js';
+import { formatDateWithOrdinal, clamp, getAssetUrl, loadImage } from './utils.js';
 
 const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 600;
@@ -21,9 +21,13 @@ const PEN_COLOUR_SWATCHES = [
   '#ffffff'
 ];
 
+const PHONICS_LINES_IMAGE_SRC = getAssetUrl('icons/Phonics lines.png');
+let phonicsLinesImage = null;
+let phonicsLinesImagePromise = null;
+
 const PAGE_STYLE_DRAWERS = {
   blank: clearBackground,
-  'red-blue': drawRedBlueGuidelines
+  'phonics-lines': drawPhonicsLinesGuidelines
 };
 
 export class Controls {
@@ -495,7 +499,8 @@ export class Controls {
   }
 
   setBackground(key, persist = true) {
-    const styleKey = PAGE_STYLE_DRAWERS[key] ? key : 'red-blue';
+    const normalisedKey = key === 'red-blue' ? 'phonics-lines' : key;
+    const styleKey = PAGE_STYLE_DRAWERS[normalisedKey] ? normalisedKey : 'phonics-lines';
     this.userData.userSettings.selectedBackground = styleKey;
     if (this.linesContext) {
       const drawer = PAGE_STYLE_DRAWERS[styleKey] ?? clearBackground;
@@ -646,34 +651,32 @@ function clearBackground(ctx, width, height) {
   ctx.clearRect(0, 0, width, height);
 }
 
-function withContext(ctx, drawFn) {
-  ctx.save();
-  try {
-    drawFn();
-  } finally {
-    ctx.restore();
+function drawPhonicsLinesGuidelines(ctx, width, height) {
+  ctx.clearRect(0, 0, width, height);
+
+  if (phonicsLinesImage) {
+    ctx.drawImage(phonicsLinesImage, 0, 0, width, height);
+    return;
   }
-}
 
-function drawRedBlueGuidelines(ctx, width, height) {
-  withContext(ctx, () => {
-    ctx.clearRect(0, 0, width, height);
-    ctx.lineWidth = 2;
+  if (!phonicsLinesImagePromise) {
+    phonicsLinesImagePromise = loadImage(PHONICS_LINES_IMAGE_SRC)
+      .then(image => {
+        phonicsLinesImage = image;
+        return image;
+      })
+      .catch(error => {
+        console.warn('Unable to load phonics lines background.', error);
+        phonicsLinesImagePromise = null;
+        return null;
+      });
+  }
 
-    const spacing = 80;
-    for (let y = spacing; y <= height; y += spacing) {
-      ctx.beginPath();
-      ctx.strokeStyle = '#1e4dd8';
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-
-      const mid = y - spacing / 2;
-      ctx.beginPath();
-      ctx.strokeStyle = '#d8342c';
-      ctx.moveTo(0, mid);
-      ctx.lineTo(width, mid);
-      ctx.stroke();
+  phonicsLinesImagePromise.then(image => {
+    if (!image) {
+      return;
     }
+    ctx.clearRect(0, 0, width, height);
+    ctx.drawImage(image, 0, 0, width, height);
   });
 }
