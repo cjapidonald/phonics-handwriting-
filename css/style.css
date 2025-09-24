@@ -48,21 +48,6 @@ body {
   pointer-events: none;
 }
 
-#titleIcon {
-  position: absolute;
-  left: min(4vw, 48px);
-  width: 96px;
-  height: auto;
-  filter: drop-shadow(0 0 18px rgba(14, 255, 255, 0.6));
-  transition: transform 0.3s ease, filter 0.3s ease;
-}
-
-.title-container:hover #titleIcon,
-.title-container:focus-within #titleIcon {
-  transform: translateY(-4px) scale(1.05);
-  filter: drop-shadow(0 0 24px rgba(111, 123, 255, 0.8));
-}
-
 .title-texts {
   position: relative;
   display: flex;
