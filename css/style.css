@@ -124,22 +124,20 @@ body {
   position: absolute;
   top: 16px;
   right: 16px;
-  background: rgba(191, 88, 0, 0.85);
-  color: #ffe9b8;
-  text-shadow: 0.08em 0.08em rgba(115, 43, 0, 0.4);
+  color: #3f2400;
+  font-family: 'KG Primary', 'Comic Sans MS', 'Comic Sans', cursive;
+  font-size: clamp(1.75rem, 2vw + 1.25rem, 3rem);
+  text-shadow: 0.08em 0.08em rgba(115, 43, 0, 0.25);
   font-weight: 700;
   letter-spacing: 0.05em;
-  padding: 8px 16px;
-  border-radius: 16px;
+  padding: 12px 18px;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease;
 }
 
 #boardDate:hover,
 #boardDate:focus-visible {
-  background: rgba(191, 88, 0, 0.95);
   transform: translateY(-2px);
   outline: none;
 }
