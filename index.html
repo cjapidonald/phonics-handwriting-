@@ -59,6 +59,109 @@
     </script>
   </head>
   <body>
+    <button
+      id="infoPanelToggle"
+      class="info-panel-toggle"
+      type="button"
+      aria-haspopup="dialog"
+      aria-expanded="false"
+      aria-controls="infoPanel"
+      title="About Handwriting Repeater and feedback"
+    >
+      <span class="visually-hidden">About Handwriting Repeater and feedback</span>
+      <span aria-hidden="true" class="info-panel-toggle__icon">i</span>
+    </button>
+
+    <div id="infoPanelBackdrop" class="info-panel-backdrop" hidden></div>
+
+    <section
+      id="infoPanel"
+      class="info-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="infoPanelTitle"
+      hidden
+      tabindex="-1"
+    >
+      <div class="info-panel__header">
+        <h2 class="info-panel__title" id="infoPanelTitle">Handwriting Repeater</h2>
+        <button
+          type="button"
+          class="info-panel__close"
+          aria-label="Close about and feedback panel"
+          data-info-panel-close
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="info-panel__content">
+        <section class="info-panel__section" aria-labelledby="infoPanelAboutHeading">
+          <h3 class="info-panel__section-title" id="infoPanelAboutHeading">About Handwriting Repeater</h3>
+          <p class="info-panel__text">
+            Handwriting Repeater is a browser-based handwriting demonstrator designed for classrooms, tutoring sessions, and
+            home learning. Educators can record handwriting strokes once and loop the playback so students can focus on
+            correct letter formation without constant repetition.
+          </p>
+          <p class="info-panel__text">
+            The app pairs looping animation with optional tracing overlays, adjustable pen colours and sizes, multiple
+            guideline templates, and a built-in timer. These features make it simple to model tidy handwriting, reinforce
+            muscle memory, and deliver consistent practice routines on interactive whiteboards or personal devices.
+          </p>
+        </section>
+
+        <section class="info-panel__section" aria-labelledby="infoPanelFeedbackHeading">
+          <h3 class="info-panel__section-title" id="infoPanelFeedbackHeading">Send Feedback</h3>
+          <p class="info-panel__section-intro">
+            Have suggestions or want to share how you use Handwriting Repeater? Drop a quick note below and we&rsquo;ll get back
+            to you.
+          </p>
+          <form
+            class="feedback-form"
+            action="mailto:dcjapi@gmail.com"
+            method="post"
+            enctype="text/plain"
+          >
+            <div class="feedback-field">
+              <label class="feedback-label" for="feedbackName">Name</label>
+              <input
+                class="feedback-input"
+                type="text"
+                id="feedbackName"
+                name="name"
+                placeholder="Your name"
+                autocomplete="name"
+              />
+            </div>
+            <div class="feedback-field">
+              <label class="feedback-label" for="feedbackEmail">Email</label>
+              <input
+                class="feedback-input"
+                type="email"
+                id="feedbackEmail"
+                name="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+                required
+              />
+            </div>
+            <div class="feedback-field">
+              <label class="feedback-label" for="feedbackMessage">Message</label>
+              <textarea
+                class="feedback-textarea"
+                id="feedbackMessage"
+                name="message"
+                placeholder="Share your thoughts, ideas, or questions"
+                rows="5"
+                required
+              ></textarea>
+            </div>
+            <button class="feedback-submit" type="submit">Send Email</button>
+          </form>
+        </section>
+      </div>
+    </section>
+
     <header class="title-container" role="banner">
       <div class="title-texts">
         <h1 class="title-text">Master handwriting</h1>
@@ -295,73 +398,6 @@
       </div>
     </main>
 
-    <section class="seo-description" aria-labelledby="seoDescriptionHeading">
-      <div class="seo-description__inner">
-        <h2 id="seoDescriptionHeading">About Handwriting Repeater</h2>
-        <p>
-          Handwriting Repeater is a browser-based handwriting demonstrator designed for classrooms, tutoring sessions, and home
-          learning. Educators can record handwriting strokes once and loop the playback so students can focus on correct letter
-          formation without constant repetition.
-        </p>
-        <p>
-          The app pairs looping animation with optional tracing overlays, adjustable pen colours and sizes, multiple guideline
-          templates, and a built-in timer. These features make it simple to model tidy handwriting, reinforce muscle memory, and
-          deliver consistent practice routines on interactive whiteboards or personal devices.
-        </p>
-      </div>
-    </section>
-
-    <section class="feedback-section" aria-labelledby="feedbackHeading">
-      <div class="feedback-section__inner">
-        <h2 id="feedbackHeading">Send Feedback</h2>
-        <p class="feedback-description">
-          Have suggestions or want to share how you use Handwriting Repeater? Drop a quick note below and we&rsquo;ll get back to you.
-        </p>
-        <form
-          class="feedback-form"
-          action="mailto:dcjapi@gmail.com"
-          method="post"
-          enctype="text/plain"
-        >
-          <div class="feedback-field">
-            <label class="feedback-label" for="feedbackName">Name</label>
-            <input
-              class="feedback-input"
-              type="text"
-              id="feedbackName"
-              name="name"
-              placeholder="Your name"
-              autocomplete="name"
-            />
-          </div>
-          <div class="feedback-field">
-            <label class="feedback-label" for="feedbackEmail">Email</label>
-            <input
-              class="feedback-input"
-              type="email"
-              id="feedbackEmail"
-              name="email"
-              placeholder="you@example.com"
-              autocomplete="email"
-              required
-            />
-          </div>
-          <div class="feedback-field">
-            <label class="feedback-label" for="feedbackMessage">Message</label>
-            <textarea
-              class="feedback-textarea"
-              id="feedbackMessage"
-              name="message"
-              placeholder="Share your thoughts, ideas, or questions"
-              rows="5"
-              required
-            ></textarea>
-          </div>
-          <button class="feedback-submit" type="submit">Send Email</button>
-        </form>
-      </div>
-    </section>
-
     <input type="file" id="inputPenImage" class="visually-hidden" accept="image/*" aria-hidden="true" />
 
     <div id="pageStylePopover" class="popover" role="dialog" aria-label="Page style options">
@@ -432,6 +468,7 @@
     </div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
+    <script type="module" src="js/infoPanel.js"></script>
     <script type="module" src="js/main.js"></script>
   </body>
 </html>
