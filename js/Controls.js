@@ -89,7 +89,13 @@ export class Controls {
       : [];
     this.timerProgress = document.getElementById('timerProgress');
 
+    this.toolbarBottom = document.getElementById('toolbarBottom');
+    this.toolbarToggleButton = document.getElementById('toolbarToggle');
+    this.toolbarOriginalParent = this.toolbarBottom?.parentElement ?? null;
+    this.toolbarNextSibling = this.toolbarBottom?.nextSibling ?? null;
+
     this.uploadPenButton = document.getElementById('btnUploadPen');
+    this.removePenImageButton = document.getElementById('btnRemovePenImage');
     this.penImageInput = document.getElementById('inputPenImage');
 
     this.cookiePopup = document.getElementById('cookiePopup');
@@ -115,6 +121,7 @@ export class Controls {
     this.setupToolbarDragging();
     this.setupCookieBanner();
     this.setupDateDisplay();
+    this.setupFullscreenBehaviour();
     this.applyToolbarLayoutVersion();
     this.applyInitialState();
   }
@@ -283,6 +290,8 @@ export class Controls {
     if (storedPageColour) {
       this.userData.userSettings.selectedPageColour = storedPageColour;
     }
+
+    this.setCustomPenImageState(Boolean(this.userData.userSettings.customPenImageSrc));
   }
 
   setupPenControls() {
@@ -315,6 +324,8 @@ export class Controls {
         this.penImageInput.click();
       });
     }
+
+    this.setCustomPenImageState(Boolean(this.userData.userSettings.customPenImageSrc));
   }
 
   setupPageControls() {
@@ -382,6 +393,7 @@ export class Controls {
     }
   }
 
+codex/increase-speed-of-repeater-and-make-toolbar-movable
   setupToolbarDragging() {
     if (!this.toolbar || typeof window === 'undefined') {
       return;
@@ -458,6 +470,78 @@ export class Controls {
     window.addEventListener('resize', () => {
       this.ensureToolbarWithinViewport();
     });
+
+  setupFullscreenBehaviour() {
+    if (typeof document === 'undefined' || !this.toolbarBottom) {
+      return;
+    }
+
+    const setCollapsedState = collapsed => {
+      if (!this.toolbarToggleButton) {
+        return;
+      }
+      const expanded = !collapsed;
+      this.toolbarToggleButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      this.toolbarToggleButton.setAttribute('aria-label', expanded ? 'Hide controls' : 'Show controls');
+    };
+
+    setCollapsedState(false);
+
+    const restoreToolbarPosition = () => {
+      if (!this.toolbarOriginalParent || !this.toolbarBottom) {
+        return;
+      }
+
+      if (this.toolbarBottom.parentElement === this.toolbarOriginalParent) {
+        return;
+      }
+
+      if (this.toolbarNextSibling && this.toolbarNextSibling.parentNode === this.toolbarOriginalParent) {
+        this.toolbarOriginalParent.insertBefore(this.toolbarBottom, this.toolbarNextSibling);
+      } else {
+        this.toolbarOriginalParent.appendChild(this.toolbarBottom);
+      }
+    };
+
+    const handleFullscreenChange = () => {
+      const fullscreenElement = document.fullscreenElement ?? document.webkitFullscreenElement ?? null;
+      const isWriterFullscreen = fullscreenElement === this.writerContainer;
+      const isDocumentFullscreen =
+        fullscreenElement === document.documentElement || fullscreenElement === document.body;
+      const isAppFullscreen = isWriterFullscreen || isDocumentFullscreen;
+      const body = document.body;
+
+      if (body) {
+        body.classList.toggle('is-fullscreen', isAppFullscreen);
+      }
+
+      if (isWriterFullscreen) {
+        if (this.writerContainer && this.toolbarBottom.parentElement !== this.writerContainer) {
+          this.writerContainer.appendChild(this.toolbarBottom);
+        }
+      } else {
+        restoreToolbarPosition();
+        this.toolbarBottom.classList.remove('is-collapsed');
+        setCollapsedState(false);
+      }
+    };
+
+    if (this.toolbarToggleButton) {
+      this.toolbarToggleButton.addEventListener('click', () => {
+        if (!document.body?.classList.contains('is-fullscreen')) {
+          return;
+        }
+        const isCollapsed = this.toolbarBottom.classList.toggle('is-collapsed');
+        setCollapsedState(isCollapsed);
+      });
+    }
+
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach(eventName => {
+      document.addEventListener(eventName, handleFullscreenChange);
+    });
+
+    handleFullscreenChange();
+ main
   }
 
   setupCookieBanner() {
@@ -554,6 +638,14 @@ export class Controls {
 
     if (persist) {
       this.userData.saveToLocalStorage();
+    }
+  }
+
+  setCustomPenImageState(hasCustomImage) {
+    const isEnabled = Boolean(hasCustomImage);
+    if (this.removePenImageButton) {
+      this.removePenImageButton.disabled = !isEnabled;
+      this.removePenImageButton.classList.toggle('is-disabled', !isEnabled);
     }
   }
 

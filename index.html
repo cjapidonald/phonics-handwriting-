@@ -73,6 +73,7 @@
           <canvas id="writerLines" width="1200" height="600"></canvas>
           <canvas id="writer" width="1200" height="600"></canvas>
           <canvas id="writerMask" width="1200" height="600"></canvas>
+          <div id="teachOverlay" class="teach-overlay" aria-live="polite"></div>
         </div>
 
         <div id="boardDate" aria-label="Date" role="button" tabindex="0">Loading date…</div>
@@ -85,6 +86,7 @@
       </div>
 
       <div id="toolbarBottom" role="toolbar" aria-label="Handwriting controls" class="disable-select">
+ codex/increase-speed-of-repeater-and-make-toolbar-movable
         <div
           class="toolbar-drag-handle"
           id="toolbarDragHandle"
@@ -94,6 +96,19 @@
         >
           <span class="toolbar-drag-grip" aria-hidden="true"></span>
         </div>
+
+        <button
+          id="toolbarToggle"
+          class="toolbar-toggle"
+          type="button"
+          aria-label="Hide controls"
+          aria-expanded="true"
+        >
+          <svg class="toolbar-toggle__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 16.5 5.5 10l1.41-1.41L12 13.67l5.09-5.08L18.5 10z"></path>
+          </svg>
+        </button>
+main
         <div class="toolbar-inner">
           <div class="toolbar-group toolbar-left" role="group" aria-label="Zoom and speed">
             <button class="btn icon" id="btnZoomOut" type="button" aria-label="Zoom out" title="Zoom out">
@@ -127,6 +142,37 @@
             <button class="btn icon btn-primary" id="btnRewrite" type="button" aria-label="Rewrite" title="Rewrite" aria-pressed="false">
               <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
             </button>
+          </div>
+
+          <div class="toolbar-group toolbar-teach" role="group" aria-label="Teaching text controls">
+            <div class="teach-field">
+              <label class="teach-label" for="teachTextInput">Practice text</label>
+              <div class="teach-input-row">
+                <input
+                  id="teachTextInput"
+                  class="teach-input"
+                  type="text"
+                  placeholder="Type a sentence for the board"
+                  autocomplete="off"
+                />
+                <button class="teach-button" id="btnTeach" type="button">Teach</button>
+                <button class="teach-button" id="btnTeachNext" type="button" disabled>
+                  Next
+                  <span aria-hidden="true" class="teach-button__arrow">➜</span>
+                </button>
+              </div>
+            </div>
+            <div class="teach-field">
+              <label class="teach-label" for="freezeLettersInput">Freeze letters</label>
+              <input
+                id="freezeLettersInput"
+                class="teach-input"
+                type="text"
+                placeholder="Enter letters to keep visible"
+                autocomplete="off"
+              />
+            </div>
+            <div class="teach-preview" id="teachPreview" aria-label="Sentence letter controls"></div>
           </div>
 
           <div class="toolbar-group toolbar-right" role="group" aria-label="Drawing controls">
@@ -182,6 +228,16 @@
             </button>
             <button class="btn icon" id="btnUploadPen" type="button" aria-label="Upload pen image" title="Upload pen image">
               <svg aria-hidden="true"><use href="assets/icons.svg#upload"></use></svg>
+            </button>
+            <button
+              class="btn icon is-disabled"
+              id="btnRemovePenImage"
+              type="button"
+              aria-label="Remove custom pen image"
+              title="Remove custom pen image"
+              disabled
+            >
+              <svg aria-hidden="true"><use href="assets/icons.svg#close"></use></svg>
             </button>
             <button
               class="btn icon"
