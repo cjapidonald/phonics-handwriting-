@@ -245,7 +245,7 @@ body {
   box-shadow: 0 22px 44px rgba(10, 9, 3, 0.24);
   overflow: hidden;
   transform: scale(var(--zoom-level, 1));
-  transform-origin: center;
+  transform-origin: top center;
   will-change: transform;
 }
 
