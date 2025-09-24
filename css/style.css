@@ -24,6 +24,7 @@ body {
     var(--color-sunglow) 100%
   );
   color: var(--color-crosstik);
+  --fullscreen-toolbar-offset: 0px;
 }
 
 .title-container {
@@ -84,19 +85,43 @@ body {
   color: var(--color-smoky-black);
 }
 
-.lesson-controls {
-  width: 100%;
+.toolbar-controls {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
-  padding: 0 16px 16px;
+  gap: 16px;
+  width: 100%;
 }
 
-.lesson-title-field {
-  width: min(100%, 380px);
+.toolbar-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.toolbar-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: 16px;
+  padding: 16px 18px 18px;
+  box-shadow: inset 0 0 0 1px rgba(10, 9, 3, 0.08);
+  color: var(--color-smoky-black);
+}
+
+.toolbar-card .teach-label,
+.toolbar-card .lesson-title-label {
+  color: inherit;
+}
+
+.toolbar-lesson .lesson-title-field {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  color: var(--color-smoky-black);
 }
 
 .lesson-title-input-row {
@@ -312,15 +337,54 @@ body {
   box-shadow: 0 4px 8px rgba(10, 9, 3, 0.24);
 }
 
+body.is-fullscreen {
+  align-items: stretch;
+}
+
+body.is-fullscreen .title-container,
+body.is-fullscreen .seo-description,
+body.is-fullscreen .feedback-section {
+  display: none;
+}
+
+body.is-fullscreen .main-container {
+  flex: 1;
+  width: 100vw;
+  padding: 0;
+  gap: 0;
+  align-items: stretch;
+}
+
 body.is-fullscreen .writer-container {
-  background: var(--color-aerospace-orange);
-  border-color: var(--color-aerospace-orange);
-  box-shadow: 0 32px 54px rgba(10, 9, 3, 0.34);
+  background: #ffffff;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  width: 100vw;
+  max-width: none;
+  min-height: calc(100vh - var(--fullscreen-toolbar-offset, 0px));
+  height: calc(100vh - var(--fullscreen-toolbar-offset, 0px));
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+body.is-fullscreen .writer-board {
+  width: min(100vw, calc((100vh - var(--fullscreen-toolbar-offset, 0px)) * 2));
+  max-width: none;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  margin: 0 auto;
 }
 
 body.is-fullscreen .board-header {
-  width: min(100%, 1200px);
-  padding-right: clamp(28px, 6vw, 56px);
+  width: 100%;
+  max-width: min(100vw, calc((100vh - var(--fullscreen-toolbar-offset, 0px)) * 2));
+  margin: 0 auto;
+  padding: clamp(16px, 4vw, 36px) clamp(28px, 6vw, 56px) 0;
+  box-sizing: border-box;
 }
 
 body.is-fullscreen #boardDate {
@@ -331,6 +395,18 @@ body.is-fullscreen #boardDate {
 body.is-fullscreen #boardLessonTitle {
   align-self: center;
   margin-top: 4px;
+}
+
+body.is-fullscreen #retroTv {
+  top: auto;
+  left: clamp(20px, 4vw, 48px);
+  bottom: calc(var(--fullscreen-toolbar-offset, 0px) + clamp(20px, 4vw, 48px));
+}
+
+body.is-fullscreen #timerProgress {
+  left: clamp(28px, 6vw, 72px);
+  right: clamp(28px, 6vw, 72px);
+  bottom: calc(var(--fullscreen-toolbar-offset, 0px) + clamp(12px, 2.6vw, 32px));
 }
 
 #retroTv {
@@ -392,10 +468,10 @@ body.is-fullscreen #boardLessonTitle {
   right: 24px;
   left: auto;
   top: auto;
-  width: min(92vw, 920px);
+  width: min(94vw, 1040px);
   background: rgba(255, 244, 213, 0.94);
   border-radius: 24px;
-  padding: 18px 20px 24px;
+  padding: 20px 24px 26px;
   box-shadow: 0 20px 36px rgba(10, 9, 3, 0.18);
   border: 1px solid rgba(10, 9, 3, 0.12);
   backdrop-filter: blur(8px);
@@ -432,35 +508,31 @@ body.is-fullscreen #boardLessonTitle {
 
 .toolbar-inner {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
   width: 100%;
-  overflow-x: auto;
-  scrollbar-width: thin;
+  overflow: visible;
 }
 
 .toolbar-group {
   display: inline-flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .toolbar-group.toolbar-board,
 .toolbar-group.toolbar-zoom,
+.toolbar-group.toolbar-right,
 .toolbar-group.toolbar-quick {
-  flex: 1 1 auto;
+  flex: 1 1 220px;
   flex-wrap: wrap;
-  justify-content: flex-start;
-}
-
-.toolbar-group.toolbar-quick {
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .toolbar-group.toolbar-centre {
-  flex: 1 1 160px;
+  flex: 0 1 auto;
   justify-content: center;
 }
 
@@ -469,10 +541,7 @@ body.is-fullscreen #boardLessonTitle {
   flex-direction: column;
   align-items: stretch;
   gap: 12px;
-  background: rgba(255, 255, 255, 0.74);
-  border-radius: 16px;
-  padding: 12px 16px 16px;
-  box-shadow: inset 0 0 0 1px rgba(10, 9, 3, 0.08);
+  min-width: 0;
 }
 
 .teach-field {
@@ -743,9 +812,12 @@ body.is-fullscreen #boardLessonTitle {
   opacity: 0;
 }
 
-.teach-letter--uppercase,
-.teach-letter--descender {
+.teach-letter--uppercase {
   color: #d8342c;
+}
+
+.teach-letter--descender {
+  color: #1e4dd8;
 }
 
 .teach-letter--period {
@@ -771,7 +843,7 @@ body.is-fullscreen #boardLessonTitle {
 .toolbar-group.toolbar-left,
 .toolbar-group.toolbar-right {
   flex: 1 1 auto;
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 .btn.icon {
@@ -885,9 +957,9 @@ body.is-fullscreen #toolbarBottom {
   left: 50%;
   bottom: 16px;
   transform: translate(-50%, 0);
-  width: min(92vw, 920px);
+  width: min(96vw, 1040px);
   margin: 0;
-  padding: 62px 24px 28px;
+  padding: 62px 28px 32px;
   z-index: 1000;
   transition: transform 0.3s ease;
 }
@@ -1420,6 +1492,12 @@ body.is-fullscreen #toolbarBottom.is-collapsed .toolbar-toggle__icon {
     width: auto;
   }
 
+  .toolbar-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
   .toolbar-group.toolbar-left,
   .toolbar-group.toolbar-right,
   .toolbar-group.toolbar-centre,
@@ -1430,8 +1508,12 @@ body.is-fullscreen #toolbarBottom.is-collapsed .toolbar-toggle__icon {
     justify-content: center;
   }
 
-  .toolbar-group.toolbar-teach {
-    padding: 10px 12px 14px;
+  .toolbar-sections {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar-card {
+    padding: 14px 16px 16px;
   }
 
   .teach-input-row {

@@ -117,6 +117,7 @@ export class Controls {
     this.openPopover = null;
     this.openPopoverButton = null;
     this.toolbarHasCustomPosition = false;
+    this.fullscreenToolbarResizeObserver = null;
 
     this.migrateSettings();
     this.initialiseCanvases();
@@ -579,12 +580,12 @@ export class Controls {
     }
 
     const setCollapsedState = collapsed => {
-      if (!this.toolbarToggleButton) {
-        return;
+      if (this.toolbarToggleButton) {
+        const expanded = !collapsed;
+        this.toolbarToggleButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        this.toolbarToggleButton.setAttribute('aria-label', expanded ? 'Hide controls' : 'Show controls');
       }
-      const expanded = !collapsed;
-      this.toolbarToggleButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-      this.toolbarToggleButton.setAttribute('aria-label', expanded ? 'Hide controls' : 'Show controls');
+      this.scheduleFullscreenToolbarOffsetUpdate();
     };
 
     setCollapsedState(false);
@@ -609,6 +610,8 @@ export class Controls {
           setCollapsedState(false);
         }
       }
+
+      this.scheduleFullscreenToolbarOffsetUpdate();
     };
 
     if (this.toolbarToggleButton) {
@@ -624,6 +627,19 @@ export class Controls {
     ['fullscreenchange', 'webkitfullscreenchange'].forEach(eventName => {
       document.addEventListener(eventName, handleFullscreenChange);
     });
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', () => {
+        this.scheduleFullscreenToolbarOffsetUpdate();
+      });
+    }
+
+    if (typeof ResizeObserver === 'function' && this.toolbarBottom) {
+      this.fullscreenToolbarResizeObserver = new ResizeObserver(() => {
+        this.scheduleFullscreenToolbarOffsetUpdate();
+      });
+      this.fullscreenToolbarResizeObserver.observe(this.toolbarBottom);
+    }
 
     handleFullscreenChange();
   }
@@ -942,6 +958,49 @@ export class Controls {
     const rect = this.toolbar.getBoundingClientRect();
     const position = this.positionToolbar(rect.left, rect.top);
     this.saveToolbarPosition(position.left, position.top);
+  }
+
+  scheduleFullscreenToolbarOffsetUpdate() {
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => this.updateFullscreenToolbarOffset());
+    } else {
+      this.updateFullscreenToolbarOffset();
+    }
+  }
+
+  updateFullscreenToolbarOffset() {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const body = document.body;
+    if (!body) {
+      return;
+    }
+
+    if (!body.classList.contains('is-fullscreen')) {
+      body.style.removeProperty('--fullscreen-toolbar-offset');
+      return;
+    }
+
+    const baseSpacing = 32;
+    let offset = baseSpacing;
+
+    if (this.toolbarBottom) {
+      const isCollapsed = this.toolbarBottom.classList.contains('is-collapsed');
+
+      if (isCollapsed && this.toolbarToggleButton) {
+        const toggleHeight = this.toolbarToggleButton.offsetHeight || 0;
+        offset = toggleHeight + baseSpacing;
+      } else {
+        const toolbarHeight = this.toolbarBottom.offsetHeight || 0;
+        if (toolbarHeight > 0) {
+          offset = toolbarHeight + baseSpacing;
+        }
+      }
+    }
+
+    body.style.setProperty('--fullscreen-toolbar-offset', `${Math.max(offset, baseSpacing)}px`);
   }
 
   loadStoredToolbarPosition() {
