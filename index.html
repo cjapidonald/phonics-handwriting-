@@ -65,29 +65,6 @@
       </div>
     </header>
 
-    <section class="lesson-controls" aria-label="Lesson details">
-      <div class="lesson-title-field">
-        <label class="lesson-title-label" for="inputLessonTitle">Lesson title</label>
-        <div class="lesson-title-input-row">
-          <input
-            type="text"
-            id="inputLessonTitle"
-            class="lesson-title-input"
-            placeholder="Lesson title here"
-            autocomplete="off"
-          />
-          <button
-            type="button"
-            id="btnLessonTitleApply"
-            class="lesson-title-apply is-disabled"
-            disabled
-          >
-            Display
-          </button>
-        </div>
-      </div>
-    </section>
-
     <main class="main-container disable-select" role="main">
       <div id="writerContainer" class="writer-container">
         <div id="writerBoard" class="writer-board">
@@ -141,7 +118,8 @@
           </svg>
         </button>
         <div class="toolbar-inner">
-          <div class="toolbar-group toolbar-board" role="group" aria-label="Board controls">
+          <div class="toolbar-controls" aria-label="Board customisation controls">
+            <div class="toolbar-group toolbar-board" role="group" aria-label="Board controls">
             <button class="btn icon" id="btnUndo" type="button" aria-label="Undo" title="Undo">
               <svg aria-hidden="true"><use href="assets/icons.svg#undo"></use></svg>
             </button>
@@ -162,9 +140,9 @@
             >
               <svg aria-hidden="true"><use href="assets/icons.svg#page-lines"></use></svg>
             </button>
-          </div>
+            </div>
 
-          <div class="toolbar-group toolbar-zoom" role="group" aria-label="Zoom and speed">
+            <div class="toolbar-group toolbar-zoom" role="group" aria-label="Zoom and speed">
             <button class="btn icon" id="btnZoomOut" type="button" aria-label="Zoom out" title="Zoom out">
               <svg aria-hidden="true"><use href="assets/icons.svg#zoom-out"></use></svg>
             </button>
@@ -190,50 +168,15 @@
                 aria-label="Rewrite speed"
               />
             </div>
-          </div>
+            </div>
 
-          <div class="toolbar-group toolbar-centre" role="group" aria-label="Playback">
+            <div class="toolbar-group toolbar-centre" role="group" aria-label="Playback">
             <button class="btn icon btn-primary" id="btnRewrite" type="button" aria-label="Rewrite" title="Rewrite" aria-pressed="false">
               <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
             </button>
-          </div>
-
-          <div class="toolbar-group toolbar-teach" role="group" aria-label="Teaching text controls">
-            <div class="teach-field">
-              <label class="teach-label" for="teachTextInput">Practice text</label>
-              <div class="teach-input-row">
-                <input
-                  id="teachTextInput"
-                  class="teach-input"
-                  type="text"
-                  placeholder="Type a sentence for the board"
-                  autocomplete="off"
-                />
-                <button class="teach-button" id="btnTeach" type="button">Teach</button>
-                <button class="teach-button" id="btnTeachNext" type="button" disabled>
-                  Next
-                  <span aria-hidden="true" class="teach-button__arrow">➜</span>
-                </button>
-              </div>
             </div>
-            <div class="teach-field teach-preview-block">
-              <div class="teach-preview__header">
-                <p class="teach-label teach-preview__title">Freeze letters</p>
-                <button
-                  type="button"
-                  id="btnToggleFreezePreview"
-                  class="teach-preview__toggle"
-                  aria-controls="teachPreview"
-                  aria-expanded="true"
-                >
-                  Hide letters
-                </button>
-              </div>
-              <div class="teach-preview" id="teachPreview" aria-label="Sentence letter controls"></div>
-            </div>
-          </div>
 
-          <div class="toolbar-group toolbar-right" role="group" aria-label="Pen controls">
+            <div class="toolbar-group toolbar-right" role="group" aria-label="Pen controls">
             <div class="slider-control" id="penSizeControl">
               <span class="icon-leading" aria-hidden="true">
                 <svg><use href="assets/icons.svg#pen"></use></svg>
@@ -264,9 +207,9 @@
             >
               <svg aria-hidden="true"><use href="assets/icons.svg#palette"></use></svg>
             </button>
-          </div>
+            </div>
 
-          <div class="toolbar-group toolbar-quick" role="group" aria-label="Quick actions">
+            <div class="toolbar-group toolbar-quick" role="group" aria-label="Quick actions">
             <button
               class="btn icon"
               id="btnTimer"
@@ -288,6 +231,67 @@
             <button class="btn icon" id="btnFullscreen" type="button" aria-label="Fullscreen" title="Fullscreen">
               <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
             </button>
+            </div>
+          </div>
+
+          <div class="toolbar-sections">
+            <div class="toolbar-card toolbar-lesson" role="group" aria-label="Lesson title controls">
+              <div class="lesson-title-field">
+                <label class="lesson-title-label" for="inputLessonTitle">Lesson title</label>
+                <div class="lesson-title-input-row">
+                  <input
+                    type="text"
+                    id="inputLessonTitle"
+                    class="lesson-title-input"
+                    placeholder="Lesson title here"
+                    autocomplete="off"
+                  />
+                  <button
+                    type="button"
+                    id="btnLessonTitleApply"
+                    class="lesson-title-apply is-disabled"
+                    disabled
+                  >
+                    Display
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="toolbar-group toolbar-teach toolbar-card" role="group" aria-label="Teaching text controls">
+              <div class="teach-field">
+                <label class="teach-label" for="teachTextInput">Practice text</label>
+                <div class="teach-input-row">
+                  <input
+                    id="teachTextInput"
+                    class="teach-input"
+                    type="text"
+                    placeholder="Type a sentence for the board"
+                    autocomplete="off"
+                  />
+                  <button class="teach-button" id="btnTeach" type="button">Teach</button>
+                  <button class="teach-button" id="btnTeachNext" type="button" disabled>
+                    Next
+                    <span aria-hidden="true" class="teach-button__arrow">➜</span>
+                  </button>
+                </div>
+              </div>
+              <div class="teach-field teach-preview-block">
+                <div class="teach-preview__header">
+                  <p class="teach-label teach-preview__title">Freeze letters</p>
+                  <button
+                    type="button"
+                    id="btnToggleFreezePreview"
+                    class="teach-preview__toggle"
+                    aria-controls="teachPreview"
+                    aria-expanded="true"
+                  >
+                    Hide letters
+                  </button>
+                </div>
+                <div class="teach-preview" id="teachPreview" aria-label="Sentence letter controls"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
