@@ -25,6 +25,7 @@ export class TeachController {
     this.previewContainer = previewContainer ?? null;
     this.previewToggleButton = previewToggleButton ?? null;
     this.hideLettersButton = hideLettersButton ?? null;
+    this.hideLettersLabelElement = this.hideLettersButton?.querySelector('[data-button-label]') ?? null;
     this.enableDefaultNextHandler = enableDefaultNextHandler;
 
     this.overlayContent = null;
@@ -35,7 +36,12 @@ export class TeachController {
     this.nextPointer = 0;
     this.isPreviewHidden = false;
     this.isHideMode = false;
-    this.hideLettersButtonInitialLabel = (this.hideLettersButton?.textContent ?? 'Show letters').trim();
+    const initialLabelSource =
+      this.hideLettersLabelElement?.textContent ??
+      this.hideLettersButton?.getAttribute('aria-label') ??
+      'Show letters';
+    this.hideLettersButtonInitialLabel = initialLabelSource.trim();
+    this.setHideLettersButtonText(this.hideLettersButtonInitialLabel);
     this.currentRawText = '';
     this.revealHistory = [];
     this.hiddenLettersPromptValue = '';
@@ -80,6 +86,23 @@ export class TeachController {
     this.setOverlayHidden(true);
     this.updateButtonStates();
     this.updatePreviewVisibility();
+  }
+
+  setHideLettersButtonText(label) {
+    if (!this.hideLettersButton) {
+      return;
+    }
+
+    const text = typeof label === 'string' ? label : '';
+
+    if (this.hideLettersLabelElement) {
+      this.hideLettersLabelElement.textContent = text;
+    } else {
+      this.hideLettersButton.textContent = text;
+    }
+
+    this.hideLettersButton.setAttribute('aria-label', text);
+    this.hideLettersButton.title = text;
   }
 
   handleTeach() {
@@ -233,7 +256,7 @@ export class TeachController {
     if (this.isHideMode === nextState) {
       if (!nextState && this.hideLettersButton) {
         const label = this.hideLettersButtonInitialLabel || 'Hide letters';
-        this.hideLettersButton.textContent = label;
+        this.setHideLettersButtonText(label);
         this.hideLettersButton.setAttribute('aria-pressed', 'false');
         this.hideLettersButton.classList.remove('is-active');
       }
@@ -251,7 +274,7 @@ export class TeachController {
 
     if (this.hideLettersButton) {
       const label = this.isHideMode ? 'Done hiding' : this.hideLettersButtonInitialLabel || 'Hide letters';
-      this.hideLettersButton.textContent = label;
+      this.setHideLettersButtonText(label);
       this.hideLettersButton.setAttribute('aria-pressed', this.isHideMode ? 'true' : 'false');
       this.hideLettersButton.classList.toggle('is-active', this.isHideMode);
     }
@@ -658,7 +681,7 @@ export class TeachController {
         this.setHideMode(false);
       }
       const label = this.hideLettersButtonInitialLabel || 'Show letters';
-      this.hideLettersButton.textContent = label;
+      this.setHideLettersButtonText(label);
       this.hideLettersButton.setAttribute('aria-pressed', 'false');
       this.hideLettersButton.classList.remove('is-active');
     }

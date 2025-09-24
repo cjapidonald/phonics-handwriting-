@@ -27,6 +27,8 @@ let penDown = false;
 let isRewriting = false;
 let previousDrawPosition = new Point(0, 0);
 let currentLine = [];
+let rainbowHue = 0;
+let lastPenColour = userData.userSettings.selectedPenColour ?? DEFAULT_SETTINGS.selectedPenColour;
 
 let controller = new AbortController();
 let signal = controller.signal;
@@ -435,6 +437,16 @@ async function drawStoredLines(ctx, instantDraw = false, abortSignal = undefined
   }
 }
 
+function getActiveStrokeColour() {
+  const selected = userData.userSettings.selectedPenColour ?? DEFAULT_SETTINGS.selectedPenColour;
+  if (typeof selected === 'string' && selected.toLowerCase() === 'rainbow') {
+    const hue = rainbowHue % 360;
+    rainbowHue = (rainbowHue + 8) % 360;
+    return `hsl(${hue}, 100%, 50%)`;
+  }
+  return selected;
+}
+
 function drawStart(event) {
   if (isRewriting) {
     return;
@@ -449,15 +461,24 @@ function drawStart(event) {
 
   if (isWithinCanvas(mousePos)) {
     userData.deletedLines = [];
+    const currentPenColour = userData.userSettings.selectedPenColour ?? DEFAULT_SETTINGS.selectedPenColour;
+    if ((lastPenColour ?? '') !== currentPenColour) {
+      if (typeof currentPenColour === 'string' && currentPenColour.toLowerCase() === 'rainbow') {
+        rainbowHue = 0;
+      }
+      lastPenColour = currentPenColour;
+    }
 
-    rewriterContext.strokeStyle = userData.userSettings.selectedPenColour;
+    const strokeColour = getActiveStrokeColour();
+
+    rewriterContext.strokeStyle = strokeColour;
     rewriterContext.beginPath();
     rewriterContext.lineWidth = userData.userSettings.selectedPenWidth;
     rewriterContext.moveTo(mousePos.x, mousePos.y);
     rewriterContext.lineTo(mousePos.x, mousePos.y);
     rewriterContext.stroke();
 
-    currentLine.push(new DrawnLine(mousePos, mousePos, new PenOptions(userData.userSettings.selectedPenColour, userData.userSettings.selectedPenWidth)));
+    currentLine.push(new DrawnLine(mousePos, mousePos, new PenOptions(strokeColour, userData.userSettings.selectedPenWidth)));
 
     previousDrawPosition = mousePos;
     penDown = true;
@@ -469,7 +490,8 @@ function drawMove(event) {
     return;
   }
 
-  rewriterContext.strokeStyle = userData.userSettings.selectedPenColour;
+  const strokeColour = getActiveStrokeColour();
+  rewriterContext.strokeStyle = strokeColour;
   rewriterContext.beginPath();
   rewriterContext.lineWidth = userData.userSettings.selectedPenWidth;
   rewriterContext.moveTo(previousDrawPosition.x, previousDrawPosition.y);
@@ -488,7 +510,7 @@ function drawMove(event) {
     new DrawnLine(
       previousDrawPosition,
       constrainedPos,
-      new PenOptions(userData.userSettings.selectedPenColour, userData.userSettings.selectedPenWidth)
+      new PenOptions(strokeColour, userData.userSettings.selectedPenWidth)
     )
   );
 
