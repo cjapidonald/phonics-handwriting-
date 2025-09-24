@@ -74,6 +74,14 @@ export class TimerController {
       return;
     }
 
+    if (!document.querySelector('script[data-yt-api="true"], script[src="https://www.youtube.com/iframe_api"]')) {
+      const script = document.createElement('script');
+      script.src = 'https://www.youtube.com/iframe_api';
+      script.async = true;
+      script.dataset.ytApi = 'true';
+      document.head.appendChild(script);
+    }
+
     window.__ytReadyCallbacks = window.__ytReadyCallbacks || [];
     window.__ytReadyCallbacks.push(() => this.createPlayer());
 
@@ -98,10 +106,16 @@ export class TimerController {
     this.player = new window.YT.Player(this.playerElementId, {
       width: 220,
       height: 150,
-      playerVars: { controls: 0, rel: 0, modestbranding: 1, playsinline: 1 },
+      playerVars: { controls: 0, rel: 0, modestbranding: 1, playsinline: 1, autoplay: 1 },
       events: {
         onReady: () => {
           this.playerReady = true;
+          try {
+            this.player.setVolume?.(100);
+            this.player.unMute?.();
+          } catch (error) {
+            // Ignore inability to control volume due to browser policies.
+          }
           this.maybePlayPendingVideo();
         }
       }
@@ -131,18 +145,32 @@ export class TimerController {
     this.setRetroTvState(true);
 
     const videoId = YT_VIDEO_MAP[durationSeconds];
-    if (videoId && this.enabled) {
-      this.ensureYouTubeAPI();
-      if (this.player && this.playerReady) {
-        this.player.loadVideoById({ videoId, startSeconds: 0 });
-        this.player.playVideo?.();
-      } else {
-        this.pendingVideoId = videoId;
-      }
-    }
+    this.queueOrPlayVideo(videoId);
 
     this.tickInterval = window.setInterval(() => this.tick(), 1000);
     this.tick(true);
+  }
+
+  queueOrPlayVideo(videoId) {
+    if (!videoId || !this.enabled) {
+      this.pendingVideoId = null;
+      return;
+    }
+
+    this.ensureYouTubeAPI();
+
+    if (this.player && this.playerReady) {
+      try {
+        this.player.loadVideoById({ videoId, startSeconds: 0 });
+        this.player.playVideo?.();
+        this.pendingVideoId = null;
+      } catch (error) {
+        console.warn('Unable to start timer video playback.', error);
+        this.pendingVideoId = videoId;
+      }
+    } else {
+      this.pendingVideoId = videoId;
+    }
   }
 
   tick(initial = false) {
@@ -201,8 +229,10 @@ export class TimerController {
     if (!this.retroTv) {
       return;
     }
-    this.retroTv.classList.toggle('tv-on', Boolean(isOn));
-    this.retroTv.classList.toggle('tv-off', !isOn);
+    const active = Boolean(isOn);
+    this.retroTv.classList.toggle('tv-on', active);
+    this.retroTv.classList.toggle('tv-off', !active);
+    this.retroTv.setAttribute('aria-hidden', active ? 'false' : 'true');
   }
 
   maybePlayPendingVideo() {
@@ -212,9 +242,9 @@ export class TimerController {
     }
 
     if (this.pendingVideoId && this.player && this.playerReady && this.enabled) {
-      this.player.loadVideoById({ videoId: this.pendingVideoId, startSeconds: 0 });
-      this.player.playVideo?.();
+      const videoId = this.pendingVideoId;
       this.pendingVideoId = null;
+      this.queueOrPlayVideo(videoId);
     }
   }
 }
