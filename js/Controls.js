@@ -96,6 +96,8 @@ export class Controls {
     this.cookieSettingsLink = document.getElementById('cookieSettingsLink');
 
     this.boardDate = document.getElementById('boardDate');
+    this.boardLessonTitle = document.getElementById('boardLessonTitle');
+    this.lessonTitleInput = document.getElementById('inputLessonTitle');
 
     this.openPopover = null;
     this.openPopoverButton = null;
@@ -111,6 +113,7 @@ export class Controls {
     this.setupAuxiliaryButtons();
     this.setupCookieBanner();
     this.setupDateDisplay();
+    this.setupLessonTitle();
     this.setupFullscreenBehaviour();
     this.applyToolbarLayoutVersion();
     this.applyInitialState();
@@ -494,7 +497,12 @@ export class Controls {
     }
 
     if (storedDate) {
-      this.boardDate.textContent = storedDate;
+      const needsUpdate = /\d(?:st|nd|rd|th)/.test(storedDate) || !storedDate.includes(',');
+      if (needsUpdate) {
+        applyDate();
+      } else {
+        this.boardDate.textContent = storedDate;
+      }
     } else {
       applyDate();
     }
@@ -509,6 +517,51 @@ export class Controls {
         applyDate();
       }
     });
+  }
+
+  setupLessonTitle() {
+    if (!this.lessonTitleInput || !this.boardLessonTitle) {
+      return;
+    }
+
+    let storedTitle = '';
+    if (typeof window !== 'undefined' && window.localStorage) {
+      storedTitle = window.localStorage.getItem('ui.lessonTitle') ?? '';
+    }
+
+    const initialTitle = storedTitle.trim();
+    this.lessonTitleInput.value = storedTitle;
+    this.applyLessonTitle(initialTitle);
+
+    this.lessonTitleInput.addEventListener('input', event => {
+      const rawValue = event.target.value ?? '';
+      const trimmedValue = rawValue.trim();
+      this.applyLessonTitle(trimmedValue);
+
+      if (typeof window !== 'undefined' && window.localStorage) {
+        if (trimmedValue) {
+          window.localStorage.setItem('ui.lessonTitle', trimmedValue);
+        } else {
+          window.localStorage.removeItem('ui.lessonTitle');
+        }
+      }
+    });
+  }
+
+  applyLessonTitle(title) {
+    if (!this.boardLessonTitle) {
+      return;
+    }
+
+    if (title) {
+      this.boardLessonTitle.textContent = title;
+      this.boardLessonTitle.classList.remove('is-hidden');
+      this.boardLessonTitle.setAttribute('aria-hidden', 'false');
+    } else {
+      this.boardLessonTitle.textContent = '';
+      this.boardLessonTitle.classList.add('is-hidden');
+      this.boardLessonTitle.setAttribute('aria-hidden', 'true');
+    }
   }
 
   applyToolbarLayoutVersion() {
@@ -727,6 +780,9 @@ export class Controls {
     if (this.timerButton) {
       this.timerButton.classList.toggle('is-active', isActive);
       this.timerButton.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    }
+    if (this.timerProgress) {
+      this.timerProgress.classList.toggle('is-visible', isActive);
     }
   }
 
