@@ -622,6 +622,7 @@ body {
 body.is-fullscreen {
   align-items: stretch;
   background: var(--color-aerospace-orange);
+  --fullscreen-horizontal-gutter: clamp(96px, 16vw, 220px);
 }
 
 body.is-fullscreen .title-container,
@@ -633,7 +634,7 @@ body.is-fullscreen .feedback-section {
 body.is-fullscreen .main-container {
   flex: 1;
   width: 100vw;
-  padding: clamp(12px, 3vw, 32px);
+  padding: clamp(8px, 2.5vw, 24px) clamp(12px, 4vw, 32px);
   gap: 0;
   align-items: center;
 }
@@ -657,7 +658,7 @@ body.is-fullscreen .app-shell {
   width: 100%;
   max-width: none;
   height: 100%;
-  padding: clamp(20px, 4vw, 40px);
+  padding: clamp(12px, 2.5vw, 24px);
   border-radius: 42px;
 }
 
@@ -666,7 +667,7 @@ body.is-fullscreen .writer-container {
   border: 2px solid rgba(255, 255, 255, 0.2);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
   border-radius: 32px;
-  padding: clamp(16px, 3.6vh, 32px) clamp(20px, 5vw, 40px);
+  padding: clamp(16px, 3vh, 26px) calc(var(--fullscreen-horizontal-gutter) / 2);
   width: 100%;
   max-width: none;
   min-height: 0;
@@ -675,12 +676,15 @@ body.is-fullscreen .writer-container {
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  gap: clamp(20px, 4.6vh, 36px);
+  gap: clamp(10px, 2vh, 18px);
   box-sizing: border-box;
 }
 
 body.is-fullscreen .board-frame {
-  width: min(100vw, calc((100vh - var(--fullscreen-toolbar-offset, 0px)) * 1.5));
+  width: min(
+    calc(100vw - var(--fullscreen-horizontal-gutter)),
+    max(320px, calc((100vh - var(--fullscreen-toolbar-offset, 0px)) * 1.5))
+  );
   max-width: none;
   border-radius: 0;
   box-shadow: none;
@@ -691,55 +695,88 @@ body.is-fullscreen .writer-board {
   width: 100%;
 }
 
+body.is-fullscreen .board-layout {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+body.is-fullscreen .board-wrapper {
+  flex: 1 1 auto;
+  height: 100%;
+}
+
+body.is-fullscreen .writer-board,
+body.is-fullscreen .writer-board__content {
+  height: 100%;
+}
+
 body.is-fullscreen .board-header {
   width: 100%;
-  max-width: min(100vw, calc((100vh - var(--fullscreen-toolbar-offset, 0px)) * 1.5));
+  max-width: calc(100vw - var(--fullscreen-horizontal-gutter));
   margin: 0 auto;
-  padding: clamp(16px, 4vw, 36px) clamp(28px, 6vw, 56px) 0;
-  justify-content: center;
-  gap: clamp(20px, 4vw, 48px);
+  padding: clamp(12px, 3vw, 24px) calc(var(--fullscreen-horizontal-gutter) / 2) 0;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: clamp(16px, 4vw, 32px);
   box-sizing: border-box;
 }
 
 body.is-fullscreen #boardRegion {
   width: 100%;
   max-width: none;
-  gap: clamp(16px, 3vw, 32px);
+  gap: clamp(10px, 2vh, 20px);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  align-items: stretch;
+  justify-items: center;
+  min-height: 0;
 }
 
 body.is-fullscreen .board-header__title {
-  max-width: clamp(320px, 58%, 720px);
+  max-width: none;
+  flex: 1 1 auto;
+  justify-content: center;
 }
 
 body.is-fullscreen .board-header__date {
-  max-width: clamp(200px, 32%, 380px);
+  max-width: none;
+  flex: 0 0 auto;
 }
 
 body.is-fullscreen #boardDate {
-  align-self: flex-start;
+  align-self: center;
+  white-space: nowrap;
+  font-size: clamp(1.2rem, 1.6vw + 1rem, 2.4rem);
+  color: #7f3f98;
+  text-shadow: none;
 }
 
 body.is-fullscreen #boardLessonTitle {
   margin-top: 0;
+  white-space: nowrap;
 }
 
 body.is-fullscreen .board-header {
   color: #ffffff;
 }
 
-body.is-fullscreen .board-lesson-title,
-body.is-fullscreen #boardDate {
+body.is-fullscreen .board-lesson-title {
   color: inherit;
   text-shadow: 0 4px 12px rgba(10, 9, 3, 0.35);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 body.is-fullscreen #boardDate:hover,
 body.is-fullscreen #boardDate:focus-visible {
-  color: #ffe6d5;
+  color: #a26dcd;
 }
 
 body.is-fullscreen #boardDate:active {
-  color: #ffe6d5;
+  color: #c8a1ef;
 }
 
 body.is-fullscreen #retroTv {
@@ -1029,13 +1066,17 @@ body.board-controls-hidden #toolbarBottom {
 }
 
 body.is-fullscreen #toolbarBottom {
-  padding: clamp(12px, 2.2vw, 20px);
+  padding: clamp(12px, 2.4vw, 20px) calc(var(--fullscreen-horizontal-gutter) / 2);
+  width: calc(100vw - var(--fullscreen-horizontal-gutter));
+  max-width: var(--board-width, calc(100vw - var(--fullscreen-horizontal-gutter)));
 }
 
 body.is-fullscreen .bottom-toolbar__inner {
-  flex-direction: column;
-  align-items: stretch;
-  gap: clamp(14px, 2.4vw, 22px);
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(14px, 2.4vw, 24px);
 }
 
 body.is-fullscreen .control-popover {
@@ -1044,6 +1085,52 @@ body.is-fullscreen .control-popover {
 
 body.is-fullscreen .fullscreen-toolbar {
   display: flex;
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: clamp(12px, 2vw, 20px);
+}
+
+body.is-fullscreen .fullscreen-toolbar__sliders {
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: clamp(12px, 2vw, 20px);
+  flex: 0 0 auto;
+}
+
+body.is-fullscreen .fullscreen-slider {
+  min-width: clamp(200px, 24vw, 320px);
+}
+
+body.is-fullscreen .fullscreen-slider .slider {
+  width: clamp(140px, 16vw, 240px);
+}
+
+body.is-fullscreen .fullscreen-palette {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(4px, 1vw, 8px);
+  width: auto;
+  max-width: none;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  flex: 1 1 clamp(360px, 48vw, 720px);
+  min-width: clamp(360px, 48vw, 720px);
+}
+
+body.is-fullscreen .fullscreen-palette .swatch {
+  width: clamp(30px, 2.8vw, 42px);
+  height: clamp(30px, 2.8vw, 42px);
+  flex: 0 0 auto;
+  aspect-ratio: 1 / 1;
+}
+
+body.is-fullscreen .board-palette {
+  display: none;
 }
 
 
@@ -1477,8 +1564,9 @@ body.is-fullscreen .fullscreen-toolbar {
 body.is-fullscreen #toolbarBottom {
   margin-top: auto;
   margin-bottom: clamp(16px, 4vw, 28px);
-  width: min(var(--board-width, 1200px), 100vw);
-  padding: clamp(24px, 6vw, 36px);
+  width: calc(100vw - var(--fullscreen-horizontal-gutter));
+  max-width: var(--board-width, calc(100vw - var(--fullscreen-horizontal-gutter)));
+  padding: clamp(12px, 2.4vw, 20px) calc(var(--fullscreen-horizontal-gutter) / 2);
 }
 
 .btn.icon.is-active {
