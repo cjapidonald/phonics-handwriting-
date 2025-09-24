@@ -589,22 +589,6 @@ export class Controls {
 
     setCollapsedState(false);
 
-    const restoreToolbarPosition = () => {
-      if (!this.toolbarOriginalParent || !this.toolbarBottom) {
-        return;
-      }
-
-      if (this.toolbarBottom.parentElement === this.toolbarOriginalParent) {
-        return;
-      }
-
-      if (this.toolbarNextSibling && this.toolbarNextSibling.parentNode === this.toolbarOriginalParent) {
-        this.toolbarOriginalParent.insertBefore(this.toolbarBottom, this.toolbarNextSibling);
-      } else {
-        this.toolbarOriginalParent.appendChild(this.toolbarBottom);
-      }
-    };
-
     const handleFullscreenChange = () => {
       const fullscreenElement = document.fullscreenElement ?? document.webkitFullscreenElement ?? null;
       const isWriterFullscreen = fullscreenElement === this.writerContainer;
@@ -617,20 +601,19 @@ export class Controls {
         body.classList.toggle('is-fullscreen', isAppFullscreen);
       }
 
-      if (isWriterFullscreen) {
-        if (this.writerContainer && this.toolbarBottom.parentElement !== this.writerContainer) {
-          this.writerContainer.appendChild(this.toolbarBottom);
+      if (this.toolbarBottom) {
+        this.toolbarBottom.classList.toggle('is-fullscreen-active', isAppFullscreen);
+
+        if (!isAppFullscreen) {
+          this.toolbarBottom.classList.remove('is-collapsed');
+          setCollapsedState(false);
         }
-      } else {
-        restoreToolbarPosition();
-        this.toolbarBottom.classList.remove('is-collapsed');
-        setCollapsedState(false);
       }
     };
 
     if (this.toolbarToggleButton) {
       this.toolbarToggleButton.addEventListener('click', () => {
-        if (!document.body?.classList.contains('is-fullscreen')) {
+        if (!this.toolbarBottom.classList.contains('is-fullscreen-active')) {
           return;
         }
         const isCollapsed = this.toolbarBottom.classList.toggle('is-collapsed');
@@ -896,16 +879,12 @@ export class Controls {
   setZoom(value, persist = true) {
     const zoom = clamp(Number(value) || DEFAULT_SETTINGS.zoomLevel, 0.5, 3);
     this.userData.userSettings.zoomLevel = zoom;
-    const boardWidth = CANVAS_WIDTH * zoom;
     if (this.writerContainer) {
-      this.writerContainer.style.transform = '';
-      this.writerContainer.style.transformOrigin = '';
       this.writerContainer.style.setProperty('--zoom-level', String(zoom));
-      this.writerContainer.style.setProperty('--board-width', `${boardWidth}px`);
     }
 
     if (this.writerBoard) {
-      this.writerBoard.style.setProperty('--board-width', `${boardWidth}px`);
+      this.writerBoard.style.setProperty('--zoom-level', String(zoom));
     }
 
     if (persist) {
