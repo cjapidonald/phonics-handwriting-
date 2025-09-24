@@ -6,8 +6,30 @@
     <title>Handwriting Repeater</title>
     <meta
       name="description"
-      content="A web app that can be used to effectively demonstrate correct handwriting technique. With useful features such as Loop and Trace, stand back and watch the handwriting teach itself!"
+      content="Handwriting Repeater is an interactive handwriting practice tool with looping playback, tracing guides, and adjustable pen settings to help learners master letter formation."
     />
+    <meta
+      name="keywords"
+      content="handwriting practice, handwriting repeater, tracing letters, handwriting tool, education technology"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Handwriting Repeater" />
+    <link rel="canonical" href="https://handwritingrepeater.app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Handwriting Repeater" />
+    <meta
+      property="og:description"
+      content="Demonstrate perfect penmanship with looping handwriting playback, tracing overlays, and customizable pen tools."
+    />
+    <meta property="og:url" content="https://handwritingrepeater.app/" />
+    <meta property="og:image" content="https://handwritingrepeater.app/images/social-share.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Handwriting Repeater" />
+    <meta
+      name="twitter:description"
+      content="Interactive handwriting demonstrator with auto-repeat playback, tracing guides, and adjustable pens for classrooms and home learning."
+    />
+    <meta name="twitter:image" content="https://handwritingrepeater.app/images/social-share.png" />
     <meta name="google-adsense-account" content="ca-pub-7814326930117674" />
     <meta name="google-site-verification" content="trCK2wLL9i76vPCScU34nWJnmlRaDWiZ_Js_sR9K9WU" />
     <link rel="icon" type="image/x-icon" href="https://handwritingrepeater.app/images/favicon.ico" />
@@ -19,27 +41,49 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="css/fonts.css" />
     <link rel="stylesheet" href="css/style.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Handwriting Repeater",
+        "url": "https://handwritingrepeater.app/",
+        "description": "Interactive handwriting teaching app with looping playback, tracing overlays, and customizable drawing tools.",
+        "applicationCategory": "EducationApplication",
+        "operatingSystem": "Any",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
   </head>
   <body>
-    <div class="title-container">
+    <header class="title-container" role="banner">
       <img src="assets/icons/logo.svg" id="titleIcon" alt="Handwriting Repeater logo" />
       <div class="title-texts">
         <h1 class="title-text">Handwriting Repeater</h1>
       </div>
-    </div>
+    </header>
 
+codex/add-cursor-removal-and-image-size-limit
     <div class="main-container disable-select" id="appContainer">
+=======
+    <main class="main-container disable-select" role="main">
+main
       <div id="writerContainer" class="writer-container">
-        <canvas id="writerPage" width="1200" height="600"></canvas>
-        <canvas id="writerTrace" width="1200" height="600"></canvas>
-        <canvas id="writerLines" width="1200" height="600"></canvas>
-        <canvas id="writer" width="1200" height="600"></canvas>
-        <canvas id="writerMask" width="1200" height="600"></canvas>
+        <div id="writerBoard" class="writer-board">
+          <canvas id="writerPage" width="1200" height="600"></canvas>
+          <canvas id="writerTrace" width="1200" height="600"></canvas>
+          <canvas id="writerLines" width="1200" height="600"></canvas>
+          <canvas id="writer" width="1200" height="600"></canvas>
+          <canvas id="writerMask" width="1200" height="600"></canvas>
+        </div>
 
         <div id="boardDate" aria-label="Date" role="button" tabindex="0">Loading date…</div>
         <div id="retroTv" class="tv-off" aria-hidden="true">
           <div class="tv-frame">
-            <iframe id="tvPlayer" title="Retro TV" allow="autoplay" loading="lazy"></iframe>
+            <div id="tvPlayer" class="tv-screen" title="Retro TV" role="presentation"></div>
             <div class="tv-overlay" aria-hidden="true"></div>
           </div>
         </div>
@@ -163,7 +207,23 @@
         </div>
         <div id="timerProgress" aria-hidden="true"></div>
       </div>
-    </div>
+    </main>
+
+    <section class="seo-description" aria-labelledby="seoDescriptionHeading">
+      <div class="seo-description__inner">
+        <h2 id="seoDescriptionHeading">About Handwriting Repeater</h2>
+        <p>
+          Handwriting Repeater is a browser-based handwriting demonstrator designed for classrooms, tutoring sessions, and home
+          learning. Educators can record handwriting strokes once and loop the playback so students can focus on correct letter
+          formation without constant repetition.
+        </p>
+        <p>
+          The app pairs looping animation with optional tracing overlays, adjustable pen colours and sizes, multiple guideline
+          templates, and a built-in timer. These features make it simple to model tidy handwriting, reinforce muscle memory, and
+          deliver consistent practice routines on interactive whiteboards or personal devices.
+        </p>
+      </div>
+    </section>
 
     <input type="file" id="inputPenImage" class="visually-hidden" accept="image/*" aria-hidden="true" />
 

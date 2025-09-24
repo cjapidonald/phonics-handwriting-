@@ -35,7 +35,11 @@ export class Controls {
     this.userData = userData;
 
     this.writerContainer = document.getElementById('writerContainer');
+codex/add-cursor-removal-and-image-size-limit
     this.fullscreenTarget = document.getElementById('appContainer') ?? this.writerContainer ?? document.documentElement;
+
+    this.writerBoard = document.getElementById('writerBoard');
+ main
     this.rewriterCanvas = document.getElementById('writer');
     this.rewriterTraceCanvas = document.getElementById('writerTrace');
     this.rewriterLinesCanvas = document.getElementById('writerLines');
@@ -594,6 +598,7 @@ export class Controls {
     if (this.writerContainer) {
       this.writerContainer.style.transform = `scale(${zoom})`;
       this.writerContainer.style.transformOrigin = 'top center';
+      this.writerContainer.style.setProperty('--zoom-level', String(zoom));
     }
 
     if (persist) {
