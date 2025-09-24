@@ -84,6 +84,50 @@ body {
   color: var(--color-smoky-black);
 }
 
+.lesson-controls {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0 16px 16px;
+}
+
+.lesson-title-field {
+  width: min(100%, 380px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--color-smoky-black);
+}
+
+.lesson-title-label {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+}
+
+.lesson-title-input {
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 2px solid rgba(10, 9, 3, 0.16);
+  background: rgba(255, 244, 213, 0.92);
+  font-size: 1.05rem;
+  font-family: inherit;
+  color: var(--color-smoky-black);
+  box-shadow: 0 10px 22px rgba(10, 9, 3, 0.18);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lesson-title-input:focus {
+  outline: none;
+  border-color: rgba(255, 130, 0, 0.7);
+  box-shadow: 0 14px 28px rgba(10, 9, 3, 0.22);
+}
+
+.lesson-title-input::placeholder {
+  color: rgba(10, 9, 3, 0.55);
+}
+
 .main-container {
   width: 100%;
   display: flex;
@@ -133,17 +177,26 @@ body {
   pointer-events: auto;
 }
 
-#boardDate {
+.board-header {
   position: absolute;
   top: 16px;
   right: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+}
+
+#boardDate {
+  pointer-events: auto;
   color: var(--color-smoky-black);
   font-family: 'KG Primary', 'Comic Sans MS', 'Comic Sans', cursive;
-  font-size: clamp(1.75rem, 2vw + 1.25rem, 3rem);
+  font-size: clamp(1.4rem, 1.6vw + 1.1rem, 2.5rem);
   text-shadow: 0.08em 0.08em rgba(255, 201, 41, 0.3);
   font-weight: 700;
   letter-spacing: 0.05em;
-  padding: 12px 18px;
+  padding: 10px 16px;
   background: rgba(255, 244, 213, 0.9);
   border-radius: 14px;
   border: 2px solid rgba(10, 9, 3, 0.12);
@@ -151,6 +204,25 @@ body {
   cursor: pointer;
   user-select: none;
   transition: transform 0.15s ease;
+}
+
+.board-lesson-title {
+  pointer-events: none;
+  color: var(--color-smoky-black);
+  font-family: 'KG Primary', 'Comic Sans MS', 'Comic Sans', cursive;
+  font-size: clamp(2rem, 2vw + 1.35rem, 3.2rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-shadow: 0.08em 0.08em rgba(255, 201, 41, 0.26);
+  padding: 4px 12px 6px;
+  min-height: 1.3em;
+  min-width: clamp(220px, 22vw, 340px);
+  text-align: right;
+  transition: opacity 0.2s ease;
+}
+
+.board-lesson-title.is-hidden {
+  opacity: 0;
 }
 
 #boardDate:hover,
@@ -783,6 +855,9 @@ body.is-fullscreen #toolbarBottom.is-collapsed .toolbar-toggle__icon {
   border-radius: 999px;
   background: rgba(10, 9, 3, 0.12);
   overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
 }
 
 #timerProgress::after {
@@ -792,6 +867,10 @@ body.is-fullscreen #toolbarBottom.is-collapsed .toolbar-toggle__icon {
   width: var(--progress, 0%);
   background: linear-gradient(90deg, var(--color-sunglow) 0%, var(--color-ut-orange) 100%);
   transition: width 0.2s linear;
+}
+
+#timerProgress.is-visible {
+  opacity: 1;
 }
 
 .popover {

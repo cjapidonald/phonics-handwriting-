@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Handwriting Repeater</title>
+    <title>Master handwriting</title>
     <meta
       name="description"
       content="Handwriting Repeater is an interactive handwriting practice tool with looping playback, tracing guides, and adjustable pen settings to help learners master letter formation."
@@ -61,9 +61,22 @@
   <body>
     <header class="title-container" role="banner">
       <div class="title-texts">
-        <h1 class="title-text">Handwriting Repeater</h1>
+        <h1 class="title-text">Master handwriting</h1>
       </div>
     </header>
+
+    <section class="lesson-controls" aria-label="Lesson details">
+      <div class="lesson-title-field">
+        <label class="lesson-title-label" for="inputLessonTitle">Lesson title</label>
+        <input
+          type="text"
+          id="inputLessonTitle"
+          class="lesson-title-input"
+          placeholder="Lesson title here"
+          autocomplete="off"
+        />
+      </div>
+    </section>
 
     <main class="main-container disable-select" role="main">
       <div id="writerContainer" class="writer-container">
@@ -76,7 +89,15 @@
           <div id="teachOverlay" class="teach-overlay" aria-live="polite"></div>
         </div>
 
-        <div id="boardDate" aria-label="Date" role="button" tabindex="0">Loading date…</div>
+        <div id="boardHeader" class="board-header">
+          <div id="boardDate" aria-label="Date" role="button" tabindex="0">Loading date…</div>
+          <div
+            id="boardLessonTitle"
+            class="board-lesson-title is-hidden"
+            aria-live="polite"
+            aria-hidden="true"
+          ></div>
+        </div>
         <div id="retroTv" class="tv-off" aria-hidden="true">
           <div class="tv-frame">
             <div id="tvPlayer" class="tv-screen" title="Retro TV" role="presentation"></div>

@@ -31,17 +31,13 @@ export function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-const ORDINAL_SUFFIXES = { 1: 'st', 2: 'nd', 3: 'rd' };
-
 export function formatDateWithOrdinal(date = new Date()) {
-  const day = date.getDate();
-  const suffix = ORDINAL_SUFFIXES[day % 10] && ![11, 12, 13].includes(day) ? ORDINAL_SUFFIXES[day % 10] : 'th';
-  const formatter = new Intl.DateTimeFormat('en-GB', {
-    weekday: 'long',
+  const safeDate = date instanceof Date ? date : new Date(date);
+  const weekday = new Intl.DateTimeFormat('en-GB', { weekday: 'long' }).format(safeDate);
+  const dayMonthYear = new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
-  });
-  const formatted = formatter.format(date);
-  return formatted.replace(String(day), `${day}${suffix}`);
+  }).format(safeDate);
+  return `${weekday}, ${dayMonthYear}`;
 }
