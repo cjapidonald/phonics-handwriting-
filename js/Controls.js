@@ -63,8 +63,19 @@ export class Controls {
     this.zoomOutButton = document.getElementById('btnZoomOut');
     this.zoomInButton = document.getElementById('btnZoomIn');
 
+    this.backgroundWhiteButton = document.getElementById('btnBackgroundWhite');
+    this.backgroundLinesButton = document.getElementById('btnBackgroundLines');
+
     this.speedSlider = document.getElementById('sliderSpeed');
     this.penSizeSlider = document.getElementById('sliderPenSize');
+
+    this.penSizeToggleButton = document.getElementById('btnPenSizeToggle');
+    this.penSizePanel = document.getElementById('penSizePanel');
+    this.penSizeValueLabel = document.getElementById('penSizeValue');
+    this.speedToggleButton = document.getElementById('btnSpeedToggle');
+    this.speedPanel = document.getElementById('speedPanel');
+    this.speedValueLabel = document.getElementById('speedValue');
+    this.speedQuickButton = document.getElementById('btnSpeedQuick');
 
     this.pageStyleButton = document.getElementById('btnPageStyle');
     this.pageStylePopover = document.getElementById('pageStylePopover');
@@ -119,6 +130,8 @@ export class Controls {
 
     this.openPopover = null;
     this.openPopoverButton = null;
+    this.sliderPanelEntries = new Map();
+    this.openSliderKey = null;
     this.toolbarHasCustomPosition = false;
     this.fullscreenToolbarResizeObserver = null;
     this.boardWidthResizeObserver = null;
@@ -311,6 +324,63 @@ export class Controls {
     }
     this.openPopover = null;
     this.openPopoverButton = null;
+    this.closeSliderPanels();
+  }
+
+  closeSliderPanels() {
+    if (!this.sliderPanelEntries) {
+      return;
+    }
+
+    this.sliderPanelEntries.forEach(({ button, panel }) => {
+      if (panel) {
+        panel.hidden = true;
+        panel.setAttribute('aria-hidden', 'true');
+      }
+      if (button) {
+        button.setAttribute('aria-expanded', 'false');
+      }
+      const container = button?.closest('.control-popover') ?? panel?.closest('.control-popover') ?? null;
+      if (container) {
+        container.classList.remove('is-open');
+      }
+    });
+
+    this.openSliderKey = null;
+  }
+
+  toggleSliderPanel(key) {
+    if (!this.sliderPanelEntries) {
+      return;
+    }
+
+    const entry = this.sliderPanelEntries.get(key);
+    if (!entry) {
+      return;
+    }
+
+    const isAlreadyOpen = this.openSliderKey === key;
+    this.closeSliderPanels();
+
+    if (isAlreadyOpen) {
+      return;
+    }
+
+    if (entry.panel) {
+      entry.panel.hidden = false;
+      entry.panel.setAttribute('aria-hidden', 'false');
+    }
+
+    if (entry.button) {
+      entry.button.setAttribute('aria-expanded', 'true');
+    }
+
+    const container = entry.button?.closest('.control-popover') ?? entry.panel?.closest('.control-popover') ?? null;
+    if (container) {
+      container.classList.add('is-open');
+    }
+
+    this.openSliderKey = key;
   }
 
   loadStoredPreferences() {
@@ -400,6 +470,21 @@ export class Controls {
         this.setPageColour(colour, true);
       });
     });
+
+    if (this.backgroundWhiteButton) {
+      this.backgroundWhiteButton.addEventListener('click', () => {
+        this.closeSliderPanels();
+        this.setBackground('blank', true);
+        this.setPageColour('#ffffff', true);
+      });
+    }
+
+    if (this.backgroundLinesButton) {
+      this.backgroundLinesButton.addEventListener('click', () => {
+        this.closeSliderPanels();
+        this.setBackground('phonics-lines', true);
+      });
+    }
   }
 
   setupSliders() {
@@ -415,6 +500,65 @@ export class Controls {
           REWRITE_SPEED_MAX
         );
         this.setRewriteSpeed(speed, true);
+      });
+    }
+
+    if (this.penSizeToggleButton && this.penSizePanel) {
+      this.sliderPanelEntries.set('pen', {
+        button: this.penSizeToggleButton,
+        panel: this.penSizePanel
+      });
+      this.penSizeToggleButton.setAttribute('aria-expanded', 'false');
+      this.penSizePanel.hidden = true;
+      this.penSizePanel.setAttribute('aria-hidden', 'true');
+      this.penSizeToggleButton.addEventListener('click', event => {
+        event.stopPropagation();
+        this.toggleSliderPanel('pen');
+      });
+    }
+
+    if (this.speedToggleButton && this.speedPanel) {
+      this.sliderPanelEntries.set('speed', {
+        button: this.speedToggleButton,
+        panel: this.speedPanel
+      });
+      this.speedToggleButton.setAttribute('aria-expanded', 'false');
+      this.speedPanel.hidden = true;
+      this.speedPanel.setAttribute('aria-hidden', 'true');
+      this.speedToggleButton.addEventListener('click', event => {
+        event.stopPropagation();
+        this.toggleSliderPanel('speed');
+      });
+    }
+
+    if (this.speedQuickButton) {
+      this.speedQuickButton.addEventListener('click', event => {
+        event.stopPropagation();
+        this.toggleSliderPanel('speed');
+      });
+    }
+
+    if (this.sliderPanelEntries.size > 0) {
+      document.addEventListener('click', event => {
+        if (!this.openSliderKey) {
+          return;
+        }
+        const entry = this.sliderPanelEntries.get(this.openSliderKey);
+        if (!entry) {
+          this.openSliderKey = null;
+          return;
+        }
+        const target = event.target instanceof Element ? event.target : null;
+        if (target && (entry.button?.contains(target) || entry.panel?.contains(target))) {
+          return;
+        }
+        this.closeSliderPanels();
+      });
+
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+          this.closeSliderPanels();
+        }
       });
     }
   }
@@ -985,6 +1129,10 @@ export class Controls {
       this.penSizeSlider.setAttribute('aria-valuenow', String(size));
     }
 
+    if (this.penSizeValueLabel) {
+      this.penSizeValueLabel.textContent = String(size);
+    }
+
     this.setStorageItem('pen.size', String(size));
 
     if (persist) {
@@ -1048,6 +1196,18 @@ export class Controls {
       button.classList.toggle('is-selected', button.dataset.pageStyle === styleKey);
     });
 
+    if (this.backgroundWhiteButton) {
+      const isBlank = styleKey === 'blank';
+      this.backgroundWhiteButton.classList.toggle('is-active', isBlank);
+      this.backgroundWhiteButton.setAttribute('aria-pressed', isBlank ? 'true' : 'false');
+    }
+
+    if (this.backgroundLinesButton) {
+      const isLines = styleKey === 'phonics-lines';
+      this.backgroundLinesButton.classList.toggle('is-active', isLines);
+      this.backgroundLinesButton.setAttribute('aria-pressed', isLines ? 'true' : 'false');
+    }
+
     this.setStorageItem('page.style', styleKey);
 
     if (persist) {
@@ -1101,6 +1261,12 @@ export class Controls {
     if (this.speedSlider && this.speedSlider.value !== String(speed)) {
       this.speedSlider.value = String(speed);
       this.speedSlider.setAttribute('aria-valuenow', String(speed));
+    }
+
+    if (this.speedValueLabel) {
+      const formatted = Number(speed).toFixed(1);
+      const display = formatted.endsWith('.0') ? String(Number(formatted)) : formatted;
+      this.speedValueLabel.textContent = `${display}×`;
     }
     if (persist) {
       this.userData.saveToLocalStorage();
