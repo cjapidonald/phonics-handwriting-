@@ -67,70 +67,6 @@
 
     <main class="main-container disable-select" role="main">
       <div id="writerContainer" class="writer-container">
-        <div class="board-side-controls board-side-controls--left" role="group" aria-label="Board controls">
-          <div class="board-side-controls__panel">
-            <button class="btn icon" id="btnUndo" type="button" aria-label="Undo" title="Undo">
-              <svg aria-hidden="true"><use href="assets/icons.svg#undo"></use></svg>
-            </button>
-            <button class="btn icon" id="btnRedo" type="button" aria-label="Redo" title="Redo">
-              <svg aria-hidden="true"><use href="assets/icons.svg#redo"></use></svg>
-            </button>
-            <button class="btn icon" id="btnReset" type="button" aria-label="Reset" title="Reset">
-              <svg aria-hidden="true"><use href="assets/icons.svg#reset"></use></svg>
-            </button>
-            <button
-              class="btn icon"
-              id="btnPageStyle"
-              type="button"
-              aria-label="Page style"
-              title="Page style"
-              aria-haspopup="dialog"
-              aria-expanded="false"
-            >
-              <svg aria-hidden="true"><use href="assets/icons.svg#page-lines"></use></svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="board-bookmarks" id="boardBookmarks">
-          <div class="board-bookmarks__panel" id="boardBookmarksPanel" role="group" aria-label="Quick actions" aria-hidden="true">
-            <button
-              class="btn icon"
-              id="btnTimer"
-              type="button"
-              aria-label="Timer"
-              title="Timer"
-              aria-haspopup="dialog"
-              aria-expanded="false"
-              aria-pressed="false"
-              tabindex="-1"
-            >
-              <svg aria-hidden="true"><use href="assets/icons.svg#timer"></use></svg>
-            </button>
-            <button class="btn icon" id="btnUploadPen" type="button" aria-label="Upload pen image" title="Upload pen image" tabindex="-1">
-              <svg aria-hidden="true"><use href="assets/icons.svg#upload"></use></svg>
-            </button>
-            <button class="btn icon is-disabled" id="btnRemovePenImage" type="button" aria-label="Remove custom pen image" title="Remove custom pen image" disabled tabindex="-1">
-              <svg aria-hidden="true"><use href="assets/icons.svg#close"></use></svg>
-            </button>
-            <button class="btn icon" id="btnFullscreen" type="button" aria-label="Fullscreen" title="Fullscreen" tabindex="-1">
-              <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
-            </button>
-          </div>
-          <button
-            type="button"
-            class="board-bookmarks__toggle"
-            id="boardBookmarksToggle"
-            aria-controls="boardBookmarksPanel"
-            aria-expanded="false"
-            aria-label="Show quick actions"
-          >
-            <svg class="board-bookmarks__toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M12 16.5 5.5 10l1.41-1.41L12 13.67l5.09-5.08L18.5 10z"></path>
-            </svg>
-          </button>
-        </div>
-
         <div id="writerBoard" class="writer-board">
           <canvas id="writerPage" width="1200" height="600"></canvas>
           <canvas id="writerTrace" width="1200" height="600"></canvas>
@@ -182,6 +118,7 @@
           </svg>
         </button>
         <div class="toolbar-inner">
+ codex/update-fullscreen-board-and-toolbar-layout
           <div class="toolbar-controls" role="group" aria-label="Board customization controls">
             <div class="toolbar-group toolbar-left" role="group" aria-label="Zoom and speed">
               <button class="btn icon" id="btnZoomOut" type="button" aria-label="Zoom out" title="Zoom out">
@@ -209,6 +146,56 @@
                   aria-label="Rewrite speed"
                 />
               </div>
+
+          <div class="toolbar-group toolbar-board" role="group" aria-label="Board controls">
+            <button class="btn icon" id="btnUndo" type="button" aria-label="Undo" title="Undo">
+              <svg aria-hidden="true"><use href="assets/icons.svg#undo"></use></svg>
+            </button>
+            <button class="btn icon" id="btnRedo" type="button" aria-label="Redo" title="Redo">
+              <svg aria-hidden="true"><use href="assets/icons.svg#redo"></use></svg>
+            </button>
+            <button class="btn icon" id="btnReset" type="button" aria-label="Reset" title="Reset">
+              <svg aria-hidden="true"><use href="assets/icons.svg#reset"></use></svg>
+            </button>
+            <button
+              class="btn icon"
+              id="btnPageStyle"
+              type="button"
+              aria-label="Page style"
+              title="Page style"
+              aria-haspopup="dialog"
+              aria-expanded="false"
+            >
+              <svg aria-hidden="true"><use href="assets/icons.svg#page-lines"></use></svg>
+            </button>
+          </div>
+
+          <div class="toolbar-group toolbar-zoom" role="group" aria-label="Zoom and speed">
+            <button class="btn icon" id="btnZoomOut" type="button" aria-label="Zoom out" title="Zoom out">
+              <svg aria-hidden="true"><use href="assets/icons.svg#zoom-out"></use></svg>
+            </button>
+            <button class="btn icon" id="btnZoomIn" type="button" aria-label="Zoom in" title="Zoom in">
+              <svg aria-hidden="true"><use href="assets/icons.svg#zoom-in"></use></svg>
+            </button>
+            <div class="slider-control" id="speedControl">
+              <span class="icon-leading" aria-hidden="true">
+                <svg><use href="assets/icons.svg#speed"></use></svg>
+              </span>
+              <label class="visually-hidden" for="sliderSpeed">Rewrite speed</label>
+              <input
+                id="sliderSpeed"
+                class="slider"
+                type="range"
+                min="0.5"
+                max="8"
+                step="0.1"
+                value="2"
+                aria-valuemin="0.5"
+                aria-valuemax="8"
+                aria-valuenow="2"
+                aria-label="Rewrite speed"
+              />
+main
             </div>
 
             <div class="toolbar-group toolbar-centre" role="group" aria-label="Playback">
@@ -309,6 +296,30 @@
                 <div class="teach-preview" id="teachPreview" aria-label="Sentence letter controls"></div>
               </div>
             </div>
+          </div>
+
+          <div class="toolbar-group toolbar-quick" role="group" aria-label="Quick actions">
+            <button
+              class="btn icon"
+              id="btnTimer"
+              type="button"
+              aria-label="Timer"
+              title="Timer"
+              aria-haspopup="dialog"
+              aria-expanded="false"
+              aria-pressed="false"
+            >
+              <svg aria-hidden="true"><use href="assets/icons.svg#timer"></use></svg>
+            </button>
+            <button class="btn icon" id="btnUploadPen" type="button" aria-label="Upload pen image" title="Upload pen image">
+              <svg aria-hidden="true"><use href="assets/icons.svg#upload"></use></svg>
+            </button>
+            <button class="btn icon is-disabled" id="btnRemovePenImage" type="button" aria-label="Remove custom pen image" title="Remove custom pen image" disabled>
+              <svg aria-hidden="true"><use href="assets/icons.svg#close"></use></svg>
+            </button>
+            <button class="btn icon" id="btnFullscreen" type="button" aria-label="Fullscreen" title="Fullscreen">
+              <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
+            </button>
           </div>
         </div>
       </div>
