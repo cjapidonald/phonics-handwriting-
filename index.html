@@ -178,25 +178,6 @@
             <button class="btn icon side-panel__button" id="btnRedo" type="button" aria-label="Redo" title="Redo">
               <svg aria-hidden="true"><use href="assets/icons.svg#redo"></use></svg>
             </button>
-            <div class="slider-control slider-control--stacked side-panel__slider" id="penSizeControl">
-              <span class="icon-leading" aria-hidden="true">
-                <svg><use href="assets/icons.svg#pen"></use></svg>
-              </span>
-              <label class="visually-hidden" for="sliderPenSize">Pen size</label>
-              <input
-                id="sliderPenSize"
-                class="slider"
-                type="range"
-                min="1"
-                max="40"
-                value="6"
-                step="1"
-                aria-valuemin="1"
-                aria-valuemax="40"
-                aria-valuenow="6"
-                aria-label="Pen size"
-              />
-            </div>
             <button
               class="btn icon side-panel__button"
               id="btnTimer"
@@ -275,25 +256,6 @@
             <button class="btn icon side-panel__button is-disabled" id="btnRemovePenImage" type="button" aria-label="Remove custom pen image" title="Remove custom pen image" disabled>
               <svg aria-hidden="true"><use href="assets/icons.svg#close"></use></svg>
             </button>
-            <div class="slider-control slider-control--compact side-panel__slider" id="speedControl">
-              <span class="icon-leading" aria-hidden="true">
-                <svg><use href="assets/icons.svg#turtle"></use></svg>
-              </span>
-              <label class="visually-hidden" for="sliderSpeed">Rewrite speed</label>
-              <input
-                id="sliderSpeed"
-                class="slider"
-                type="range"
-                min="0.5"
-                max="8"
-                step="0.1"
-                value="2"
-                aria-valuemin="0.5"
-                aria-valuemax="8"
-                aria-valuenow="2"
-                aria-label="Rewrite speed"
-              />
-            </div>
             <button
               class="btn icon side-panel__button"
               id="btnFullscreen"
@@ -346,6 +308,47 @@
                   autocomplete="off"
                 />
                 <button class="teach-button" id="btnTeach" type="button">Teach</button>
+              </div>
+            </div>
+
+            <div class="bottom-panel__sliders" aria-label="Drawing speed and pen size controls">
+              <div class="slider-control slider-control--stacked bottom-panel__slider" id="penSizeControl">
+                <span class="icon-leading" aria-hidden="true">
+                  <svg><use href="assets/icons.svg#pen"></use></svg>
+                </span>
+                <label class="visually-hidden" for="sliderPenSize">Pen size</label>
+                <input
+                  id="sliderPenSize"
+                  class="slider"
+                  type="range"
+                  min="1"
+                  max="40"
+                  value="6"
+                  step="1"
+                  aria-valuemin="1"
+                  aria-valuemax="40"
+                  aria-valuenow="6"
+                  aria-label="Pen size"
+                />
+              </div>
+              <div class="slider-control slider-control--compact bottom-panel__slider" id="speedControl">
+                <span class="icon-leading" aria-hidden="true">
+                  <svg><use href="assets/icons.svg#turtle"></use></svg>
+                </span>
+                <label class="visually-hidden" for="sliderSpeed">Rewrite speed</label>
+                <input
+                  id="sliderSpeed"
+                  class="slider"
+                  type="range"
+                  min="0.5"
+                  max="8"
+                  step="0.1"
+                  value="2"
+                  aria-valuemin="0.5"
+                  aria-valuemax="8"
+                  aria-valuenow="2"
+                  aria-label="Rewrite speed"
+                />
               </div>
             </div>
           </div>
