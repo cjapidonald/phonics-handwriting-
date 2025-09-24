@@ -93,203 +93,201 @@
         </div>
 
         <div id="timerProgress" aria-hidden="true"></div>
-      </div>
-
-      <div id="toolbarBottom" role="toolbar" aria-label="Handwriting controls" class="disable-select">
         <div
-          class="toolbar-drag-handle"
-          id="toolbarDragHandle"
-          role="presentation"
-          aria-hidden="true"
-          title="Drag toolbar"
+          id="toolbarBottom"
+          role="toolbar"
+          aria-label="Handwriting controls"
+          class="disable-select"
         >
-          <span class="toolbar-drag-grip" aria-hidden="true"></span>
-        </div>
-
-        <button
-          id="toolbarToggle"
-          class="toolbar-toggle"
-          type="button"
-          aria-label="Hide controls"
-          aria-expanded="true"
-        >
-          <svg class="toolbar-toggle__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M12 16.5 5.5 10l1.41-1.41L12 13.67l5.09-5.08L18.5 10z"></path>
-          </svg>
-        </button>
-        <div class="toolbar-inner">
-          <div class="toolbar-controls" aria-label="Board customisation controls">
-            <div class="toolbar-group toolbar-board" role="group" aria-label="Board controls">
-            <button class="btn icon" id="btnUndo" type="button" aria-label="Undo" title="Undo">
-              <svg aria-hidden="true"><use href="assets/icons.svg#undo"></use></svg>
-            </button>
-            <button class="btn icon" id="btnRedo" type="button" aria-label="Redo" title="Redo">
-              <svg aria-hidden="true"><use href="assets/icons.svg#redo"></use></svg>
-            </button>
-            <button class="btn icon" id="btnReset" type="button" aria-label="Reset" title="Reset">
-              <svg aria-hidden="true"><use href="assets/icons.svg#reset"></use></svg>
-            </button>
-            <button
-              class="btn icon"
-              id="btnPageStyle"
-              type="button"
-              aria-label="Page style"
-              title="Page style"
-              aria-haspopup="dialog"
-              aria-expanded="false"
-            >
-              <svg aria-hidden="true"><use href="assets/icons.svg#page-lines"></use></svg>
-            </button>
-            </div>
-
-            <div class="toolbar-group toolbar-zoom" role="group" aria-label="Zoom and speed">
-            <button class="btn icon" id="btnZoomOut" type="button" aria-label="Zoom out" title="Zoom out">
-              <svg aria-hidden="true"><use href="assets/icons.svg#zoom-out"></use></svg>
-            </button>
-            <button class="btn icon" id="btnZoomIn" type="button" aria-label="Zoom in" title="Zoom in">
-              <svg aria-hidden="true"><use href="assets/icons.svg#zoom-in"></use></svg>
-            </button>
-            <div class="slider-control" id="speedControl">
-              <span class="icon-leading" aria-hidden="true">
-                <svg><use href="assets/icons.svg#speed"></use></svg>
-              </span>
-              <label class="visually-hidden" for="sliderSpeed">Rewrite speed</label>
-              <input
-                id="sliderSpeed"
-                class="slider"
-                type="range"
-                min="0.5"
-                max="8"
-                step="0.1"
-                value="2"
-                aria-valuemin="0.5"
-                aria-valuemax="8"
-                aria-valuenow="2"
-                aria-label="Rewrite speed"
-              />
-            </div>
-            </div>
-
-            <div class="toolbar-group toolbar-centre" role="group" aria-label="Playback">
-            <button class="btn icon btn-primary" id="btnRewrite" type="button" aria-label="Rewrite" title="Rewrite" aria-pressed="false">
-              <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
-            </button>
-            </div>
-
-            <div class="toolbar-group toolbar-right" role="group" aria-label="Pen controls">
-            <div class="slider-control" id="penSizeControl">
-              <span class="icon-leading" aria-hidden="true">
-                <svg><use href="assets/icons.svg#pen"></use></svg>
-              </span>
-              <label class="visually-hidden" for="sliderPenSize">Pen size</label>
-              <input
-                id="sliderPenSize"
-                class="slider"
-                type="range"
-                min="1"
-                max="40"
-                value="6"
-                step="1"
-                aria-valuemin="1"
-                aria-valuemax="40"
-                aria-valuenow="6"
-                aria-label="Pen size"
-              />
-            </div>
-            <button
-              class="btn icon"
-              id="btnPalette"
-              type="button"
-              aria-label="Pen colour"
-              title="Pen colour"
-              aria-haspopup="dialog"
-              aria-expanded="false"
-            >
-              <svg aria-hidden="true"><use href="assets/icons.svg#palette"></use></svg>
-            </button>
-            </div>
-
-            <div class="toolbar-group toolbar-quick" role="group" aria-label="Quick actions">
-            <button
-              class="btn icon"
-              id="btnTimer"
-              type="button"
-              aria-label="Timer"
-              title="Timer"
-              aria-haspopup="dialog"
-              aria-expanded="false"
-              aria-pressed="false"
-            >
-              <svg aria-hidden="true"><use href="assets/icons.svg#timer"></use></svg>
-            </button>
-            <button class="btn icon" id="btnUploadPen" type="button" aria-label="Upload pen image" title="Upload pen image">
-              <svg aria-hidden="true"><use href="assets/icons.svg#upload"></use></svg>
-            </button>
-            <button class="btn icon is-disabled" id="btnRemovePenImage" type="button" aria-label="Remove custom pen image" title="Remove custom pen image" disabled>
-              <svg aria-hidden="true"><use href="assets/icons.svg#close"></use></svg>
-            </button>
-            <button class="btn icon" id="btnFullscreen" type="button" aria-label="Fullscreen" title="Fullscreen">
-              <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
-            </button>
-            </div>
-          </div>
-
-          <div class="toolbar-sections">
-            <div class="toolbar-card toolbar-lesson" role="group" aria-label="Lesson title controls">
-              <div class="lesson-title-field">
-                <label class="lesson-title-label" for="inputLessonTitle">Lesson title</label>
-                <div class="lesson-title-input-row">
-                  <input
-                    type="text"
-                    id="inputLessonTitle"
-                    class="lesson-title-input"
-                    placeholder="Lesson title here"
-                    autocomplete="off"
-                  />
+          <button
+            id="toolbarToggle"
+            class="toolbar-toggle"
+            type="button"
+            aria-label="Hide controls"
+            aria-expanded="true"
+          >
+            <svg class="toolbar-toggle__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 16.5 5.5 10l1.41-1.41L12 13.67l5.09-5.08L18.5 10z"></path>
+            </svg>
+          </button>
+          <div class="toolbar-inner">
+            <div class="toolbar-controls" aria-label="Board customisation controls">
+              <div class="toolbar-row toolbar-row--primary">
+                <div class="toolbar-group toolbar-board" role="group" aria-label="Board controls">
+                  <button class="btn icon" id="btnUndo" type="button" aria-label="Undo" title="Undo">
+                    <svg aria-hidden="true"><use href="assets/icons.svg#undo"></use></svg>
+                  </button>
+                  <button class="btn icon" id="btnRedo" type="button" aria-label="Redo" title="Redo">
+                    <svg aria-hidden="true"><use href="assets/icons.svg#redo"></use></svg>
+                  </button>
+                  <button class="btn icon" id="btnReset" type="button" aria-label="Reset" title="Reset">
+                    <svg aria-hidden="true"><use href="assets/icons.svg#reset"></use></svg>
+                  </button>
                   <button
+                    class="btn icon"
+                    id="btnPageStyle"
                     type="button"
-                    id="btnLessonTitleApply"
-                    class="lesson-title-apply is-disabled"
-                    disabled
+                    aria-label="Page style"
+                    title="Page style"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
                   >
-                    Display
+                    <svg aria-hidden="true"><use href="assets/icons.svg#page-lines"></use></svg>
+                  </button>
+                </div>
+
+                <div class="toolbar-group toolbar-zoom" role="group" aria-label="Zoom and speed">
+                  <button class="btn icon" id="btnZoomOut" type="button" aria-label="Zoom out" title="Zoom out">
+                    <svg aria-hidden="true"><use href="assets/icons.svg#zoom-out"></use></svg>
+                  </button>
+                  <button class="btn icon" id="btnZoomIn" type="button" aria-label="Zoom in" title="Zoom in">
+                    <svg aria-hidden="true"><use href="assets/icons.svg#zoom-in"></use></svg>
+                  </button>
+                  <div class="slider-control" id="speedControl">
+                    <span class="icon-leading" aria-hidden="true">
+                      <svg><use href="assets/icons.svg#turtle"></use></svg>
+                    </span>
+                    <label class="visually-hidden" for="sliderSpeed">Rewrite speed</label>
+                    <input
+                      id="sliderSpeed"
+                      class="slider"
+                      type="range"
+                      min="0.5"
+                      max="8"
+                      step="0.1"
+                      value="2"
+                      aria-valuemin="0.5"
+                      aria-valuemax="8"
+                      aria-valuenow="2"
+                      aria-label="Rewrite speed"
+                    />
+                  </div>
+                </div>
+
+                <div class="toolbar-group toolbar-playback" role="group" aria-label="Playback">
+                  <button class="btn icon btn-primary" id="btnRewrite" type="button" aria-label="Rewrite" title="Rewrite" aria-pressed="false">
+                    <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="toolbar-row toolbar-row--secondary">
+                <div class="toolbar-group toolbar-pen" role="group" aria-label="Pen controls">
+                  <div class="slider-control" id="penSizeControl">
+                    <span class="icon-leading" aria-hidden="true">
+                      <svg><use href="assets/icons.svg#pen"></use></svg>
+                    </span>
+                    <label class="visually-hidden" for="sliderPenSize">Pen size</label>
+                    <input
+                      id="sliderPenSize"
+                      class="slider"
+                      type="range"
+                      min="1"
+                      max="40"
+                      value="6"
+                      step="1"
+                      aria-valuemin="1"
+                      aria-valuemax="40"
+                      aria-valuenow="6"
+                      aria-label="Pen size"
+                    />
+                  </div>
+                  <button
+                    class="btn icon"
+                    id="btnPalette"
+                    type="button"
+                    aria-label="Pen colour"
+                    title="Pen colour"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                  >
+                    <svg aria-hidden="true"><use href="assets/icons.svg#palette"></use></svg>
+                  </button>
+                </div>
+
+                <div class="toolbar-group toolbar-quick" role="group" aria-label="Quick actions">
+                  <button
+                    class="btn icon"
+                    id="btnTimer"
+                    type="button"
+                    aria-label="Timer"
+                    title="Timer"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                    aria-pressed="false"
+                  >
+                    <svg aria-hidden="true"><use href="assets/icons.svg#timer"></use></svg>
+                  </button>
+                  <button class="btn icon" id="btnUploadPen" type="button" aria-label="Upload pen image" title="Upload pen image">
+                    <svg aria-hidden="true"><use href="assets/icons.svg#upload"></use></svg>
+                  </button>
+                  <button class="btn icon is-disabled" id="btnRemovePenImage" type="button" aria-label="Remove custom pen image" title="Remove custom pen image" disabled>
+                    <svg aria-hidden="true"><use href="assets/icons.svg#close"></use></svg>
+                  </button>
+                  <button class="btn icon" id="btnFullscreen" type="button" aria-label="Fullscreen" title="Fullscreen">
+                    <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
                   </button>
                 </div>
               </div>
             </div>
 
-            <div class="toolbar-group toolbar-teach toolbar-card" role="group" aria-label="Teaching text controls">
-              <div class="teach-field">
-                <label class="teach-label" for="teachTextInput">Practice text</label>
-                <div class="teach-input-row">
-                  <input
-                    id="teachTextInput"
-                    class="teach-input"
-                    type="text"
-                    placeholder="Type a sentence for the board"
-                    autocomplete="off"
-                  />
-                  <button class="teach-button" id="btnTeach" type="button">Teach</button>
-                  <button class="teach-button" id="btnTeachNext" type="button" disabled>
-                    Next
-                    <span aria-hidden="true" class="teach-button__arrow">➜</span>
-                  </button>
+            <div class="toolbar-sections">
+              <div class="toolbar-card toolbar-lesson" role="group" aria-label="Lesson title controls">
+                <div class="lesson-title-field">
+                  <label class="lesson-title-label" for="inputLessonTitle">Lesson title</label>
+                  <div class="lesson-title-input-row">
+                    <input
+                      type="text"
+                      id="inputLessonTitle"
+                      class="lesson-title-input"
+                      placeholder="Lesson title here"
+                      autocomplete="off"
+                    />
+                    <button
+                      type="button"
+                      id="btnLessonTitleApply"
+                      class="lesson-title-apply is-disabled"
+                      disabled
+                    >
+                      Display
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div class="teach-field teach-preview-block">
-                <div class="teach-preview__header">
-                  <p class="teach-label teach-preview__title">Freeze letters</p>
-                  <button
-                    type="button"
-                    id="btnToggleFreezePreview"
-                    class="teach-preview__toggle"
-                    aria-controls="teachPreview"
-                    aria-expanded="true"
-                  >
-                    Hide letters
-                  </button>
+
+              <div class="toolbar-group toolbar-teach toolbar-card" role="group" aria-label="Teaching text controls">
+                <div class="teach-field">
+                  <label class="teach-label" for="teachTextInput">Practice text</label>
+                  <div class="teach-input-row">
+                    <input
+                      id="teachTextInput"
+                      class="teach-input"
+                      type="text"
+                      placeholder="Type a sentence for the board"
+                      autocomplete="off"
+                    />
+                    <button class="teach-button" id="btnTeach" type="button">Teach</button>
+                    <button class="teach-button" id="btnTeachNext" type="button" disabled>
+                      Next
+                      <span aria-hidden="true" class="teach-button__arrow">➜</span>
+                    </button>
+                  </div>
                 </div>
-                <div class="teach-preview" id="teachPreview" aria-label="Sentence letter controls"></div>
+                <div class="teach-field teach-preview-block">
+                  <div class="teach-preview__header">
+                    <p class="teach-label teach-preview__title">Freeze letters</p>
+                    <button
+                      type="button"
+                      id="btnToggleFreezePreview"
+                      class="teach-preview__toggle"
+                      aria-controls="teachPreview"
+                      aria-expanded="true"
+                    >
+                      Hide letters
+                    </button>
+                  </div>
+                  <div class="teach-preview" id="teachPreview" aria-label="Sentence letter controls"></div>
+                </div>
               </div>
             </div>
           </div>
