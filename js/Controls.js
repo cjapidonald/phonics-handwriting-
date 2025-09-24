@@ -110,6 +110,7 @@ export class Controls {
 
     this.boardDate = document.getElementById('boardDate');
     this.boardLessonTitle = document.getElementById('boardLessonTitle');
+    this.boardHeader = document.getElementById('boardHeader');
     this.lessonTitleInput = document.getElementById('inputLessonTitle');
     this.lessonTitleSubmitButton = document.getElementById('btnLessonTitleApply');
 
@@ -121,6 +122,11 @@ export class Controls {
     this.toolbarHasCustomPosition = false;
     this.fullscreenToolbarResizeObserver = null;
     this.boardWidthResizeObserver = null;
+    this.boardHeaderResizeObserver = null;
+    this.boardHeaderResizeAnimationFrame = null;
+    this.handleBoardHeaderResize = () => {
+      this.queueBoardHeaderResize();
+    };
 
     this.migrateSettings();
     this.initialiseCanvases();
@@ -137,6 +143,7 @@ export class Controls {
     this.setupCookieBanner();
     this.setupDateDisplay();
     this.setupLessonTitle();
+    this.setupBoardHeaderScaling();
     this.setupFullscreenBehaviour();
     this.setupToolbarWidthSync();
     this.applyInitialState();
@@ -731,6 +738,7 @@ export class Controls {
       const formatted = formatDateWithOrdinal(new Date());
       this.boardDate.textContent = formatted;
       this.setStorageItem('ui.dateText', formatted);
+      this.queueBoardHeaderResize();
     };
 
     let storedDate = '';
@@ -745,6 +753,7 @@ export class Controls {
         applyDate();
       } else {
         this.boardDate.textContent = storedDate;
+        this.queueBoardHeaderResize();
       }
     } else {
       applyDate();
@@ -760,6 +769,8 @@ export class Controls {
         applyDate();
       }
     });
+
+    this.queueBoardHeaderResize();
   }
 
   setupLessonTitle() {
@@ -813,6 +824,115 @@ export class Controls {
     });
   }
 
+  setupBoardHeaderScaling() {
+    if (!this.boardHeader) {
+      return;
+    }
+
+    this.queueBoardHeaderResize();
+
+    if (typeof ResizeObserver === 'function') {
+      this.boardHeaderResizeObserver = new ResizeObserver(() => {
+        this.queueBoardHeaderResize();
+      });
+
+      this.boardHeaderResizeObserver.observe(this.boardHeader);
+
+      const titleWrapper = this.boardLessonTitle?.parentElement ?? null;
+      const dateWrapper = this.boardDate?.parentElement ?? null;
+      const headerParent = this.boardHeader.parentElement ?? null;
+
+      if (titleWrapper) {
+        this.boardHeaderResizeObserver.observe(titleWrapper);
+      }
+
+      if (dateWrapper) {
+        this.boardHeaderResizeObserver.observe(dateWrapper);
+      }
+
+      if (headerParent) {
+        this.boardHeaderResizeObserver.observe(headerParent);
+      }
+
+      if (this.writerBoard) {
+        this.boardHeaderResizeObserver.observe(this.writerBoard);
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', this.handleBoardHeaderResize);
+    }
+  }
+
+  queueBoardHeaderResize() {
+    if (!this.boardHeader) {
+      return;
+    }
+
+    if (typeof window === 'undefined') {
+      this.adjustBoardHeaderScaling();
+      return;
+    }
+
+    if (this.boardHeaderResizeAnimationFrame) {
+      window.cancelAnimationFrame(this.boardHeaderResizeAnimationFrame);
+    }
+
+    this.boardHeaderResizeAnimationFrame = window.requestAnimationFrame(() => {
+      this.boardHeaderResizeAnimationFrame = null;
+      this.adjustBoardHeaderScaling();
+    });
+  }
+
+  adjustBoardHeaderScaling() {
+    if (!this.boardHeader || typeof window === 'undefined') {
+      return;
+    }
+
+    const adjustElement = (element, minScale = 0.6) => {
+      if (!element) {
+        return;
+      }
+
+      const container = element.parentElement;
+      if (!container) {
+        return;
+      }
+
+      element.style.fontSize = '';
+
+      const computed = window.getComputedStyle(element);
+      const baseSize = parseFloat(computed.fontSize) || 16;
+
+      if (!Number.isFinite(baseSize) || baseSize <= 0) {
+        element.style.fontSize = '';
+        return;
+      }
+
+      element.style.fontSize = `${baseSize}px`;
+
+      const hasContent = (element.textContent ?? '').trim().length > 0;
+      const containerWidth = container.clientWidth;
+
+      if (!hasContent || !containerWidth) {
+        return;
+      }
+
+      const elementWidth = element.scrollWidth;
+
+      if (elementWidth <= containerWidth) {
+        return;
+      }
+
+      const scale = containerWidth / elementWidth;
+      const clampedScale = Math.max(scale, minScale);
+      element.style.fontSize = `${baseSize * clampedScale}px`;
+    };
+
+    adjustElement(this.boardLessonTitle, 0.55);
+    adjustElement(this.boardDate, 0.65);
+  }
+
   applyLessonTitle(title) {
     if (!this.boardLessonTitle) {
       return;
@@ -827,6 +947,8 @@ export class Controls {
       this.boardLessonTitle.classList.add('is-hidden');
       this.boardLessonTitle.setAttribute('aria-hidden', 'true');
     }
+
+    this.queueBoardHeaderResize();
   }
 
   applyToolbarLayoutVersion() {
