@@ -56,6 +56,7 @@ teachController = new TeachController({
   textInput: document.getElementById('teachTextInput'),
   teachButton: document.getElementById('btnTeach'),
   nextButton: document.getElementById('btnTeachNext'),
+  previousButton: document.getElementById('btnTeachPrevious'),
   previewContainer: document.getElementById('teachPreview'),
   previewToggleButton: document.getElementById('btnToggleFreezePreview'),
   hideLettersButton: document.getElementById('btnHideLetters'),
@@ -324,6 +325,21 @@ function setupLessonAndPracticePrompts() {
       }
       const textValue = typeof result === 'string' ? result : '';
       teachController.applyText(textValue);
+    });
+  }
+
+  const clearPracticeButton = document.getElementById('btnClearPracticeText');
+  if (clearPracticeButton) {
+    clearPracticeButton.addEventListener('click', () => {
+      if (!teachController) {
+        return;
+      }
+      teachController.applyText('');
+      const practiceInput = document.getElementById('teachTextInput');
+      if (practiceInput) {
+        practiceInput.value = '';
+        practiceInput.focus?.({ preventScroll: true });
+      }
     });
   }
 }
