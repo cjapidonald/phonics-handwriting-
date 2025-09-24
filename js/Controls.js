@@ -23,9 +23,7 @@ const PEN_COLOUR_SWATCHES = [
 
 const PAGE_STYLE_DRAWERS = {
   blank: clearBackground,
-  'red-blue': drawRedBlueGuidelines,
-  squares: drawSquares,
-  'grey-dotted': drawGreyDottedLines
+  'red-blue': drawRedBlueGuidelines
 };
 
 export class Controls {
@@ -657,32 +655,6 @@ function withContext(ctx, drawFn) {
   }
 }
 
-function drawHorizontalLines(ctx, width, height, { spacing, colour, widthPx = 2, dash = [], offset = 0 }) {
-  withContext(ctx, () => {
-    ctx.clearRect(0, 0, width, height);
-    ctx.strokeStyle = colour;
-    ctx.lineWidth = widthPx;
-    ctx.setLineDash(dash);
-
-    for (let y = offset; y <= height; y += spacing) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-  });
-}
-
-function drawGreyDottedLines(ctx, width, height) {
-  drawHorizontalLines(ctx, width, height, {
-    spacing: 60,
-    colour: '#7a7a7a',
-    widthPx: 2,
-    dash: [10, 22],
-    offset: 40
-  });
-}
-
 function drawRedBlueGuidelines(ctx, width, height) {
   withContext(ctx, () => {
     ctx.clearRect(0, 0, width, height);
@@ -701,29 +673,6 @@ function drawRedBlueGuidelines(ctx, width, height) {
       ctx.strokeStyle = '#d8342c';
       ctx.moveTo(0, mid);
       ctx.lineTo(width, mid);
-      ctx.stroke();
-    }
-  });
-}
-
-function drawSquares(ctx, width, height) {
-  withContext(ctx, () => {
-    ctx.clearRect(0, 0, width, height);
-    const spacing = 70;
-    ctx.strokeStyle = '#1f4ea3';
-    ctx.lineWidth = 1.5;
-
-    for (let y = spacing; y <= height; y += spacing) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-
-    for (let x = spacing; x <= width; x += spacing) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
       ctx.stroke();
     }
   });
