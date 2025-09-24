@@ -55,6 +55,10 @@ export class TeachController {
   handleTeach() {
     const text = this.textInput?.value ?? '';
     this.applyText(text);
+
+    if (this.textInput) {
+      this.textInput.value = '';
+    }
   }
 
   handleNext() {
