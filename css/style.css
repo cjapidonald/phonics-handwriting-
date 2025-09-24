@@ -438,6 +438,61 @@ body {
   width: 100%;
 }
 
+.side-panel .control-popover {
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.side-panel .control-popover__toggle {
+  width: clamp(64px, 16vw, 92px);
+  min-height: clamp(76px, 18vw, 112px);
+  padding: 12px;
+  font-size: 0.85rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border-radius: 18px;
+  border: 2px solid rgba(10, 9, 3, 0.18);
+  background: rgba(255, 244, 213, 0.92);
+  box-shadow: 0 12px 22px rgba(10, 9, 3, 0.18);
+  text-align: center;
+}
+
+.side-panel .control-popover__toggle:hover,
+.side-panel .control-popover__toggle:focus-visible,
+.side-panel .control-popover.is-open .control-popover__toggle {
+  border-color: rgba(10, 9, 3, 0.32);
+  box-shadow: 0 16px 28px rgba(10, 9, 3, 0.22);
+}
+
+.side-panel .control-popover__icon {
+  width: 34px;
+  height: 34px;
+}
+
+.side-panel .control-popover__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.side-panel .control-popover__label {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.side-panel .control-popover__value {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.side-panel .control-popover__panel {
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(100% + 10px);
+  min-width: clamp(200px, 34vw, 280px);
+}
+
 .slider-control--stacked {
   flex-direction: column;
   align-items: center;
@@ -791,6 +846,20 @@ body.board-controls-hidden #toolbarBottom {
   gap: clamp(16px, 2.8vw, 28px);
 }
 
+.board-palette {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 2.4vw, 18px);
+}
+
+.board-palette .swatch {
+  width: clamp(40px, 5vw, 52px);
+  height: clamp(40px, 5vw, 52px);
+}
+
 .control-popover {
   position: relative;
   display: flex;
@@ -977,9 +1046,6 @@ body.is-fullscreen .fullscreen-toolbar {
   display: flex;
 }
 
-body.is-fullscreen #btnPalette {
-  display: none;
-}
 
 .teach-field {
   display: flex;
@@ -1361,23 +1427,6 @@ body.is-fullscreen #btnPalette {
 .btn.icon:active {
   transform: translateY(0);
   box-shadow: 0 4px 8px rgba(10, 9, 3, 0.24);
-}
-
-#btnPalette::after {
-  content: "";
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--active-colour, transparent);
-  border: 2px solid #ffffff;
-  bottom: 6px;
-  right: 6px;
-  box-shadow: 0 0 0 2px rgba(10, 9, 3, 0.2);
-}
-
-#btnPalette.is-rainbow::after {
-  background: conic-gradient(from 0deg, #ff004d, #ffa500, #ffee00, #00d084, #1e4dd8, #7f3f98, #ff004d);
 }
 
 .btn.icon.is-disabled,

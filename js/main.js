@@ -29,6 +29,7 @@ let previousDrawPosition = new Point(0, 0);
 let currentLine = [];
 let rainbowHue = 0;
 let lastPenColour = userData.userSettings.selectedPenColour ?? DEFAULT_SETTINGS.selectedPenColour;
+let boardControlsRestoreTimer = null;
 
 let controller = new AbortController();
 let signal = controller.signal;
@@ -67,6 +68,26 @@ teachController = new TeachController({
 
 setupCombinedNextRedoButton();
 setupLessonAndPracticePrompts();
+
+function setBoardControlsHidden(isHidden) {
+  const body = document.body;
+  if (!body) {
+    return;
+  }
+
+  if (isHidden) {
+    body.classList.add('board-controls-hidden');
+  } else {
+    body.classList.remove('board-controls-hidden');
+  }
+
+  window.clearTimeout(boardControlsRestoreTimer);
+  if (isHidden) {
+    boardControlsRestoreTimer = window.setTimeout(() => {
+      body.classList.remove('board-controls-hidden');
+    }, 2000);
+  }
+}
 
 async function loadInitialPenImage() {
   const storedSrc = userData.userSettings.customPenImageSrc;
@@ -221,71 +242,16 @@ function setupCombinedNextRedoButton() {
     }
   };
 
-  let activePointerId = null;
-
-  combinedButton.addEventListener('pointerdown', event => {
-    activePointerId = event.pointerId;
-    combinedButton.setPointerCapture?.(event.pointerId);
-  });
-
-  combinedButton.addEventListener('pointercancel', () => {
-    activePointerId = null;
-  });
-
-  combinedButton.addEventListener('pointerup', async event => {
-    if (activePointerId !== null && event.pointerId !== activePointerId) {
-      return;
-    }
-
-    activePointerId = null;
-    combinedButton.releasePointerCapture?.(event.pointerId);
-
-    if (event.button !== undefined && event.button !== 0) {
-      return;
-    }
-
-    const rect = combinedButton.getBoundingClientRect();
-    const isUpperHalf = event.clientY < rect.top + rect.height / 2;
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (isUpperHalf) {
-      const didRedo = await redoLastLine();
-      if (!didRedo) {
-        handleNext();
-      }
-    } else {
-      handleNext();
-    }
-  });
-
   combinedButton.addEventListener('click', event => {
-    if (event.detail === 0) {
-      handleNext();
-    }
     event.preventDefault();
+    handleNext();
   });
 
-  combinedButton.addEventListener('keydown', async event => {
-    if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown') {
+  combinedButton.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowRight' || event.key === 'ArrowDown') {
       event.preventDefault();
       handleNext();
       return;
-    }
-
-    if (event.key && event.key.toLowerCase() === 'r') {
-      event.preventDefault();
-      await redoLastLine();
-      return;
-    }
-
-    if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      const didRedo = await redoLastLine();
-      if (!didRedo) {
-        handleNext();
-      }
     }
   });
 }
@@ -523,6 +489,7 @@ function drawMove(event) {
 }
 
 function drawEnd() {
+  setBoardControlsHidden(false);
   if (!penDown) {
     return;
   }

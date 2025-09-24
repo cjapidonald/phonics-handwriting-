@@ -262,6 +262,78 @@ main
                 <button class="btn icon side-panel__button" id="btnZoomIn" type="button" aria-label="Zoom in" title="Zoom in">
                   <svg aria-hidden="true"><use href="assets/icons.svg#zoom-in"></use></svg>
                 </button>
+                <div class="side-panel__slider control-popover" data-control="pen">
+                  <button
+                    class="control-popover__toggle"
+                    id="btnPenSizeToggle"
+                    type="button"
+                    aria-expanded="false"
+                    aria-controls="penSizePanel"
+                  >
+                    <span class="control-popover__icon" aria-hidden="true">
+                      <svg><use href="assets/icons.svg#pen"></use></svg>
+                    </span>
+                    <span class="control-popover__label">Pen size</span>
+                    <span class="control-popover__value" id="penSizeValue">6</span>
+                  </button>
+                  <div class="control-popover__panel" id="penSizePanel" hidden>
+                    <label class="visually-hidden" for="sliderPenSize">Pen size</label>
+                    <input
+                      id="sliderPenSize"
+                      class="slider"
+                      type="range"
+                      min="1"
+                      max="40"
+                      value="6"
+                      step="1"
+                      aria-valuemin="1"
+                      aria-valuemax="40"
+                      aria-valuenow="6"
+                      aria-label="Pen size"
+                    />
+                  </div>
+                </div>
+                <button
+                  class="btn icon side-panel__button btn-primary"
+                  id="btnRewrite"
+                  type="button"
+                  aria-label="Rewrite"
+                  title="Rewrite"
+                  aria-pressed="false"
+                >
+                  <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
+                </button>
+                <div class="side-panel__slider control-popover" data-control="speed">
+                  <button
+                    class="control-popover__toggle"
+                    id="btnSpeedToggle"
+                    type="button"
+                    aria-expanded="false"
+                    aria-controls="speedPanel"
+                  >
+                    <span class="control-popover__icon" aria-hidden="true">
+                      <svg><use href="assets/icons.svg#speed"></use></svg>
+                    </span>
+                    <span class="control-popover__label">Rewrite speed</span>
+                    <span class="control-popover__value" id="speedValue">2×</span>
+                  </button>
+                  <div class="control-popover__panel" id="speedPanel" hidden>
+                    <label class="visually-hidden" for="sliderSpeed">Rewrite speed</label>
+                    <input
+                      id="sliderSpeed"
+                      class="slider"
+                      type="range"
+                      min="0.5"
+                      max="8"
+                      step="0.1"
+                      value="2"
+                      aria-valuemin="0.5"
+                      aria-valuemax="8"
+                      aria-valuenow="2"
+                      aria-label="Rewrite speed"
+                    />
+                  </div>
+                </div>
                 <button
                   class="btn icon side-panel__button"
                   id="btnBackgroundWhite"
@@ -395,20 +467,6 @@ main
                   <svg aria-hidden="true"><use href="assets/icons.svg#arrow-right"></use></svg>
                   <span class="visually-hidden">Next letter</span>
                 </button>
-                <button
-                  class="btn icon side-panel__button"
-                  id="btnPalette"
-                  type="button"
-                  aria-label="Pen colour"
-                  title="Pen colour"
-                  aria-haspopup="dialog"
-                  aria-expanded="false"
-                >
-                  <svg aria-hidden="true"><use href="assets/icons.svg#palette"></use></svg>
-                </button>
-                <button class="btn icon side-panel__button" id="btnSpeedQuick" type="button" aria-label="Rewrite speed" title="Rewrite speed">
-                  <svg aria-hidden="true"><use href="assets/icons.svg#speed"></use></svg>
-                </button>
                 <button class="btn icon side-panel__button" id="btnUploadPen" type="button" aria-label="Upload pen image" title="Upload pen image">
                   <svg aria-hidden="true"><use href="assets/icons.svg#upload"></use></svg>
                 </button>
@@ -430,75 +488,28 @@ main
           </div>
         </div>
 
-        <section
-          id="toolbarBottom"
-          class="toolbar toolbar--bottom"
-          role="region"
-          aria-label="Drawing adjustments"
-        >
+        <section id="toolbarBottom" class="toolbar toolbar--bottom" role="region" aria-label="Pen colours">
           <div class="bottom-toolbar__inner">
-            <div class="control-popover" data-control="pen">
+            <div class="board-palette" id="boardPalette" role="list">
+              <button class="swatch" type="button" data-colour="#111111" aria-label="Black" style="--swatch-colour: #111111"></button>
+              <button class="swatch" type="button" data-colour="#444444" aria-label="Dark grey" style="--swatch-colour: #444444"></button>
+              <button class="swatch" type="button" data-colour="#1e4dd8" aria-label="Blue" style="--swatch-colour: #1e4dd8"></button>
+              <button class="swatch" type="button" data-colour="#d8342c" aria-label="Red" style="--swatch-colour: #d8342c"></button>
+              <button class="swatch" type="button" data-colour="#0f7a3d" aria-label="Green" style="--swatch-colour: #0f7a3d"></button>
+              <button class="swatch" type="button" data-colour="#7f3f98" aria-label="Purple" style="--swatch-colour: #7f3f98"></button>
+              <button class="swatch" type="button" data-colour="#f17f1a" aria-label="Orange" style="--swatch-colour: #f17f1a"></button>
+              <button class="swatch" type="button" data-colour="#5b3a1d" aria-label="Brown" style="--swatch-colour: #5b3a1d"></button>
+              <button class="swatch" type="button" data-colour="#e969ad" aria-label="Pink" style="--swatch-colour: #e969ad"></button>
+              <button class="swatch" type="button" data-colour="#00bcd4" aria-label="Cyan" style="--swatch-colour: #00bcd4"></button>
+              <button class="swatch" type="button" data-colour="#ffffff" aria-label="White" style="--swatch-colour: #ffffff"></button>
+              <button class="swatch" type="button" data-colour="#ffd700" aria-label="Yellow" style="--swatch-colour: #ffd700"></button>
               <button
-                class="control-popover__toggle"
-                id="btnPenSizeToggle"
+                class="swatch swatch--rainbow"
                 type="button"
-                aria-expanded="false"
-                aria-controls="penSizePanel"
-              >
-                <span class="control-popover__icon" aria-hidden="true">
-                  <svg><use href="assets/icons.svg#pen"></use></svg>
-                </span>
-                <span class="control-popover__label">Pen size</span>
-                <span class="control-popover__value" id="penSizeValue">6</span>
-              </button>
-              <div class="control-popover__panel" id="penSizePanel" hidden>
-                <label class="visually-hidden" for="sliderPenSize">Pen size</label>
-                <input
-                  id="sliderPenSize"
-                  class="slider"
-                  type="range"
-                  min="1"
-                  max="40"
-                  value="6"
-                  step="1"
-                  aria-valuemin="1"
-                  aria-valuemax="40"
-                  aria-valuenow="6"
-                  aria-label="Pen size"
-                />
-              </div>
-            </div>
-
-            <div class="control-popover" data-control="speed">
-              <button
-                class="control-popover__toggle"
-                id="btnSpeedToggle"
-                type="button"
-                aria-expanded="false"
-                aria-controls="speedPanel"
-              >
-                <span class="control-popover__icon" aria-hidden="true">
-                  <svg><use href="assets/icons.svg#speed"></use></svg>
-                </span>
-                <span class="control-popover__label">Rewrite speed</span>
-                <span class="control-popover__value" id="speedValue">2×</span>
-              </button>
-              <div class="control-popover__panel" id="speedPanel" hidden>
-                <label class="visually-hidden" for="sliderSpeed">Rewrite speed</label>
-                <input
-                  id="sliderSpeed"
-                  class="slider"
-                  type="range"
-                  min="0.5"
-                  max="8"
-                  step="0.1"
-                  value="2"
-                  aria-valuemin="0.5"
-                  aria-valuemax="8"
-                  aria-valuenow="2"
-                  aria-label="Rewrite speed"
-                />
-              </div>
+                data-colour="rainbow"
+                aria-label="Rainbow"
+                style="--swatch-colour: conic-gradient(from 0deg, #ff004d, #ffa500, #ffee00, #00d084, #1e4dd8, #7f3f98, #ff004d)"
+              ></button>
             </div>
 
             <div class="fullscreen-toolbar" id="fullscreenToolbar">
@@ -520,17 +531,6 @@ main
                   />
                   <span class="fullscreen-slider__value" id="penSizeValueFullscreen">6</span>
                 </div>
-
-                <button
-                  class="btn icon btn-primary fullscreen-toolbar__action"
-                  id="btnRewrite"
-                  type="button"
-                  aria-label="Rewrite"
-                  title="Rewrite"
-                  aria-pressed="false"
-                >
-                  <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
-                </button>
 
                 <div class="fullscreen-slider" id="fullscreenSpeedControl">
                   <label class="fullscreen-slider__label" for="sliderSpeedFullscreen">Rewrite speed</label>
@@ -602,34 +602,6 @@ main
           <button class="swatch" type="button" data-page-colour="#e5f1ff" aria-label="Pale blue" style="--swatch-colour: #e5f1ff"></button>
           <button class="swatch" type="button" data-page-colour="#dce1e8" aria-label="Grey" style="--swatch-colour: #dce1e8"></button>
         </div>
-      </div>
-    </div>
-
-    <div id="palettePopover" class="popover" role="dialog" aria-label="Pen colours">
-      <div id="palette" class="swatch-grid" role="list">
-        <button class="swatch" type="button" data-colour="#111111" aria-label="Black" style="--swatch-colour: #111111"></button>
-        <button class="swatch" type="button" data-colour="#444444" aria-label="Dark grey" style="--swatch-colour: #444444"></button>
-        <button class="swatch" type="button" data-colour="#1e4dd8" aria-label="Blue" style="--swatch-colour: #1e4dd8"></button>
-        <button class="swatch" type="button" data-colour="#d8342c" aria-label="Red" style="--swatch-colour: #d8342c"></button>
-        <button class="swatch" type="button" data-colour="#0f7a3d" aria-label="Green" style="--swatch-colour: #0f7a3d"></button>
-        <button class="swatch" type="button" data-colour="#7f3f98" aria-label="Purple" style="--swatch-colour: #7f3f98"></button>
-        <button class="swatch" type="button" data-colour="#f17f1a" aria-label="Orange" style="--swatch-colour: #f17f1a"></button>
-        <button class="swatch" type="button" data-colour="#5b3a1d" aria-label="Brown" style="--swatch-colour: #5b3a1d"></button>
-        <button class="swatch" type="button" data-colour="#e969ad" aria-label="Pink" style="--swatch-colour: #e969ad"></button>
-        <button class="swatch" type="button" data-colour="#00bcd4" aria-label="Cyan" style="--swatch-colour: #00bcd4"></button>
-        <button class="swatch" type="button" data-colour="#ffffff" aria-label="White" style="--swatch-colour: #ffffff"></button>
-        <button class="swatch" type="button" data-colour="#ffd700" aria-label="Yellow" style="--swatch-colour: #ffd700"></button>
-        <button
-          class="swatch swatch--rainbow"
-          type="button"
-          data-colour="rainbow"
-          aria-label="Rainbow"
-          style="--swatch-colour: conic-gradient(from 0deg, #ff004d, #ffa500, #ffee00, #00d084, #1e4dd8, #7f3f98, #ff004d)"
-        ></button>
-        <label class="custom-colour" for="colorPicker">
-          <span>Custom</span>
-          <input type="color" id="colorPicker" aria-label="Custom colour" />
-        </label>
       </div>
     </div>
 

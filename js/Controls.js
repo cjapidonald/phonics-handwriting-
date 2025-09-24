@@ -103,11 +103,19 @@ export class Controls {
     this.paletteSwatches = this.palettePopover
       ? Array.from(this.palettePopover.querySelectorAll('.swatch[data-colour]'))
       : [];
+    this.boardPalette = document.getElementById('boardPalette');
+    this.boardPaletteSwatches = this.boardPalette
+      ? Array.from(this.boardPalette.querySelectorAll('.swatch[data-colour]'))
+      : [];
     this.fullscreenPalette = document.getElementById('fullscreenPalette');
     this.fullscreenPaletteSwatches = this.fullscreenPalette
       ? Array.from(this.fullscreenPalette.querySelectorAll('.swatch[data-colour]'))
       : [];
-    this.allPaletteSwatches = [...this.paletteSwatches, ...this.fullscreenPaletteSwatches];
+    this.allPaletteSwatches = [
+      ...this.paletteSwatches,
+      ...this.fullscreenPaletteSwatches,
+      ...this.boardPaletteSwatches
+    ];
     this.customColourInput = document.getElementById('colorPicker');
 
     this.timerButton = document.getElementById('btnTimer');
