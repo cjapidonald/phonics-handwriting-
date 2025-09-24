@@ -89,6 +89,10 @@ export class Controls {
       : [];
     this.timerProgress = document.getElementById('timerProgress');
 
+    this.boardBookmarks = document.getElementById('boardBookmarks');
+    this.boardBookmarksToggle = document.getElementById('boardBookmarksToggle');
+    this.boardBookmarksPanel = document.getElementById('boardBookmarksPanel');
+
     this.toolbarBottom = document.getElementById('toolbarBottom');
     this.toolbarToggleButton = document.getElementById('toolbarToggle');
     this.toolbarOriginalParent = this.toolbarBottom?.parentElement ?? null;
@@ -123,6 +127,7 @@ export class Controls {
     this.setupSliders();
     this.setupZoomButtons();
     this.setupAuxiliaryButtons();
+    this.setupBookmarkDock();
     this.setupToolbarDragging();
     this.setupCookieBanner();
     this.setupDateDisplay();
@@ -428,6 +433,64 @@ export class Controls {
           document.exitFullscreen();
         } else {
           (this.writerContainer ?? document.documentElement).requestFullscreen().catch(() => {});
+        }
+      });
+    }
+  }
+
+  setupBookmarkDock() {
+    if (!this.boardBookmarks || !this.boardBookmarksToggle) {
+      return;
+    }
+
+    const panel = this.boardBookmarksPanel ?? null;
+    const actionButtons = panel ? Array.from(panel.querySelectorAll('button')) : [];
+
+    const setExpandedState = expanded => {
+      this.boardBookmarks.classList.toggle('is-expanded', expanded);
+      this.boardBookmarksToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      this.boardBookmarksToggle.setAttribute('aria-label', expanded ? 'Hide quick actions' : 'Show quick actions');
+      if (panel) {
+        panel.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+      }
+      actionButtons.forEach(button => {
+        if (expanded) {
+          button.removeAttribute('tabindex');
+        } else {
+          button.setAttribute('tabindex', '-1');
+        }
+      });
+      if (!expanded && this.openPopoverButton && actionButtons.includes(this.openPopoverButton)) {
+        this.closeOpenPopover();
+      }
+    };
+
+    setExpandedState(false);
+
+    this.boardBookmarksToggle.addEventListener('click', () => {
+      const isExpanded = this.boardBookmarks.classList.contains('is-expanded');
+      const nextExpanded = !isExpanded;
+      setExpandedState(nextExpanded);
+      if (nextExpanded && actionButtons.length > 0) {
+        window.setTimeout(() => {
+          const firstButton = actionButtons[0];
+          if (firstButton && typeof firstButton.focus === 'function') {
+            try {
+              firstButton.focus({ preventScroll: true });
+            } catch (error) {
+              firstButton.focus();
+            }
+          }
+        }, 0);
+      }
+    });
+
+    if (panel) {
+      panel.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          setExpandedState(false);
+          this.boardBookmarksToggle.focus({ preventScroll: true });
         }
       });
     }
