@@ -3,20 +3,20 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Master handwriting</title>
+    <title>Teach Handwriting</title>
     <meta
       name="description"
-      content="Handwriting Repeater is an interactive handwriting practice tool with looping playback, tracing guides, and adjustable pen settings to help learners master letter formation."
+      content="Teach Handwriting is an interactive handwriting practice tool with looping playback, tracing guides, and adjustable pen settings to help learners master letter formation."
     />
     <meta
       name="keywords"
       content="handwriting practice, handwriting repeater, tracing letters, handwriting tool, education technology"
     />
     <meta name="robots" content="index, follow" />
-    <meta name="author" content="Handwriting Repeater" />
+    <meta name="author" content="Teach Handwriting" />
     <link rel="canonical" href="https://handwritingrepeater.app/" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Handwriting Repeater" />
+    <meta property="og:title" content="Teach Handwriting" />
     <meta
       property="og:description"
       content="Demonstrate perfect penmanship with looping handwriting playback, tracing overlays, and customizable pen tools."
@@ -24,7 +24,7 @@
     <meta property="og:url" content="https://handwritingrepeater.app/" />
     <meta property="og:image" content="https://handwritingrepeater.app/images/social-share.png" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Handwriting Repeater" />
+    <meta name="twitter:title" content="Teach Handwriting" />
     <meta
       name="twitter:description"
       content="Interactive handwriting demonstrator with auto-repeat playback, tracing guides, and adjustable pens for classrooms and home learning."
@@ -45,7 +45,7 @@
       {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        "name": "Handwriting Repeater",
+        "name": "Teach Handwriting",
         "url": "https://handwritingrepeater.app/",
         "description": "Interactive handwriting teaching app with looping playback, tracing overlays, and customizable drawing tools.",
         "applicationCategory": "EducationApplication",
@@ -66,10 +66,11 @@
       aria-haspopup="dialog"
       aria-expanded="false"
       aria-controls="infoPanel"
-      title="About Handwriting Repeater and feedback"
+      aria-label="Teach Handwriting information and feedback"
+      title="Teach Handwriting information and feedback"
     >
-      <span class="visually-hidden">About Handwriting Repeater and feedback</span>
       <span aria-hidden="true" class="info-panel-toggle__icon">i</span>
+      <span class="info-panel-toggle__label">Teach Handwriting</span>
     </button>
 
     <div id="infoPanelBackdrop" class="info-panel-backdrop" hidden></div>
@@ -84,7 +85,7 @@
       tabindex="-1"
     >
       <div class="info-panel__header">
-        <h2 class="info-panel__title" id="infoPanelTitle">Handwriting Repeater</h2>
+        <h2 class="info-panel__title" id="infoPanelTitle">Teach Handwriting</h2>
         <button
           type="button"
           class="info-panel__close"
@@ -97,9 +98,9 @@
 
       <div class="info-panel__content">
         <section class="info-panel__section" aria-labelledby="infoPanelAboutHeading">
-          <h3 class="info-panel__section-title" id="infoPanelAboutHeading">About Handwriting Repeater</h3>
+          <h3 class="info-panel__section-title" id="infoPanelAboutHeading">About Teach Handwriting</h3>
           <p class="info-panel__text">
-            Handwriting Repeater is a browser-based handwriting demonstrator designed for classrooms, tutoring sessions, and
+            Teach Handwriting is a browser-based handwriting demonstrator designed for classrooms, tutoring sessions, and
             home learning. Educators can record handwriting strokes once and loop the playback so students can focus on
             correct letter formation without constant repetition.
           </p>
@@ -113,7 +114,7 @@
         <section class="info-panel__section" aria-labelledby="infoPanelFeedbackHeading">
           <h3 class="info-panel__section-title" id="infoPanelFeedbackHeading">Send Feedback</h3>
           <p class="info-panel__section-intro">
-            Have suggestions or want to share how you use Handwriting Repeater? Drop a quick note below and we&rsquo;ll get back
+            Have suggestions or want to share how you use Teach Handwriting? Drop a quick note below and we&rsquo;ll get back
             to you.
           </p>
           <form
@@ -162,126 +163,15 @@
       </div>
     </section>
 
-    <header class="title-container" role="banner">
-      <div class="title-texts">
-        <h1 class="title-text">Master handwriting</h1>
-      </div>
-    </header>
-
-    <main class="main-container disable-select" role="main">
-      <div id="writerContainer" class="writer-container">
-        <div class="board-layout">
-          <aside class="side-panel side-panel--left" aria-label="Drawing controls">
-            <button class="btn icon side-panel__button" id="btnUndo" type="button" aria-label="Undo" title="Undo">
-              <svg aria-hidden="true"><use href="assets/icons.svg#undo"></use></svg>
-            </button>
-            <button class="btn icon side-panel__button" id="btnRedo" type="button" aria-label="Redo" title="Redo">
-              <svg aria-hidden="true"><use href="assets/icons.svg#redo"></use></svg>
-            </button>
-            <button class="btn icon side-panel__button" id="btnZoomOut" type="button" aria-label="Zoom out" title="Zoom out">
-              <svg aria-hidden="true"><use href="assets/icons.svg#zoom-out"></use></svg>
-            </button>
-            <button class="btn icon side-panel__button" id="btnZoomIn" type="button" aria-label="Zoom in" title="Zoom in">
-              <svg aria-hidden="true"><use href="assets/icons.svg#zoom-in"></use></svg>
-            </button>
-            <button
-              class="btn icon side-panel__button"
-              id="btnTimer"
-              type="button"
-              aria-label="Timer"
-              title="Timer"
-              aria-haspopup="dialog"
-              aria-expanded="false"
-              aria-pressed="false"
-            >
-              <svg aria-hidden="true"><use href="assets/icons.svg#timer"></use></svg>
-            </button>
-            <button
-              class="btn icon side-panel__button"
-              id="btnFullscreenLeft"
-              type="button"
-              data-action="fullscreen"
-              aria-label="Fullscreen"
-              title="Fullscreen"
-            >
-              <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
-            </button>
-          </aside>
-
-          <div class="board-wrapper">
-            <div id="writerBoard" class="writer-board">
-              <canvas id="writerPage" width="1200" height="600"></canvas>
-              <canvas id="writerTrace" width="1200" height="600"></canvas>
-              <canvas id="writerLines" width="1200" height="600"></canvas>
-              <canvas id="writer" width="1200" height="600"></canvas>
-              <canvas id="writerMask" width="1200" height="600"></canvas>
-              <div id="teachOverlay" class="teach-overlay" aria-live="polite"></div>
-            </div>
-
-            <div id="boardHeader" class="board-header">
-              <div id="boardDate" aria-label="Date" role="button" tabindex="0">Loading date…</div>
-              <div
-                id="boardLessonTitle"
-                class="board-lesson-title is-hidden"
-                aria-live="polite"
-                aria-hidden="true"
-              ></div>
-            </div>
-            <div id="retroTv" class="tv-off" aria-hidden="true">
-              <div class="tv-frame">
-                <div id="tvPlayer" class="tv-screen" title="Retro TV" role="presentation"></div>
-                <div class="tv-overlay" aria-hidden="true"></div>
-              </div>
-            </div>
-
-            <div id="timerProgress" aria-hidden="true"></div>
-          </div>
-
-          <aside class="side-panel side-panel--right" aria-label="Playback controls">
-            <button class="teach-button side-panel__action" id="btnTeachNext" type="button" disabled>
-              Next
-              <span aria-hidden="true" class="teach-button__arrow">➜</span>
-            </button>
-            <button
-              class="btn icon side-panel__button"
-              id="btnPalette"
-              type="button"
-              aria-label="Pen colour"
-              title="Pen colour"
-              aria-haspopup="dialog"
-              aria-expanded="false"
-            >
-              <svg aria-hidden="true"><use href="assets/icons.svg#palette"></use></svg>
-            </button>
-            <button class="btn icon btn-primary side-panel__button" id="btnRewrite" type="button" aria-label="Rewrite" title="Rewrite" aria-pressed="false">
-              <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
-            </button>
-            <button class="btn icon side-panel__button" id="btnUploadPen" type="button" aria-label="Upload pen image" title="Upload pen image">
-              <svg aria-hidden="true"><use href="assets/icons.svg#upload"></use></svg>
-            </button>
-            <button class="btn icon side-panel__button is-disabled" id="btnRemovePenImage" type="button" aria-label="Remove custom pen image" title="Remove custom pen image" disabled>
-              <svg aria-hidden="true"><use href="assets/icons.svg#close"></use></svg>
-            </button>
-            <button
-              class="btn icon side-panel__button"
-              id="btnFullscreen"
-              type="button"
-              data-action="fullscreen"
-              aria-label="Fullscreen"
-              title="Fullscreen"
-            >
-              <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
-            </button>
-          </aside>
-        </div>
-
-        <div
-          id="toolbarBottom"
+    <main class="main-container" role="main">
+      <div class="app-shell disable-select">
+        <section
+          id="toolbarTop"
+          class="toolbar toolbar--top"
           role="region"
           aria-label="Lesson and practice settings"
-          class="disable-select"
         >
-          <div class="bottom-panel__inner">
+          <div class="toolbar-top__inner">
             <div class="lesson-title-field">
               <label class="lesson-title-label" for="inputLessonTitle">Lesson title</label>
               <div class="lesson-title-input-row">
@@ -303,7 +193,7 @@
               </div>
             </div>
 
-            <div class="teach-field bottom-panel__practice">
+            <div class="teach-field toolbar-top__practice">
               <label class="teach-label" for="teachTextInput">Practice text</label>
               <div class="teach-input-row">
                 <input
@@ -316,9 +206,134 @@
                 <button class="teach-button" id="btnTeach" type="button">Teach</button>
               </div>
             </div>
+          </div>
+        </section>
 
-            <div class="bottom-panel__sliders" aria-label="Drawing speed and pen size controls">
-              <div class="slider-control slider-control--stacked bottom-panel__slider" id="penSizeControl">
+        <div id="writerContainer" class="writer-container">
+          <div class="board-layout">
+            <aside class="side-panel side-panel--left" aria-label="Drawing controls">
+              <button class="btn icon side-panel__button" id="btnZoomOut" type="button" aria-label="Zoom out" title="Zoom out">
+                <svg aria-hidden="true"><use href="assets/icons.svg#zoom-out"></use></svg>
+              </button>
+              <button class="btn icon side-panel__button" id="btnZoomIn" type="button" aria-label="Zoom in" title="Zoom in">
+                <svg aria-hidden="true"><use href="assets/icons.svg#zoom-in"></use></svg>
+              </button>
+              <button
+                class="btn icon side-panel__button"
+                id="btnTimer"
+                type="button"
+                aria-label="Timer"
+                title="Timer"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+                aria-pressed="false"
+              >
+                <svg aria-hidden="true"><use href="assets/icons.svg#timer"></use></svg>
+              </button>
+              <button
+                class="btn icon side-panel__button"
+                id="btnFullscreenLeft"
+                type="button"
+                data-action="fullscreen"
+                aria-label="Fullscreen"
+                title="Fullscreen"
+              >
+                <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
+              </button>
+            </aside>
+
+            <div class="board-wrapper">
+              <div id="writerBoard" class="writer-board">
+                <canvas id="writerPage" width="1200" height="600"></canvas>
+                <canvas id="writerTrace" width="1200" height="600"></canvas>
+                <canvas id="writerLines" width="1200" height="600"></canvas>
+                <canvas id="writer" width="1200" height="600"></canvas>
+                <canvas id="writerMask" width="1200" height="600"></canvas>
+                <div id="teachOverlay" class="teach-overlay" aria-live="polite"></div>
+              </div>
+
+              <div id="boardHeader" class="board-header">
+                <div id="boardDate" aria-label="Date" role="button" tabindex="0">Loading date…</div>
+                <div
+                  id="boardLessonTitle"
+                  class="board-lesson-title is-hidden"
+                  aria-live="polite"
+                  aria-hidden="true"
+                ></div>
+              </div>
+              <div id="retroTv" class="tv-off" aria-hidden="true">
+                <div class="tv-frame">
+                  <div id="tvPlayer" class="tv-screen" title="Retro TV" role="presentation"></div>
+                  <div class="tv-overlay" aria-hidden="true"></div>
+                </div>
+              </div>
+
+              <div id="timerProgress" aria-hidden="true"></div>
+
+              <button class="board-fab board-fab--undo" id="btnUndo" type="button" aria-label="Undo" title="Undo">
+                <svg aria-hidden="true"><use href="assets/icons.svg#undo"></use></svg>
+              </button>
+
+              <button
+                class="board-fab board-fab--next"
+                id="btnTeachNext"
+                type="button"
+                aria-label="Redo (top) or Next (bottom)"
+                title="Tap top for redo, bottom for next"
+                disabled
+              >
+                <span class="board-fab__segment board-fab__segment--redo" aria-hidden="true">
+                  <svg aria-hidden="true"><use href="assets/icons.svg#redo"></use></svg>
+                  <span class="board-fab__label">Redo</span>
+                </span>
+                <span class="board-fab__segment board-fab__segment--next">
+                  <span class="board-fab__label">Next</span>
+                  <span aria-hidden="true" class="teach-button__arrow">➜</span>
+                </span>
+              </button>
+            </div>
+
+            <aside class="side-panel side-panel--right" aria-label="Playback controls">
+              <button
+                class="btn icon side-panel__button"
+                id="btnPalette"
+                type="button"
+                aria-label="Pen colour"
+                title="Pen colour"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+              >
+                <svg aria-hidden="true"><use href="assets/icons.svg#palette"></use></svg>
+              </button>
+              <button class="btn icon side-panel__button" id="btnUploadPen" type="button" aria-label="Upload pen image" title="Upload pen image">
+                <svg aria-hidden="true"><use href="assets/icons.svg#upload"></use></svg>
+              </button>
+              <button class="btn icon side-panel__button is-disabled" id="btnRemovePenImage" type="button" aria-label="Remove custom pen image" title="Remove custom pen image" disabled>
+                <svg aria-hidden="true"><use href="assets/icons.svg#close"></use></svg>
+              </button>
+              <button
+                class="btn icon side-panel__button"
+                id="btnFullscreen"
+                type="button"
+                data-action="fullscreen"
+                aria-label="Fullscreen"
+                title="Fullscreen"
+              >
+                <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
+              </button>
+            </aside>
+          </div>
+        </div>
+
+        <section
+          id="toolbarBottom"
+          class="toolbar toolbar--bottom"
+          role="region"
+          aria-label="Drawing speed and playback controls"
+        >
+          <div class="bottom-toolbar__inner">
+            <div class="bottom-toolbar__sliders" aria-label="Drawing speed and pen size controls">
+              <div class="slider-control slider-control--stacked bottom-toolbar__slider" id="penSizeControl">
                 <span class="icon-leading" aria-hidden="true">
                   <svg><use href="assets/icons.svg#pen"></use></svg>
                 </span>
@@ -337,7 +352,7 @@
                   aria-label="Pen size"
                 />
               </div>
-              <div class="slider-control slider-control--compact bottom-panel__slider" id="speedControl">
+              <div class="slider-control slider-control--compact bottom-toolbar__slider" id="speedControl">
                 <span class="icon-leading" aria-hidden="true">
                   <svg><use href="assets/icons.svg#turtle"></use></svg>
                 </span>
@@ -357,8 +372,11 @@
                 />
               </div>
             </div>
+            <button class="btn icon btn-primary bottom-toolbar__play" id="btnRewrite" type="button" aria-label="Rewrite" title="Rewrite" aria-pressed="false">
+              <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
+            </button>
           </div>
-        </div>
+        </section>
       </div>
     </main>
 

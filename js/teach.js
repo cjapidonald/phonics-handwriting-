@@ -6,13 +6,22 @@ const LETTER_COLLATOR =
     : null;
 
 export class TeachController {
-  constructor({ overlay, textInput, teachButton, nextButton, previewContainer, previewToggleButton }) {
+  constructor({
+    overlay,
+    textInput,
+    teachButton,
+    nextButton,
+    previewContainer,
+    previewToggleButton,
+    enableDefaultNextHandler = true
+  }) {
     this.overlay = overlay ?? null;
     this.textInput = textInput ?? null;
     this.teachButton = teachButton ?? null;
     this.nextButton = nextButton ?? null;
     this.previewContainer = previewContainer ?? null;
     this.previewToggleButton = previewToggleButton ?? null;
+    this.enableDefaultNextHandler = enableDefaultNextHandler;
 
     this.overlayContent = null;
     this.lines = [];
@@ -28,7 +37,9 @@ export class TeachController {
     this.handleTogglePreview = this.handleTogglePreview.bind(this);
 
     this.teachButton?.addEventListener('click', this.handleTeach);
-    this.nextButton?.addEventListener('click', this.handleNext);
+    if (this.nextButton && this.enableDefaultNextHandler) {
+      this.nextButton.addEventListener('click', this.handleNext);
+    }
     this.previewContainer?.addEventListener('click', this.handlePreviewClick);
     this.previewToggleButton?.addEventListener('click', this.handleTogglePreview);
     this.textInput?.addEventListener('keydown', event => {

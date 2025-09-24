@@ -36,6 +36,8 @@ const rewriteIconUse = controls.rewriteButton?.querySelector('use');
 let currentPenImage = null;
 let customPenScale = clamp(userData.userSettings.penImageScale ?? 1, 0.1, 5);
 
+let teachController = null;
+
 const retroTvElement = document.getElementById('retroTv');
 const timerController = new TimerController({
   menu: controls.timerMenu,
@@ -49,14 +51,18 @@ await drawStoredLines(rewriterContext, true);
 
 setupEventListeners();
 
-new TeachController({
+teachController = new TeachController({
   overlay: document.getElementById('teachOverlay'),
   textInput: document.getElementById('teachTextInput'),
   teachButton: document.getElementById('btnTeach'),
   nextButton: document.getElementById('btnTeachNext'),
   previewContainer: document.getElementById('teachPreview'),
-  previewToggleButton: document.getElementById('btnToggleFreezePreview')
+  previewToggleButton: document.getElementById('btnToggleFreezePreview'),
+  enableDefaultNextHandler: false
 });
+
+setupCombinedNextRedoButton();
+setupBoardAutoHide();
 
 async function loadInitialPenImage() {
   const storedSrc = userData.userSettings.customPenImageSrc;
@@ -81,27 +87,11 @@ function setupEventListeners() {
   });
 
   controls.undoButton?.addEventListener('click', async () => {
-    if (isRewriting) {
-      return;
-    }
-    if (userData.deletedLines.length < 100 && userData.storedLines.length > 0) {
-      userData.deletedLines.push(userData.storedLines.pop());
-      rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
-      await drawStoredLines(rewriterContext, true);
-      userData.saveToLocalStorage();
-    }
+    await undoLastLine();
   });
 
   controls.redoButton?.addEventListener('click', async () => {
-    if (isRewriting) {
-      return;
-    }
-    if (userData.deletedLines.length > 0) {
-      userData.storedLines.push(userData.deletedLines.pop());
-      rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
-      await drawStoredLines(rewriterContext, true);
-      userData.saveToLocalStorage();
-    }
+    await redoLastLine();
   });
 
   controls.resetButton?.addEventListener('click', () => {
@@ -181,6 +171,155 @@ function setupEventListeners() {
   });
 
   setRewriteButtonState(false);
+}
+
+async function undoLastLine() {
+  if (isRewriting) {
+    return false;
+  }
+
+  if (userData.deletedLines.length < 100 && userData.storedLines.length > 0) {
+    userData.deletedLines.push(userData.storedLines.pop());
+    rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
+    await drawStoredLines(rewriterContext, true);
+    userData.saveToLocalStorage();
+    return true;
+  }
+
+  return false;
+}
+
+async function redoLastLine() {
+  if (isRewriting) {
+    return false;
+  }
+
+  if (userData.deletedLines.length > 0) {
+    userData.storedLines.push(userData.deletedLines.pop());
+    rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
+    await drawStoredLines(rewriterContext, true);
+    userData.saveToLocalStorage();
+    return true;
+  }
+
+  return false;
+}
+
+function setBoardControlsHidden(hidden) {
+  document.body.classList.toggle('board-controls-hidden', Boolean(hidden));
+}
+
+function setupBoardAutoHide() {
+  const boardWrapper = controls.writerBoard?.parentElement ?? null;
+  const boardCanvas = controls.rewriterCanvas;
+
+  if (boardCanvas) {
+    const hideControls = () => {
+      setBoardControlsHidden(true);
+    };
+    boardCanvas.addEventListener('pointerdown', hideControls);
+    try {
+      boardCanvas.addEventListener('touchstart', hideControls, { passive: true });
+    } catch (error) {
+      boardCanvas.addEventListener('touchstart', hideControls);
+    }
+    boardCanvas.addEventListener('mousedown', hideControls);
+  }
+
+  document.addEventListener('pointerdown', event => {
+    if (!boardWrapper) {
+      setBoardControlsHidden(false);
+      return;
+    }
+
+    const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
+    const isInsideBoard = path.length ? path.includes(boardWrapper) : boardWrapper.contains(event.target);
+
+    if (!isInsideBoard) {
+      setBoardControlsHidden(false);
+    }
+  });
+}
+
+function setupCombinedNextRedoButton() {
+  const combinedButton = document.getElementById('btnTeachNext');
+  if (!combinedButton) {
+    return;
+  }
+
+  const handleNext = () => {
+    if (teachController) {
+      teachController.handleNext();
+    }
+  };
+
+  let activePointerId = null;
+
+  combinedButton.addEventListener('pointerdown', event => {
+    activePointerId = event.pointerId;
+    combinedButton.setPointerCapture?.(event.pointerId);
+  });
+
+  combinedButton.addEventListener('pointercancel', () => {
+    activePointerId = null;
+  });
+
+  combinedButton.addEventListener('pointerup', async event => {
+    if (activePointerId !== null && event.pointerId !== activePointerId) {
+      return;
+    }
+
+    activePointerId = null;
+    combinedButton.releasePointerCapture?.(event.pointerId);
+
+    if (event.button !== undefined && event.button !== 0) {
+      return;
+    }
+
+    const rect = combinedButton.getBoundingClientRect();
+    const isUpperHalf = event.clientY < rect.top + rect.height / 2;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (isUpperHalf) {
+      const didRedo = await redoLastLine();
+      if (!didRedo) {
+        handleNext();
+      }
+    } else {
+      handleNext();
+    }
+  });
+
+  combinedButton.addEventListener('click', event => {
+    if (event.detail === 0) {
+      handleNext();
+    }
+    event.preventDefault();
+  });
+
+  combinedButton.addEventListener('keydown', async event => {
+    if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown') {
+      event.preventDefault();
+      handleNext();
+      return;
+    }
+
+    if (event.key && event.key.toLowerCase() === 'r') {
+      event.preventDefault();
+      await redoLastLine();
+      return;
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      const didRedo = await redoLastLine();
+      if (!didRedo) {
+        handleNext();
+      }
+    }
+  });
 }
 
 function resetCanvas() {
@@ -278,6 +417,8 @@ function drawStart(event) {
   if (isRewriting) {
     return;
   }
+
+  setBoardControlsHidden(true);
 
   const mousePos = getCanvasCoordinates(event);
   if (!mousePos) {
