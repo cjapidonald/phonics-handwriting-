@@ -57,7 +57,8 @@ export class Controls {
     this.undoButton = document.getElementById('btnUndo');
     this.redoButton = document.getElementById('btnRedo');
     this.resetButton = document.getElementById('btnReset');
-    this.fullscreenButton = document.getElementById('btnFullscreen');
+    this.fullscreenButtons = Array.from(document.querySelectorAll('[data-action="fullscreen"]'));
+    this.fullscreenButton = this.fullscreenButtons[0] ?? null;
 
     this.zoomOutButton = document.getElementById('btnZoomOut');
     this.zoomInButton = document.getElementById('btnZoomIn');
@@ -431,13 +432,17 @@ export class Controls {
   }
 
   setupAuxiliaryButtons() {
-    if (this.fullscreenButton) {
-      this.fullscreenButton.addEventListener('click', () => {
+    if (this.fullscreenButtons.length > 0) {
+      const toggleFullscreen = () => {
         if (document.fullscreenElement) {
           document.exitFullscreen();
         } else {
           (this.writerContainer ?? document.documentElement).requestFullscreen().catch(() => {});
         }
+      };
+
+      this.fullscreenButtons.forEach(button => {
+        button.addEventListener('click', toggleFullscreen);
       });
     }
   }
