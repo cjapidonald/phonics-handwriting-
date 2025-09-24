@@ -567,26 +567,11 @@ body {
   overflow: hidden;
 }
 
-.style-preview.style-three-line::before,
-.style-preview.style-three-line::after {
-  content: "";
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  border-radius: 999px;
-}
-
-.style-preview.style-three-line::before {
-  top: 14px;
-  height: 2px;
-  background: var(--color-ut-orange);
-}
-
-.style-preview.style-three-line::after {
-  bottom: 14px;
-  height: 2px;
-  background: #ffffff;
-  box-shadow: 0 -14px 0 #ffffff;
+.style-preview.style-phonics-lines {
+  background-image: url("../assets/icons/Phonics lines.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
 .style-preview.style-grid::before,
