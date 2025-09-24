@@ -5,6 +5,7 @@
 :root {
   --color-smoky-black: #0a0903;
   --color-aerospace-orange: #ff5100;
+  --color-aerospace-blue: #1d2951;
   --color-ut-orange: #ff8200;
   --color-sunglow: #ffc929;
   --color-crosstik: #fff4d5;
@@ -22,7 +23,7 @@ body {
   justify-content: flex-start;
   min-width: var(--app-fixed-width);
   overflow-x: auto;
-  background: var(--color-aerospace-orange);
+  background: var(--color-aerospace-blue);
   color: var(--color-crosstik);
   --fullscreen-toolbar-offset: 0px;
 }
@@ -84,6 +85,7 @@ body {
   box-shadow: 0 18px 36px rgba(10, 9, 3, 0.2);
   color: var(--color-smoky-black);
   padding: clamp(20px, 2.6vw, 28px) clamp(24px, 3vw, 36px);
+  display: none;
 }
 
 .toolbar-top__inner {
@@ -570,7 +572,7 @@ body.is-fullscreen .main-container {
 }
 
 body.is-fullscreen .writer-container {
-  background: #ffffff;
+  background: var(--color-aerospace-blue);
   border: none;
   box-shadow: none;
   border-radius: 0;
@@ -642,7 +644,7 @@ body.is-fullscreen #timerProgress {
   top: 16px;
   left: 16px;
   width: 220px;
-  pointer-events: none;
+  pointer-events: auto;
   transition: transform 0.2s ease, filter 0.3s ease, opacity 0.3s ease;
   opacity: 0.4;
 }
@@ -683,6 +685,7 @@ body.is-fullscreen #timerProgress {
     rgba(0, 0, 0, 0.3);
   mix-blend-mode: screen;
   transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 #retroTv.tv-on {
@@ -911,6 +914,12 @@ body.board-controls-hidden #toolbarBottom {
   padding: 12px 20px;
 }
 
+.side-panel__action.teach-button.is-active {
+  background: linear-gradient(180deg, var(--color-ut-orange) 0%, var(--color-aerospace-orange) 100%);
+  color: #fff;
+  border-color: rgba(10, 9, 3, 0.18);
+}
+
 .side-panel__action.teach-button:hover,
 .side-panel__action.teach-button:focus-visible {
   background: #ffffff;
@@ -1049,6 +1058,14 @@ body.board-controls-hidden #toolbarBottom {
   padding: clamp(28px, 6vw, 72px) clamp(36px, 8vw, 140px);
   pointer-events: none;
   z-index: 2;
+}
+
+.teach-overlay.is-hide-mode {
+  pointer-events: auto;
+}
+
+.teach-overlay.is-hide-mode .teach-letter:not(.teach-letter--space) {
+  cursor: pointer;
 }
 
 .teach-overlay.is-hidden {

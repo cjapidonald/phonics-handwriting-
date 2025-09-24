@@ -13,6 +13,7 @@ export class TeachController {
     nextButton,
     previewContainer,
     previewToggleButton,
+    hideLettersButton,
     enableDefaultNextHandler = true
   }) {
     this.overlay = overlay ?? null;
@@ -21,6 +22,7 @@ export class TeachController {
     this.nextButton = nextButton ?? null;
     this.previewContainer = previewContainer ?? null;
     this.previewToggleButton = previewToggleButton ?? null;
+    this.hideLettersButton = hideLettersButton ?? null;
     this.enableDefaultNextHandler = enableDefaultNextHandler;
 
     this.overlayContent = null;
@@ -30,11 +32,17 @@ export class TeachController {
     this.revealedByNext = new Set();
     this.nextPointer = 0;
     this.isPreviewHidden = false;
+    this.isHideMode = false;
+    this.hideLettersButtonInitialLabel = (this.hideLettersButton?.textContent ?? 'Hide letters').trim();
+    this.currentRawText = '';
 
     this.handleTeach = this.handleTeach.bind(this);
     this.handleNext = this.handleNext.bind(this);
     this.handlePreviewClick = this.handlePreviewClick.bind(this);
     this.handleTogglePreview = this.handleTogglePreview.bind(this);
+    this.handleHideLetters = this.handleHideLetters.bind(this);
+    this.handleOverlayClick = this.handleOverlayClick.bind(this);
+    this.handleOverlayKeydown = this.handleOverlayKeydown.bind(this);
 
     this.teachButton?.addEventListener('click', this.handleTeach);
     if (this.nextButton && this.enableDefaultNextHandler) {
@@ -42,12 +50,16 @@ export class TeachController {
     }
     this.previewContainer?.addEventListener('click', this.handlePreviewClick);
     this.previewToggleButton?.addEventListener('click', this.handleTogglePreview);
+    this.hideLettersButton?.addEventListener('click', this.handleHideLetters);
     this.textInput?.addEventListener('keydown', event => {
       if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
         this.handleTeach();
       }
     });
+
+    this.overlay?.addEventListener('click', this.handleOverlayClick);
+    this.overlay?.addEventListener('keydown', this.handleOverlayKeydown, true);
 
     if (this.overlay && typeof ResizeObserver !== 'undefined') {
       this.resizeObserver = new ResizeObserver(() => this.fitOverlay());
@@ -90,14 +102,7 @@ export class TeachController {
       return;
     }
 
-    if (this.manualFrozenIndices.has(index)) {
-      this.manualFrozenIndices.delete(index);
-    } else {
-      this.manualFrozenIndices.add(index);
-    }
-
-    this.updateLetterState(letter);
-    this.updateButtonStates();
+    this.toggleLetterFreeze(letter);
   }
 
   handleTogglePreview() {
@@ -105,13 +110,125 @@ export class TeachController {
     this.updatePreviewVisibility();
   }
 
+  handleHideLetters() {
+    if (!this.hasPreviewLetters()) {
+      return;
+    }
+    this.setHideMode(!this.isHideMode);
+  }
+
+  handleOverlayClick(event) {
+    if (!this.isHideMode) {
+      return;
+    }
+    const target = event.target.closest('[data-letter-index]');
+    if (!target) {
+      return;
+    }
+    const index = Number.parseInt(target.dataset.letterIndex ?? '', 10);
+    if (Number.isNaN(index)) {
+      return;
+    }
+    const letter = this.letters[index];
+    if (!letter || !letter.isRevealable) {
+      return;
+    }
+    this.toggleLetterFreeze(letter);
+  }
+
+  handleOverlayKeydown(event) {
+    if (!this.isHideMode) {
+      return;
+    }
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+    const target = event.target.closest('[data-letter-index]');
+    if (!target) {
+      return;
+    }
+    const index = Number.parseInt(target.dataset.letterIndex ?? '', 10);
+    if (Number.isNaN(index)) {
+      return;
+    }
+    const letter = this.letters[index];
+    if (!letter || !letter.isRevealable) {
+      return;
+    }
+    event.preventDefault();
+    this.toggleLetterFreeze(letter);
+  }
+
+  toggleLetterFreeze(letter) {
+    if (!letter || !letter.isRevealable) {
+      return;
+    }
+
+    if (this.manualFrozenIndices.has(letter.index)) {
+      this.manualFrozenIndices.delete(letter.index);
+    } else {
+      this.manualFrozenIndices.add(letter.index);
+    }
+
+    this.updateLetterState(letter);
+    this.updateButtonStates();
+  }
+
+  setHideMode(enabled) {
+    const hasLetters = this.hasPreviewLetters();
+    const nextState = Boolean(enabled) && hasLetters;
+    if (this.isHideMode === nextState) {
+      if (!nextState && this.hideLettersButton) {
+        const label = this.hideLettersButtonInitialLabel || 'Hide letters';
+        this.hideLettersButton.textContent = label;
+        this.hideLettersButton.setAttribute('aria-pressed', 'false');
+        this.hideLettersButton.classList.remove('is-active');
+      }
+      if (!nextState && this.overlay) {
+        this.overlay.classList.remove('is-hide-mode');
+      }
+      return;
+    }
+
+    this.isHideMode = nextState;
+
+    if (this.overlay) {
+      this.overlay.classList.toggle('is-hide-mode', this.isHideMode);
+    }
+
+    if (this.hideLettersButton) {
+      const label = this.isHideMode ? 'Done hiding' : this.hideLettersButtonInitialLabel || 'Hide letters';
+      this.hideLettersButton.textContent = label;
+      this.hideLettersButton.setAttribute('aria-pressed', this.isHideMode ? 'true' : 'false');
+      this.hideLettersButton.classList.toggle('is-active', this.isHideMode);
+    }
+
+    this.letters.forEach(letter => {
+      if (!letter || !letter.element) {
+        return;
+      }
+      if (letter.isRevealable) {
+        letter.element.setAttribute('tabindex', this.isHideMode ? '0' : '-1');
+        letter.element.setAttribute('aria-pressed', this.manualFrozenIndices.has(letter.index) ? 'true' : 'false');
+      } else {
+        letter.element.removeAttribute('tabindex');
+      }
+    });
+  }
+
+  getCurrentText() {
+    return this.currentRawText;
+  }
+
   applyText(rawText) {
     const text = typeof rawText === 'string' ? rawText : '';
+    this.currentRawText = text;
     this.lines = [];
     this.letters = [];
     this.manualFrozenIndices.clear();
     this.revealedByNext.clear();
     this.nextPointer = 0;
+    this.setHideMode(false);
 
     if (!text.trim()) {
       this.clearOverlay();
@@ -245,6 +362,17 @@ export class TeachController {
         letterElement.appendChild(charElement);
         lineElement.appendChild(letterElement);
 
+        letterElement.dataset.letterIndex = String(letter.index);
+        if (letter.isRevealable) {
+          letterElement.setAttribute('role', 'button');
+          letterElement.setAttribute('tabindex', this.isHideMode ? '0' : '-1');
+          letterElement.setAttribute('aria-pressed', this.manualFrozenIndices.has(letter.index) ? 'true' : 'false');
+        } else {
+          letterElement.removeAttribute('role');
+          letterElement.removeAttribute('tabindex');
+          letterElement.removeAttribute('aria-pressed');
+        }
+
         letter.element = letterElement;
         letter.placeholderElement = placeholder;
         letter.charElement = charElement;
@@ -292,6 +420,8 @@ export class TeachController {
     this.manualFrozenIndices.clear();
     this.revealedByNext.clear();
     this.nextPointer = 0;
+    this.currentRawText = '';
+    this.setHideMode(false);
     this.updatePreviewVisibility();
   }
 
@@ -351,6 +481,9 @@ export class TeachController {
 
     if (letter.element) {
       letter.element.classList.toggle('is-revealed', isRevealed);
+      if (letter.isRevealable) {
+        letter.element.setAttribute('aria-pressed', isFrozen ? 'true' : 'false');
+      }
     }
 
     if (letter.previewElement) {
@@ -415,15 +548,27 @@ export class TeachController {
   }
 
   updateButtonStates() {
-    if (!this.nextButton) {
-      return;
-    }
     const hasRevealableLetters = this.letters.some(letter => letter?.isRevealable);
     const allRevealed = hasRevealableLetters
       ? this.letters.every(letter => !letter?.isRevealable || this.isLetterRevealed(letter))
       : false;
 
-    this.nextButton.disabled = !hasRevealableLetters || allRevealed;
+    if (this.nextButton) {
+      this.nextButton.disabled = !hasRevealableLetters || allRevealed;
+    }
+
+    if (this.hideLettersButton) {
+      const shouldDisable = !hasRevealableLetters;
+      this.hideLettersButton.disabled = shouldDisable;
+      if (shouldDisable) {
+        this.hideLettersButton.setAttribute('aria-disabled', 'true');
+      } else {
+        this.hideLettersButton.removeAttribute('aria-disabled');
+      }
+      if (shouldDisable) {
+        this.setHideMode(false);
+      }
+    }
   }
 
   fitOverlay() {

@@ -58,11 +58,12 @@ teachController = new TeachController({
   nextButton: document.getElementById('btnTeachNext'),
   previewContainer: document.getElementById('teachPreview'),
   previewToggleButton: document.getElementById('btnToggleFreezePreview'),
+  hideLettersButton: document.getElementById('btnHideLetters'),
   enableDefaultNextHandler: false
 });
 
 setupCombinedNextRedoButton();
-setupBoardAutoHide();
+setupLessonAndPracticePrompts();
 
 async function loadInitialPenImage() {
   const storedSrc = userData.userSettings.customPenImageSrc;
@@ -205,42 +206,6 @@ async function redoLastLine() {
   return false;
 }
 
-function setBoardControlsHidden(hidden) {
-  document.body.classList.toggle('board-controls-hidden', Boolean(hidden));
-}
-
-function setupBoardAutoHide() {
-  const boardWrapper = controls.writerBoard?.parentElement ?? null;
-  const boardCanvas = controls.rewriterCanvas;
-
-  if (boardCanvas) {
-    const hideControls = () => {
-      setBoardControlsHidden(true);
-    };
-    boardCanvas.addEventListener('pointerdown', hideControls);
-    try {
-      boardCanvas.addEventListener('touchstart', hideControls, { passive: true });
-    } catch (error) {
-      boardCanvas.addEventListener('touchstart', hideControls);
-    }
-    boardCanvas.addEventListener('mousedown', hideControls);
-  }
-
-  document.addEventListener('pointerdown', event => {
-    if (!boardWrapper) {
-      setBoardControlsHidden(false);
-      return;
-    }
-
-    const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
-    const isInsideBoard = path.length ? path.includes(boardWrapper) : boardWrapper.contains(event.target);
-
-    if (!isInsideBoard) {
-      setBoardControlsHidden(false);
-    }
-  });
-}
-
 function setupCombinedNextRedoButton() {
   const combinedButton = document.getElementById('btnTeachNext');
   if (!combinedButton) {
@@ -320,6 +285,47 @@ function setupCombinedNextRedoButton() {
       }
     }
   });
+}
+
+function setupLessonAndPracticePrompts() {
+  const lessonTitleButton = document.getElementById('btnLessonTitlePrompt');
+  if (lessonTitleButton) {
+    lessonTitleButton.addEventListener('click', () => {
+      const inputValue = controls.lessonTitleInput?.value ?? '';
+      const boardValue = controls.boardLessonTitle?.textContent ?? '';
+      const initialValue = inputValue.trim() || boardValue.trim();
+      const result = window.prompt('Enter lesson title', initialValue);
+      if (result === null) {
+        return;
+      }
+      const trimmed = result.trim();
+      if (controls.lessonTitleInput) {
+        controls.lessonTitleInput.value = trimmed;
+      }
+      controls.applyLessonTitle(trimmed);
+      if (trimmed) {
+        controls.setStorageItem?.('ui.lessonTitle', trimmed);
+      } else {
+        controls.removeStorageItem?.('ui.lessonTitle');
+      }
+    });
+  }
+
+  const practiceButton = document.getElementById('btnPracticeTextPrompt');
+  if (practiceButton) {
+    practiceButton.addEventListener('click', () => {
+      if (!teachController) {
+        return;
+      }
+      const currentText = teachController.getCurrentText?.() ?? '';
+      const result = window.prompt('Enter practice text', currentText);
+      if (result === null) {
+        return;
+      }
+      const textValue = typeof result === 'string' ? result : '';
+      teachController.applyText(textValue);
+    });
+  }
 }
 
 function resetCanvas() {
