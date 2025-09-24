@@ -274,11 +274,19 @@ body {
   gap: 6px;
 }
 
+.teach-preview-block {
+  gap: 8px;
+}
+
 .teach-label {
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--color-smoky-black);
+}
+
+.teach-preview__title {
+  margin: 0;
 }
 
 .teach-input-row {

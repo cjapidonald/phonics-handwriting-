@@ -53,7 +53,6 @@ new TeachController({
   textInput: document.getElementById('teachTextInput'),
   teachButton: document.getElementById('btnTeach'),
   nextButton: document.getElementById('btnTeachNext'),
-  freezeInput: document.getElementById('freezeLettersInput'),
   previewContainer: document.getElementById('teachPreview')
 });
 

@@ -2,37 +2,26 @@ const DESCENDER_CHARACTERS = new Set(['g', 'j', 'p', 'q', 'y']);
 const PUNCTUATION_REGEX = /^[!?;:,]$/;
 
 export class TeachController {
-  constructor({
-    overlay,
-    textInput,
-    teachButton,
-    nextButton,
-    freezeInput,
-    previewContainer
-  }) {
+  constructor({ overlay, textInput, teachButton, nextButton, previewContainer }) {
     this.overlay = overlay ?? null;
     this.textInput = textInput ?? null;
     this.teachButton = teachButton ?? null;
     this.nextButton = nextButton ?? null;
-    this.freezeInput = freezeInput ?? null;
     this.previewContainer = previewContainer ?? null;
 
     this.overlayContent = null;
     this.lines = [];
     this.letters = [];
-    this.autoFrozenIndices = new Set();
     this.manualFrozenIndices = new Set();
     this.revealedByNext = new Set();
     this.nextPointer = 0;
 
     this.handleTeach = this.handleTeach.bind(this);
     this.handleNext = this.handleNext.bind(this);
-    this.handleFreezeInputChange = this.handleFreezeInputChange.bind(this);
     this.handlePreviewClick = this.handlePreviewClick.bind(this);
 
     this.teachButton?.addEventListener('click', this.handleTeach);
     this.nextButton?.addEventListener('click', this.handleNext);
-    this.freezeInput?.addEventListener('input', this.handleFreezeInputChange);
     this.previewContainer?.addEventListener('click', this.handlePreviewClick);
     this.textInput?.addEventListener('keydown', event => {
       if (event.key === 'Enter' && !event.shiftKey) {
@@ -59,10 +48,6 @@ export class TeachController {
 
   handleNext() {
     this.revealNextLetter();
-  }
-
-  handleFreezeInputChange() {
-    this.applyFreezeInput();
   }
 
   handlePreviewClick(event) {
@@ -95,7 +80,6 @@ export class TeachController {
     const text = typeof rawText === 'string' ? rawText : '';
     this.lines = [];
     this.letters = [];
-    this.autoFrozenIndices.clear();
     this.manualFrozenIndices.clear();
     this.revealedByNext.clear();
     this.nextPointer = 0;
@@ -122,7 +106,8 @@ export class TeachController {
     });
 
     this.renderOverlay();
-    this.applyFreezeInput();
+    this.updateAllLetterStates();
+    this.updateButtonStates();
 
     if (typeof requestAnimationFrame === 'function') {
       requestAnimationFrame(() => this.fitOverlay());
@@ -277,34 +262,9 @@ export class TeachController {
     this.overlayContent = null;
     this.lines = [];
     this.letters = [];
-    this.autoFrozenIndices.clear();
     this.manualFrozenIndices.clear();
     this.revealedByNext.clear();
     this.nextPointer = 0;
-  }
-
-  applyFreezeInput() {
-    this.autoFrozenIndices.clear();
-
-    if (!this.letters.length) {
-      this.updateAllLetterStates();
-      return;
-    }
-
-    const value = this.freezeInput?.value ?? '';
-    const trimmed = value.replace(/\s+/g, '');
-    if (trimmed) {
-      const characters = Array.from(trimmed.toLowerCase());
-      const freezeSet = new Set(characters);
-      this.letters.forEach(letter => {
-        if (letter.isRevealable && freezeSet.has(letter.char.toLowerCase())) {
-          this.autoFrozenIndices.add(letter.index);
-        }
-      });
-    }
-
-    this.updateAllLetterStates();
-    this.updateButtonStates();
   }
 
   revealNextLetter() {
@@ -333,7 +293,7 @@ export class TeachController {
   }
 
   isLetterFrozen(letterIndex) {
-    return this.autoFrozenIndices.has(letterIndex) || this.manualFrozenIndices.has(letterIndex);
+    return this.manualFrozenIndices.has(letterIndex);
   }
 
   isLetterRevealed(letter) {
