@@ -703,6 +703,36 @@ body {
   }
 }
 
+.seo-description {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.88);
+  padding: clamp(32px, 6vw, 56px) 16px;
+  color: #0b1f5b;
+}
+
+.seo-description__inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  line-height: 1.7;
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+}
+
+.seo-description h2 {
+  margin: 0;
+  font-family: 'Orbitron', 'ABeeZee', Verdana, Geneva, Tahoma, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: clamp(1.4rem, 3.6vw, 2rem);
+  color: #142a77;
+}
+
+.seo-description p {
+  margin: 0;
+}
+
 @media (max-width: 640px) {
   #toolbarBottom {
     padding: 18px 16px 26px;
