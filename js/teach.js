@@ -56,7 +56,6 @@ export class TeachController {
     this.setHideLettersButtonText(this.hideLettersButtonInitialLabel);
     this.currentRawText = '';
     this.revealHistory = [];
-    this.hiddenLettersPromptValue = '';
     this.hiddenLetterFilter = new Set();
     this.isHideLettersModalOpen = false;
     this.hideLettersModalHideTimer = null;
@@ -146,6 +145,23 @@ export class TeachController {
 
     this.hideLettersButton.setAttribute('aria-label', text);
     this.hideLettersButton.title = text;
+  }
+
+  updateHideLettersButtonLabel() {
+    if (!this.hideLettersButton) {
+      return;
+    }
+
+    const hasLetters = this.hasPreviewLetters();
+    if (!hasLetters) {
+      const fallbackLabel = this.hideLettersButtonInitialLabel || 'Show letters';
+      this.setHideLettersButtonText(fallbackLabel);
+      return;
+    }
+
+    const hasHiddenLetters = this.hiddenLetterFilter.size > 0;
+    const label = hasHiddenLetters ? 'Show letters' : 'Hide letters';
+    this.setHideLettersButtonText(label);
   }
 
   handleTeach() {
@@ -439,8 +455,6 @@ export class TeachController {
 
     const uniqueCharacters = Array.from(new Set(normalized));
     this.hiddenLetterFilter = new Set(uniqueCharacters);
-    this.hiddenLettersPromptValue = uniqueCharacters.join('');
-
     this.revealedByNext.clear();
     this.manualFrozenIndices.clear();
     this.revealHistory = [];
@@ -527,8 +541,7 @@ export class TeachController {
     const nextState = Boolean(enabled) && hasLetters;
     if (this.isHideMode === nextState) {
       if (!nextState && this.hideLettersButton) {
-        const label = this.hideLettersButtonInitialLabel || 'Hide letters';
-        this.setHideLettersButtonText(label);
+        this.updateHideLettersButtonLabel();
         this.hideLettersButton.setAttribute('aria-pressed', 'false');
         this.hideLettersButton.classList.remove('is-active');
       }
@@ -545,8 +558,11 @@ export class TeachController {
     }
 
     if (this.hideLettersButton) {
-      const label = this.isHideMode ? 'Done hiding' : this.hideLettersButtonInitialLabel || 'Hide letters';
-      this.setHideLettersButtonText(label);
+      if (this.isHideMode) {
+        this.setHideLettersButtonText('Done hiding');
+      } else {
+        this.updateHideLettersButtonLabel();
+      }
       this.hideLettersButton.setAttribute('aria-pressed', this.isHideMode ? 'true' : 'false');
       this.hideLettersButton.classList.toggle('is-active', this.isHideMode);
     }
@@ -577,7 +593,6 @@ export class TeachController {
     this.revealedByNext.clear();
     this.nextPointer = 0;
     this.revealHistory = [];
-    this.hiddenLettersPromptValue = '';
     this.hiddenLetterFilter.clear();
     this.setHideMode(false);
     this.closeHideLettersModal({ restoreFocus: false });
@@ -774,7 +789,6 @@ export class TeachController {
     this.nextPointer = 0;
     this.currentRawText = '';
     this.revealHistory = [];
-    this.hiddenLettersPromptValue = '';
     this.hiddenLetterFilter.clear();
     this.setHideMode(false);
     this.updatePreviewVisibility();
@@ -953,10 +967,14 @@ export class TeachController {
       if (shouldDisable) {
         this.setHideMode(false);
       }
-      const label = this.hideLettersButtonInitialLabel || 'Show letters';
-      this.setHideLettersButtonText(label);
-      this.hideLettersButton.setAttribute('aria-pressed', 'false');
-      this.hideLettersButton.classList.remove('is-active');
+      if (!this.isHideMode) {
+        this.updateHideLettersButtonLabel();
+        this.hideLettersButton.setAttribute('aria-pressed', 'false');
+        this.hideLettersButton.classList.remove('is-active');
+      } else {
+        this.hideLettersButton.setAttribute('aria-pressed', 'true');
+        this.hideLettersButton.classList.add('is-active');
+      }
     }
 
     if (this.previousButton) {
