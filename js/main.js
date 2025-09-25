@@ -26,8 +26,214 @@ const eraserSizeInput = document.getElementById('btnEraserSize');
 const uploadCursorButton = document.getElementById('btnUploadCursor');
 const resetCursorButton = document.getElementById('btnResetCursor');
 const cursorFileInput = document.getElementById('cursorFile');
+const backgroundButton = document.getElementById('btnBackground');
+const writerPageCanvas = document.getElementById('writerPage');
 
 const CURSOR_STORAGE_KEY = 'ph.cursor';
+const BACKGROUND_STORAGE_KEY = 'ph.bg';
+const DOTTED_LINE_SPACING = 24;
+const DOTTED_BASELINE_OFFSET = 6;
+const DOTTED_PATTERN_WIDTH = 240;
+
+const BACKGROUND_OPTIONS = {
+  white: { className: 'bg-white', label: 'White' },
+  dotted: { className: 'bg-dotted', label: 'Dotted' }
+};
+
+const BACKGROUND_CLASS_NAMES = Object.values(BACKGROUND_OPTIONS).map(option => option.className);
+
+const backgroundOptionElements = new Map();
+let backgroundPopover = null;
+let currentBackgroundKey = null;
+
+const normaliseBackgroundKey = key => (key === 'dotted' ? 'dotted' : 'white');
+
+const updateBackgroundSelectionUI = key => {
+  backgroundOptionElements.forEach((label, optionKey) => {
+    const isSelected = optionKey === key;
+    const input = label.querySelector('input[type="radio"]');
+    label.classList.toggle('is-selected', isSelected);
+    if (input) {
+      input.checked = isSelected;
+    }
+  });
+};
+
+const generateDottedBackgroundPattern = () => {
+  try {
+    const ratio = window.devicePixelRatio || 1;
+    const canvas = document.createElement('canvas');
+    const width = Math.max(1, Math.round(DOTTED_PATTERN_WIDTH * ratio));
+    const height = Math.max(1, Math.round(DOTTED_LINE_SPACING * ratio));
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext('2d');
+    if (!context) {
+      return null;
+    }
+
+    context.save();
+    context.scale(ratio, ratio);
+    context.strokeStyle = 'rgba(29, 41, 81, 0.45)';
+    context.lineWidth = 1.4;
+    context.setLineDash([4, 6]);
+    context.lineCap = 'round';
+    const baselineY = DOTTED_LINE_SPACING - DOTTED_BASELINE_OFFSET;
+    context.beginPath();
+    context.moveTo(0, baselineY);
+    context.lineTo(width / ratio, baselineY);
+    context.stroke();
+    context.restore();
+
+    return canvas.toDataURL('image/png');
+  } catch (error) {
+    console.warn('Unable to generate dotted background pattern.', error);
+    return null;
+  }
+};
+
+const applyWriterBackground = (key, { persist = true } = {}) => {
+  const normalisedKey = normaliseBackgroundKey(key);
+  currentBackgroundKey = normalisedKey;
+
+  if (writerPageCanvas) {
+    writerPageCanvas.classList.remove(...BACKGROUND_CLASS_NAMES);
+    const className = BACKGROUND_OPTIONS[normalisedKey]?.className ?? BACKGROUND_OPTIONS.white.className;
+    writerPageCanvas.classList.add(className);
+
+    if (normalisedKey === 'dotted') {
+      const patternUrl = generateDottedBackgroundPattern();
+      if (patternUrl) {
+        writerPageCanvas.style.backgroundImage = `url(${patternUrl})`;
+        writerPageCanvas.style.backgroundSize = `auto ${DOTTED_LINE_SPACING}px`;
+        writerPageCanvas.style.backgroundRepeat = 'repeat';
+        writerPageCanvas.style.backgroundPosition = 'left top';
+      } else {
+        writerPageCanvas.style.backgroundImage = 'none';
+        writerPageCanvas.style.removeProperty('background-size');
+        writerPageCanvas.style.removeProperty('background-position');
+        writerPageCanvas.style.removeProperty('background-repeat');
+      }
+    } else {
+      writerPageCanvas.style.backgroundImage = 'none';
+      writerPageCanvas.style.removeProperty('background-size');
+      writerPageCanvas.style.removeProperty('background-position');
+      writerPageCanvas.style.removeProperty('background-repeat');
+    }
+  }
+
+  updateBackgroundSelectionUI(normalisedKey);
+
+  if (persist && storage) {
+    storage.setItem(BACKGROUND_STORAGE_KEY, normalisedKey);
+  }
+
+  return normalisedKey;
+};
+
+const buildBackgroundPopover = () => {
+  if (!document?.body) {
+    return null;
+  }
+
+  backgroundOptionElements.clear();
+
+  const popover = document.createElement('div');
+  popover.id = 'backgroundPopover';
+  popover.className = 'popover';
+  popover.setAttribute('role', 'dialog');
+  popover.setAttribute('aria-label', 'Background options');
+
+  const section = document.createElement('div');
+  section.className = 'popover-section';
+
+  const heading = document.createElement('h2');
+  heading.className = 'popover-title';
+  heading.textContent = 'Background';
+  section.appendChild(heading);
+
+  const optionsContainer = document.createElement('div');
+  optionsContainer.className = 'background-options';
+
+  Object.entries(BACKGROUND_OPTIONS).forEach(([optionKey, option]) => {
+    const label = document.createElement('label');
+    label.className = 'background-option';
+    label.dataset.backgroundKey = optionKey;
+
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'writerBackground';
+    input.value = optionKey;
+
+    const text = document.createElement('span');
+    text.className = 'background-option__label';
+    text.textContent = option.label;
+
+    label.appendChild(input);
+    label.appendChild(text);
+    optionsContainer.appendChild(label);
+    backgroundOptionElements.set(optionKey, label);
+
+    input.addEventListener('change', () => {
+      if (!input.checked) {
+        return;
+      }
+      applyWriterBackground(optionKey);
+      controls.closeOpenPopover();
+    });
+  });
+
+  section.appendChild(optionsContainer);
+  popover.appendChild(section);
+  document.body.appendChild(popover);
+
+  return popover;
+};
+
+const initialiseBackgroundControls = () => {
+  if (!backgroundButton || !writerPageCanvas) {
+    return;
+  }
+
+  backgroundPopover = buildBackgroundPopover();
+  if (!backgroundPopover) {
+    return;
+  }
+
+  backgroundButton.setAttribute('aria-haspopup', 'dialog');
+  backgroundButton.setAttribute('aria-expanded', 'false');
+
+  backgroundButton.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    controls.togglePopover(backgroundButton, backgroundPopover);
+  });
+
+  const storedBackground = storage?.getItem?.(BACKGROUND_STORAGE_KEY);
+  applyWriterBackground(storedBackground, { persist: false });
+
+  window.addEventListener('resize', () => {
+    if (currentBackgroundKey === 'dotted') {
+      applyWriterBackground('dotted', { persist: false });
+    }
+  });
+};
+
+initialiseBackgroundControls();
+
+if (typeof controls.setPageColour === 'function') {
+  const originalSetPageColour = controls.setPageColour.bind(controls);
+  controls.setPageColour = function patchedSetPageColour(colour, persist = true) {
+    originalSetPageColour(colour, persist);
+
+    const pageCanvas = this.rewriterPageCanvas ?? null;
+    const pageContext = this.pageContext ?? pageCanvas?.getContext?.('2d') ?? null;
+    if (pageCanvas && pageContext) {
+      pageContext.clearRect(0, 0, pageCanvas.width || 0, pageCanvas.height || 0);
+    }
+  };
+}
 
 const applyCustomCursor = dataUrl => {
   if (typeof dataUrl === 'string' && dataUrl) {
