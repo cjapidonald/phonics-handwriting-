@@ -198,6 +198,15 @@ main
     <button id="btnBackground" class="toolbar__button" type="button" aria-label="Change background">
       <svg aria-hidden="true"><use href="assets/icons.svg#page-lines"></use></svg>
     </button>
+    <button
+      id="btnStopwatchLeft"
+      class="toolbar__button"
+      type="button"
+      aria-label="Toggle stopwatch"
+      aria-pressed="false"
+    >
+      <svg aria-hidden="true"><use href="assets/icons.svg#timer"></use></svg>
+    </button>
     <button id="btnFullscreenLeft" class="toolbar__button" type="button" aria-label="Enter fullscreen">
       <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
     </button>
@@ -258,7 +267,27 @@ main
     <input id="replaySpeed" type="range" min="0.25" max="4" step="0.25" value="1" aria-label="Replay speed" />
   </footer>
 
-  <aside id="stopwatchPanel" class="floating-panel" hidden></aside>
+  <aside id="stopwatchPanel" class="floating-panel" hidden aria-hidden="true">
+    <div class="stopwatch" role="group" aria-label="Stopwatch controls">
+      <div class="stopwatch__header" data-stopwatch-drag-handle>
+        <span class="stopwatch__title" aria-hidden="true">Stopwatch</span>
+        <button
+          type="button"
+          class="stopwatch__close"
+          data-stopwatch-close
+          aria-label="Hide stopwatch"
+        >
+          <svg aria-hidden="true"><use href="assets/icons.svg#close"></use></svg>
+        </button>
+      </div>
+      <div id="stopwatchDisplay" class="stopwatch__display" aria-live="polite">00:00.00</div>
+      <div class="stopwatch__controls">
+        <button id="stopwatchStart" type="button" class="stopwatch__button">Start</button>
+        <button id="stopwatchPause" type="button" class="stopwatch__button" disabled>Pause</button>
+        <button id="stopwatchReset" type="button" class="stopwatch__button" disabled>Reset</button>
+      </div>
+    </div>
+  </aside>
 </main>
 
     <div id="practiceStripBackdrop" class="practice-strip__backdrop" hidden></div>
