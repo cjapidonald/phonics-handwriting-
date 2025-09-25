@@ -105,80 +105,126 @@ async function loadInitialPenImage() {
 }
 
 function setupEventListeners() {
-  controls.rewriteButton?.addEventListener('click', async () => {
-    if (isRewriting) {
-      controller?.abort();
+  const attachClickListener = (element, handler, elementId) => {
+    if (!element) {
+      console.warn(`Missing expected element ${elementId}.`);
       return;
     }
 
-    controller?.abort();
-    controller = new AbortController();
-    signal = controller.signal;
-    await rewrite(signal);
-  });
+    element.addEventListener('click', handler);
+  };
 
-  controls.undoButton?.addEventListener('click', async () => {
-    await undoLastLine();
-  });
-
-  controls.redoButton?.addEventListener('click', async () => {
-    await redoLastLine();
-  });
-
-  controls.resetButton?.addEventListener('click', () => {
-    if (isRewriting) {
-      controller?.abort();
+  const attachChangeListener = (element, handler, elementId) => {
+    if (!element) {
+      console.warn(`Missing expected element ${elementId}.`);
+      return;
     }
-    resetCanvas();
-  });
+
+    element.addEventListener('change', handler);
+  };
+
+  attachClickListener(
+    controls.rewriteButton,
+    async () => {
+      if (isRewriting) {
+        controller?.abort();
+        return;
+      }
+
+      controller?.abort();
+      controller = new AbortController();
+      signal = controller.signal;
+      await rewrite(signal);
+    },
+    '#btnRewrite'
+  );
+
+  attachClickListener(
+    controls.undoButton,
+    async () => {
+      await undoLastLine();
+    },
+    '#btnUndo'
+  );
+
+  attachClickListener(
+    controls.redoButton,
+    async () => {
+      await redoLastLine();
+    },
+    '#btnRedo'
+  );
+
+  attachClickListener(
+    controls.resetButton,
+    () => {
+      if (isRewriting) {
+        controller?.abort();
+      }
+      resetCanvas();
+    },
+    '#btnReset'
+  );
 
   controls.penSizeSlider?.addEventListener('change', () => {
     // Pen size is already persisted by Controls; redraw pen indicator on next move.
   });
 
-  controls.penImageInput?.addEventListener('change', async event => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
-
-    try {
-      const dataUrl = await readFileAsDataURL(file);
-      const image = await safeLoadPenImage(dataUrl);
-      if (image) {
-        currentPenImage = image;
-        userData.userSettings.customPenImageSrc = dataUrl;
-        if (storage) {
-          try {
-            storage.setItem('pen.imageSrc', dataUrl);
-          } catch (storageError) {
-            console.warn('Unable to save custom pen image to localStorage.', storageError);
-          }
-        }
-        userData.saveToLocalStorage();
-        controls.setCustomPenImageState(true);
+  attachChangeListener(
+    controls.penImageInput,
+    async event => {
+      const file = event.target.files?.[0];
+      if (!file) {
+        return;
       }
-    } catch (error) {
-      console.warn('Unable to load custom pen image.', error);
-    } finally {
-      event.target.value = '';
-    }
-  });
 
-  controls.removePenImageButton?.addEventListener('click', async () => {
-    await resetPenImageToDefault();
-  });
+      try {
+        const dataUrl = await readFileAsDataURL(file);
+        const image = await safeLoadPenImage(dataUrl);
+        if (image) {
+          currentPenImage = image;
+          userData.userSettings.customPenImageSrc = dataUrl;
+          if (storage) {
+            try {
+              storage.setItem('pen.imageSrc', dataUrl);
+            } catch (storageError) {
+              console.warn('Unable to save custom pen image to localStorage.', storageError);
+            }
+          }
+          userData.saveToLocalStorage();
+          controls.setCustomPenImageState(true);
+        }
+      } catch (error) {
+        console.warn('Unable to load custom pen image.', error);
+      } finally {
+        event.target.value = '';
+      }
+    },
+    '#inputPenImage'
+  );
 
-  controls.rewriterCanvas.addEventListener('touchstart', event => {
-    const touch = event.touches[0];
-    if (touch) {
-      drawStart(touch);
-    }
-  });
+  attachClickListener(
+    controls.removePenImageButton,
+    async () => {
+      await resetPenImageToDefault();
+    },
+    '#btnRemovePenImage'
+  );
 
-  controls.rewriterCanvas.addEventListener('mousedown', event => {
-    drawStart(event);
-  });
+  if (controls.rewriterCanvas) {
+    controls.rewriterCanvas.addEventListener('touchstart', event => {
+      const touch = event.touches[0];
+      if (touch) {
+        drawStart(touch);
+      }
+    });
+
+    controls.rewriterCanvas.addEventListener('mousedown', event => {
+      drawStart(event);
+    });
+  } else {
+    console.warn('Missing expected drawing surface #writer.');
+  }
 
   document.addEventListener('touchmove', event => {
     const touch = event.touches[0];
