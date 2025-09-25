@@ -14,6 +14,7 @@ const TOOLBAR_POSITION_KEY = 'ui.toolbarPosition';
 const DATE_POSITION_KEY = 'ui.datePosition';
 const LESSON_TITLE_KEY = 'ph.lessonTitle';
 const LESSON_TITLE_POSITION_KEY = 'ph.lessonTitle.pos';
+const STOPWATCH_PANEL_POSITION_KEY = 'ui.stopwatchPanel.position';
 
 const PEN_COLOUR_SWATCHES = [
   '#111111',
@@ -67,7 +68,12 @@ export class Controls {
     this.undoButton = document.getElementById('btnUndo');
     this.redoButton = document.getElementById('btnRedo');
     this.resetButton = document.getElementById('btnReset');
-    this.fullscreenButtons = Array.from(document.querySelectorAll('[data-action="fullscreen"]'));
+    const fullscreenCandidates = [
+      document.getElementById('btnFullscreenLeft'),
+      document.getElementById('btnFullscreenRight'),
+      ...document.querySelectorAll('[data-action="fullscreen"]')
+    ].filter(Boolean);
+    this.fullscreenButtons = Array.from(new Set(fullscreenCandidates));
     this.fullscreenButton = this.fullscreenButtons[0] ?? null;
 
     this.zoomOutButton = document.getElementById('btnZoomOut');
@@ -187,6 +193,11 @@ export class Controls {
     this.lessonTitlePointerId = null;
     this.lessonTitlePointerOffset = { x: 0, y: 0 };
 
+    this.stopwatchPanel = document.getElementById('stopwatchPanel');
+    this.stopwatchPanelPointerId = null;
+    this.stopwatchPanelPointerOffset = { x: 0, y: 0 };
+    this.stopwatchPanelPosition = null;
+
     this.migrateSettings();
     this.initialiseCanvases();
     this.setupPopovers();
@@ -204,6 +215,7 @@ export class Controls {
     this.setupFloatingDateDragging();
     this.setupLessonTitle();
     this.setupLessonTitleDrag();
+    this.setupStopwatchPanel();
     this.setupBoardHeaderScaling();
     this.setupFullscreenBehaviour();
     this.setupToolbarWidthSync();
@@ -889,11 +901,11 @@ export class Controls {
 
       applyCollapsedState(isAppFullscreen && wasCollapsed);
       this.updateToolbarWidthFromBoard();
- codex/implement-draggable-lesson-title-editor
+      this.updateFullscreenButtonState(isAppFullscreen);
       this.applyFullscreenLessonTitleState(isAppFullscreen);
 
       this.updateFloatingDateFullscreenState(isAppFullscreen);
-main
+      this.ensureStopwatchPanelWithinViewport();
     };
 
     if (this.toolbarToggleButton) {
@@ -1271,6 +1283,189 @@ main
     }
   }
 
+  setupStopwatchPanel() {
+    if (!this.stopwatchPanel) {
+      return;
+    }
+
+    const panel = this.stopwatchPanel;
+    panel.classList.add('is-floating');
+
+    const storedPosition = this.getStoredStopwatchPanelPosition();
+    if (storedPosition) {
+      this.setStopwatchPanelPosition(storedPosition.left, storedPosition.top);
+    } else {
+      const defaults = this.getDefaultStopwatchPanelPosition();
+      this.setStopwatchPanelPosition(defaults.left, defaults.top);
+    }
+
+    const handlePointerDown = event => {
+      if (event.button === 1 || event.button === 2) {
+        return;
+      }
+
+      this.stopwatchPanelPointerId = event.pointerId;
+      const rect = panel.getBoundingClientRect();
+      this.stopwatchPanelPointerOffset = {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+      };
+      panel.classList.add('is-dragging');
+
+      try {
+        panel.setPointerCapture?.(event.pointerId);
+      } catch (error) {
+        // Ignore inability to capture pointer.
+      }
+
+      event.preventDefault();
+    };
+
+    const handlePointerMove = event => {
+      if (this.stopwatchPanelPointerId === null || event.pointerId !== this.stopwatchPanelPointerId) {
+        return;
+      }
+
+      const nextLeft = event.clientX - this.stopwatchPanelPointerOffset.x;
+      const nextTop = event.clientY - this.stopwatchPanelPointerOffset.y;
+      this.setStopwatchPanelPosition(nextLeft, nextTop);
+      event.preventDefault();
+    };
+
+    const handlePointerUp = event => {
+      if (this.stopwatchPanelPointerId === null || event.pointerId !== this.stopwatchPanelPointerId) {
+        return;
+      }
+
+      this.stopwatchPanelPointerId = null;
+      panel.classList.remove('is-dragging');
+
+      try {
+        panel.releasePointerCapture?.(event.pointerId);
+      } catch (error) {
+        // Ignore inability to release pointer.
+      }
+
+      if (this.stopwatchPanelPosition) {
+        this.saveStopwatchPanelPosition(this.stopwatchPanelPosition.left, this.stopwatchPanelPosition.top);
+      }
+
+      event.preventDefault();
+    };
+
+    panel.addEventListener('pointerdown', handlePointerDown);
+    panel.addEventListener('pointermove', handlePointerMove);
+    panel.addEventListener('pointerup', handlePointerUp);
+    panel.addEventListener('pointercancel', handlePointerUp);
+    panel.addEventListener('lostpointercapture', () => {
+      this.stopwatchPanelPointerId = null;
+      panel.classList.remove('is-dragging');
+    });
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', () => {
+        this.ensureStopwatchPanelWithinViewport();
+      });
+    }
+  }
+
+  getStoredStopwatchPanelPosition() {
+    const storedValue = this.getStorageItem(STOPWATCH_PANEL_POSITION_KEY);
+    if (!storedValue) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(storedValue);
+      if (Number.isFinite(parsed?.left) && Number.isFinite(parsed?.top)) {
+        return {
+          left: parsed.left,
+          top: parsed.top
+        };
+      }
+    } catch (error) {
+      console.warn('Unable to parse stored stopwatch panel position.', error);
+      this.removeStorageItem(STOPWATCH_PANEL_POSITION_KEY);
+    }
+
+    return null;
+  }
+
+  saveStopwatchPanelPosition(left, top) {
+    if (!Number.isFinite(left) || !Number.isFinite(top)) {
+      this.removeStorageItem(STOPWATCH_PANEL_POSITION_KEY);
+      return;
+    }
+
+    const payload = JSON.stringify({ left, top });
+    this.setStorageItem(STOPWATCH_PANEL_POSITION_KEY, payload);
+  }
+
+  getDefaultStopwatchPanelPosition() {
+    if (typeof window === 'undefined' || !this.stopwatchPanel) {
+      return { left: 24, top: 24 };
+    }
+
+    const margin = 24;
+    const rect = this.stopwatchPanel.getBoundingClientRect();
+    const width = rect.width || this.stopwatchPanel.offsetWidth || 240;
+    const left = clamp(window.innerWidth - width - margin, margin, Math.max(margin, window.innerWidth - margin));
+
+    return {
+      left,
+      top: margin
+    };
+  }
+
+  clampStopwatchPanelPosition(left, top) {
+    if (!this.stopwatchPanel || typeof window === 'undefined') {
+      return { left, top };
+    }
+
+    const margin = 16;
+    const rect = this.stopwatchPanel.getBoundingClientRect();
+    const width = rect.width || this.stopwatchPanel.offsetWidth || 240;
+    const height = rect.height || this.stopwatchPanel.offsetHeight || 160;
+
+    const minLeft = margin;
+    const minTop = margin;
+    const maxLeft = Math.max(minLeft, window.innerWidth - width - margin);
+    const maxTop = Math.max(minTop, window.innerHeight - height - margin);
+
+    return {
+      left: clamp(left, minLeft, maxLeft),
+      top: clamp(top, minTop, maxTop)
+    };
+  }
+
+  setStopwatchPanelPosition(left, top) {
+    if (!this.stopwatchPanel) {
+      return;
+    }
+
+    const { left: clampedLeft, top: clampedTop } = this.clampStopwatchPanelPosition(left, top);
+    this.stopwatchPanel.style.left = `${clampedLeft}px`;
+    this.stopwatchPanel.style.top = `${clampedTop}px`;
+    this.stopwatchPanelPosition = { left: clampedLeft, top: clampedTop };
+    return this.stopwatchPanelPosition;
+  }
+
+  ensureStopwatchPanelWithinViewport() {
+    if (!this.stopwatchPanel) {
+      return;
+    }
+
+    if (this.stopwatchPanelPosition) {
+      const { left, top } = this.stopwatchPanelPosition;
+      this.setStopwatchPanelPosition(left, top);
+      this.saveStopwatchPanelPosition(this.stopwatchPanelPosition.left, this.stopwatchPanelPosition.top);
+      return;
+    }
+
+    const defaults = this.getDefaultStopwatchPanelPosition();
+    this.setStopwatchPanelPosition(defaults.left, defaults.top);
+  }
+
   ensureLessonTitleFloatingPosition() {
     if (!this.boardLessonTitle || !this.boardRegion) {
       return;
@@ -1406,6 +1601,25 @@ main
     this.boardLessonTitle.style.transform = '';
     this.boardLessonTitle.classList.remove('is-dragging', 'is-floating');
     this.removeStorageItem(LESSON_TITLE_POSITION_KEY);
+  }
+
+  updateFullscreenButtonState(isFullscreen) {
+    if (!Array.isArray(this.fullscreenButtons) || this.fullscreenButtons.length === 0) {
+      return;
+    }
+
+    const label = isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen';
+    const pressedValue = isFullscreen ? 'true' : 'false';
+
+    this.fullscreenButtons.forEach(button => {
+      if (!button) {
+        return;
+      }
+
+      button.setAttribute('aria-label', label);
+      button.setAttribute('aria-pressed', pressedValue);
+      button.classList.toggle('is-active', isFullscreen);
+    });
   }
 
   setupBoardHeaderScaling() {
