@@ -335,11 +335,53 @@ function setupCombinedNextRedoButton() {
 
 function setupLessonAndPracticePrompts() {
   const lessonTitleButton = document.getElementById('btnLessonTitlePrompt');
-  const lessonTitleFlyout = document.getElementById('lessonTitleFlyout');
-  const lessonTitleFlyoutInput = document.getElementById('lessonTitleFlyoutInput');
+  let lessonTitleFlyout = document.getElementById('lessonTitleFlyout');
+  let lessonTitleFlyoutInput = document.getElementById('lessonTitleFlyoutInput');
   let isLessonFlyoutOpen = false;
 
   const isFullscreenActive = () => document.body?.classList.contains('is-fullscreen') ?? false;
+
+  const ensureLessonFlyoutElements = () => {
+    if (lessonTitleFlyout && lessonTitleFlyoutInput) {
+      return;
+    }
+
+    if (!lessonTitleButton) {
+      return;
+    }
+
+    const flyoutContainer =
+      lessonTitleButton.closest('.side-panel__flyout') ?? lessonTitleButton.parentElement ?? lessonTitleButton;
+    lessonTitleButton.setAttribute('aria-controls', 'lessonTitleFlyout');
+
+    if (!lessonTitleFlyout) {
+      lessonTitleFlyout = document.createElement('div');
+      lessonTitleFlyout.id = 'lessonTitleFlyout';
+      lessonTitleFlyout.className = 'lesson-title-flyout';
+      lessonTitleFlyout.setAttribute('role', 'presentation');
+      lessonTitleFlyout.setAttribute('aria-hidden', 'true');
+      flyoutContainer.appendChild(lessonTitleFlyout);
+    }
+
+    if (!lessonTitleFlyoutInput) {
+      const label = document.createElement('label');
+      label.className = 'lesson-title-flyout__label';
+      label.htmlFor = 'lessonTitleFlyoutInput';
+      label.textContent = 'Lesson title';
+
+      lessonTitleFlyoutInput = document.createElement('input');
+      lessonTitleFlyoutInput.id = 'lessonTitleFlyoutInput';
+      lessonTitleFlyoutInput.className = 'lesson-title-flyout__input';
+      lessonTitleFlyoutInput.type = 'text';
+      lessonTitleFlyoutInput.placeholder = 'Put the lesson title';
+      lessonTitleFlyoutInput.autocomplete = 'off';
+
+      lessonTitleFlyout.appendChild(label);
+      lessonTitleFlyout.appendChild(lessonTitleFlyoutInput);
+    }
+  };
+
+  ensureLessonFlyoutElements();
 
   const syncStoredLessonTitle = value => {
     const trimmed = value.trim();
@@ -464,11 +506,91 @@ function setupLessonAndPracticePrompts() {
   });
 
   const practiceButton = document.getElementById('btnPracticeTextPrompt');
-  const practiceStrip = document.getElementById('practiceStrip');
-  const practiceStripBackdrop = document.getElementById('practiceStripBackdrop');
-  const practiceStripForm = document.getElementById('practiceStripForm');
-  const practiceStripInput = document.getElementById('practiceStripInput');
-  const practiceStripCancel = document.getElementById('practiceStripCancel');
+  let practiceStrip = document.getElementById('practiceStrip');
+  let practiceStripBackdrop = document.getElementById('practiceStripBackdrop');
+  let practiceStripForm = document.getElementById('practiceStripForm');
+  let practiceStripInput = document.getElementById('practiceStripInput');
+  let practiceStripCancel = document.getElementById('practiceStripCancel');
+
+  const ensurePracticeStripElements = () => {
+    if (practiceButton) {
+      practiceButton.setAttribute('aria-controls', 'practiceStrip');
+    }
+
+    if (!practiceStripBackdrop) {
+      practiceStripBackdrop = document.createElement('div');
+      practiceStripBackdrop.id = 'practiceStripBackdrop';
+      practiceStripBackdrop.className = 'practice-strip__backdrop';
+      practiceStripBackdrop.hidden = true;
+      document.body.appendChild(practiceStripBackdrop);
+    }
+
+    if (!practiceStrip) {
+      practiceStrip = document.createElement('section');
+      practiceStrip.id = 'practiceStrip';
+      practiceStrip.className = 'practice-strip';
+      practiceStrip.setAttribute('role', 'dialog');
+      practiceStrip.setAttribute('aria-modal', 'true');
+      practiceStrip.setAttribute('aria-labelledby', 'practiceStripLabel');
+      practiceStrip.hidden = true;
+
+      practiceStripForm = document.createElement('form');
+      practiceStripForm.id = 'practiceStripForm';
+      practiceStripForm.className = 'practice-strip__form';
+
+      const label = document.createElement('label');
+      label.id = 'practiceStripLabel';
+      label.className = 'practice-strip__label';
+      label.htmlFor = 'practiceStripInput';
+      label.textContent = 'Practice text';
+
+      practiceStripInput = document.createElement('textarea');
+      practiceStripInput.id = 'practiceStripInput';
+      practiceStripInput.className = 'practice-strip__input';
+      practiceStripInput.name = 'practiceText';
+      practiceStripInput.rows = 2;
+      practiceStripInput.placeholder = 'Type the text you want to practice';
+      practiceStripInput.autocomplete = 'off';
+
+      const actions = document.createElement('div');
+      actions.className = 'practice-strip__actions';
+
+      const applyButton = document.createElement('button');
+      applyButton.type = 'submit';
+      applyButton.className = 'practice-strip__button practice-strip__button--primary';
+      applyButton.textContent = 'Apply';
+
+      practiceStripCancel = document.createElement('button');
+      practiceStripCancel.type = 'button';
+      practiceStripCancel.id = 'practiceStripCancel';
+      practiceStripCancel.className = 'practice-strip__button';
+      practiceStripCancel.textContent = 'Cancel';
+
+      actions.appendChild(applyButton);
+      actions.appendChild(practiceStripCancel);
+
+      practiceStripForm.appendChild(label);
+      practiceStripForm.appendChild(practiceStripInput);
+      practiceStripForm.appendChild(actions);
+
+      practiceStrip.appendChild(practiceStripForm);
+      document.body.appendChild(practiceStrip);
+    }
+
+    if (!practiceStripForm) {
+      practiceStripForm = practiceStrip.querySelector('form');
+    }
+
+    if (!practiceStripInput) {
+      practiceStripInput = practiceStrip.querySelector('textarea');
+    }
+
+    if (!practiceStripCancel) {
+      practiceStripCancel = practiceStrip.querySelector('#practiceStripCancel');
+    }
+  };
+
+  ensurePracticeStripElements();
 
   const PRACTICE_STRIP_TRANSITION_MS = 400;
   let practiceStripHideTimer = null;
