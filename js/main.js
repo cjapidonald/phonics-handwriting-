@@ -30,6 +30,7 @@ let currentLine = [];
 let rainbowHue = 0;
 let lastPenColour = userData.userSettings.selectedPenColour ?? DEFAULT_SETTINGS.selectedPenColour;
 let boardControlsRestoreTimer = null;
+let activePointerId = null;
 
 let controller = new AbortController();
 let signal = controller.signal;
@@ -252,40 +253,98 @@ function setupEventListeners() {
   );
 
   if (controls.rewriterCanvas) {
-    controls.rewriterCanvas.addEventListener('touchstart', event => {
-      const touch = event.touches[0];
-      if (touch) {
-        drawStart(touch);
-      }
-    });
+    const canvas = controls.rewriterCanvas;
+    if (window?.PointerEvent) {
+      const handlePointerDown = event => {
+        if (event.pointerType === 'mouse' && event.button !== 0) {
+          return;
+        }
 
-    controls.rewriterCanvas.addEventListener('mousedown', event => {
-      drawStart(event);
-    });
+        activePointerId = event.pointerId;
+
+        try {
+          canvas.setPointerCapture?.(event.pointerId);
+        } catch (error) {
+          console.warn('Unable to set pointer capture on drawing surface.', error);
+        }
+
+        drawStart(event);
+        event.preventDefault();
+      };
+
+      const handlePointerMove = event => {
+        if (activePointerId !== event.pointerId) {
+          return;
+        }
+
+        if (!penDown) {
+          return;
+        }
+
+        drawMove(event);
+        event.preventDefault();
+      };
+
+      const handlePointerUp = event => {
+        if (activePointerId !== event.pointerId) {
+          return;
+        }
+
+        if (penDown) {
+          drawEnd();
+        }
+
+        try {
+          canvas.releasePointerCapture?.(event.pointerId);
+        } catch (error) {
+          // No action needed if releasePointerCapture is unsupported or fails.
+        }
+
+        activePointerId = null;
+        event.preventDefault();
+      };
+
+      canvas.addEventListener('pointerdown', handlePointerDown);
+      canvas.addEventListener('pointermove', handlePointerMove);
+      canvas.addEventListener('pointerup', handlePointerUp);
+      canvas.addEventListener('pointercancel', handlePointerUp);
+      canvas.addEventListener('pointerleave', handlePointerUp);
+    } else {
+      canvas.addEventListener('touchstart', event => {
+        const touch = event.touches[0];
+        if (touch) {
+          drawStart(touch);
+        }
+      });
+
+      canvas.addEventListener('mousedown', event => {
+        drawStart(event);
+      });
+
+      document.addEventListener('touchmove', event => {
+        const touch = event.touches[0];
+        if (touch && penDown) {
+          drawMove(touch);
+        }
+      });
+
+      document.addEventListener('mousemove', event => {
+        if (penDown) {
+          drawMove(event);
+        }
+      });
+
+      document.addEventListener('touchend', () => {
+        drawEnd();
+      });
+
+      document.addEventListener('mouseup', () => {
+        drawEnd();
+      });
+    }
   } else {
     console.warn('Missing expected drawing surface #writer.');
   }
-
-  document.addEventListener('touchmove', event => {
-    const touch = event.touches[0];
-    if (touch && penDown) {
-      drawMove(touch);
-    }
-  });
-
-  document.addEventListener('mousemove', event => {
-    if (penDown) {
-      drawMove(event);
-    }
-  });
-
-  document.addEventListener('touchend', () => {
-    drawEnd();
-  });
-
-  document.addEventListener('mouseup', () => {
-    drawEnd();
-  });
 
   setRewriteButtonState(false);
 }
@@ -943,6 +1002,7 @@ function drawEnd() {
 
   userData.storedLines.push(currentLine.slice());
   currentLine = [];
+  activePointerId = null;
   penDown = false;
   rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
   userData.saveToLocalStorage();
