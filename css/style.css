@@ -3098,3 +3098,134 @@ body.info-panel-open {
   }
 }
 
+
+
+/* Layout updates for simplified board shell */
+#app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(16px, 2vw, 32px);
+  width: min(100%, 1200px);
+  margin: 0 auto;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(6px);
+  position: relative;
+  z-index: 12;
+}
+
+.toolbar__button,
+.toolbar__slider {
+  appearance: none;
+  border: none;
+  background: #fff;
+  color: inherit;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(10, 9, 3, 0.2);
+}
+
+.toolbar__button svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.toolbar__slider {
+  cursor: pointer;
+  padding: 0;
+  height: 32px;
+}
+
+.board-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px;
+  position: relative;
+  z-index: 12;
+}
+
+.board-region {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(12px, 2vw, 24px);
+}
+
+.writer-container {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  aspect-ratio: 4 / 3;
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 36px rgba(10, 9, 3, 0.24);
+}
+
+.writer-container canvas {
+  display: block;
+}
+
+canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+#writer {
+  pointer-events: auto;
+}
+
+.bottom-bar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  position: relative;
+  z-index: 12;
+}
+
+.bottom-bar input[type='range'] {
+  width: clamp(120px, 30vw, 260px);
+}
+
+.floating-panel {
+  position: relative;
+  z-index: 14;
+}
+
+.board-lesson-title,
+.board-date,
+#stopwatchPanel {
+  position: relative;
+  z-index: 20;
+}
+
+.board-lesson-title.is-floating,
+.board-date.is-floating,
+#stopwatchPanel.is-floating,
+.board-lesson-title.is-dragging,
+.board-date.is-dragging,
+#stopwatchPanel.is-dragging {
+  position: absolute;
+}
