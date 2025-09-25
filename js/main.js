@@ -23,6 +23,79 @@ const penColourInput = document.getElementById('penColour');
 const penSizeInput = document.getElementById('penSize');
 const eraserButton = document.getElementById('btnEraser');
 const eraserSizeInput = document.getElementById('btnEraserSize');
+const uploadCursorButton = document.getElementById('btnUploadCursor');
+const resetCursorButton = document.getElementById('btnResetCursor');
+const cursorFileInput = document.getElementById('cursorFile');
+
+const CURSOR_STORAGE_KEY = 'ph.cursor';
+
+const applyCustomCursor = dataUrl => {
+  if (typeof dataUrl === 'string' && dataUrl) {
+    document.body.style.cursor = `url(${dataUrl}) 0 0, auto`;
+    return;
+  }
+
+  document.body.style.cursor = '';
+};
+
+const persistCursor = dataUrl => {
+  if (!storage) {
+    return;
+  }
+
+  if (typeof dataUrl === 'string' && dataUrl) {
+    storage.setItem(CURSOR_STORAGE_KEY, dataUrl);
+  } else {
+    storage.removeItem(CURSOR_STORAGE_KEY);
+  }
+};
+
+const resetCursor = () => {
+  applyCustomCursor(null);
+  persistCursor(null);
+
+  if (cursorFileInput) {
+    cursorFileInput.value = '';
+  }
+};
+
+const storedCursor = storage?.getItem?.(CURSOR_STORAGE_KEY);
+if (typeof storedCursor === 'string' && storedCursor) {
+  applyCustomCursor(storedCursor);
+}
+
+if (uploadCursorButton && cursorFileInput) {
+  uploadCursorButton.addEventListener('click', () => {
+    cursorFileInput.click();
+  });
+}
+
+if (cursorFileInput) {
+  cursorFileInput.addEventListener('change', event => {
+    const file = event.target?.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.addEventListener('load', e => {
+      const result = typeof e.target?.result === 'string' ? e.target.result : null;
+      if (!result) {
+        return;
+      }
+
+      applyCustomCursor(result);
+      persistCursor(result);
+    });
+    reader.readAsDataURL(file);
+  });
+}
+
+if (resetCursorButton) {
+  resetCursorButton.addEventListener('click', () => {
+    resetCursor();
+  });
+}
 
 const isHexColour = colour => typeof colour === 'string' && /^#([0-9a-f]{6}|[0-9a-f]{3})$/i.test(colour);
 
