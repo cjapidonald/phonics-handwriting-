@@ -148,7 +148,6 @@ export class Controls {
     this.boardHeader = document.getElementById('boardHeader');
     this.lessonTitleInput = document.getElementById('inputLessonTitle');
     this.lessonTitleSubmitButton = document.getElementById('btnLessonTitleApply');
-
     this.storage = getLocalStorage();
     this.toolbarLayoutVersion = this.getStorageItem?.('ui.toolbarLayoutVersion') ?? null;
     this.currentZoom = this.userData?.userSettings?.zoomLevel ?? DEFAULT_SETTINGS.zoomLevel;
@@ -165,6 +164,10 @@ export class Controls {
     this.handleBoardHeaderResize = () => {
       this.queueBoardHeaderResize();
     };
+    this.isFullscreenActive = false;
+    this.lessonTitlePosition = null;
+    this.lessonTitlePointerId = null;
+    this.lessonTitlePointerOffset = { x: 0, y: 0 };
 
     this.migrateSettings();
     this.initialiseCanvases();
@@ -181,6 +184,7 @@ export class Controls {
     this.setupCookieBanner();
     this.setupDateDisplay();
     this.setupLessonTitle();
+    this.setupLessonTitleDrag();
     this.setupBoardHeaderScaling();
     this.setupFullscreenBehaviour();
     this.setupToolbarWidthSync();
@@ -866,6 +870,7 @@ export class Controls {
 
       applyCollapsedState(isAppFullscreen && wasCollapsed);
       this.updateToolbarWidthFromBoard();
+      this.applyFullscreenLessonTitleState(isAppFullscreen);
     };
 
     if (this.toolbarToggleButton) {
@@ -1075,6 +1080,184 @@ export class Controls {
     });
   }
 
+  setupLessonTitleDrag() {
+    if (!this.boardLessonTitle || !this.boardRegion) {
+      return;
+    }
+
+    const element = this.boardLessonTitle;
+    const container = this.boardRegion;
+
+    const updateFromPointer = (clientX, clientY) => {
+      const containerRect = container.getBoundingClientRect();
+      const desiredLeft = clientX - containerRect.left - this.lessonTitlePointerOffset.x;
+      const desiredTop = clientY - containerRect.top - this.lessonTitlePointerOffset.y;
+      this.setLessonTitleFloatingPosition(desiredLeft, desiredTop);
+    };
+
+    const handlePointerDown = event => {
+      if (!this.isFullscreenActive || event.button === 1 || event.button === 2) {
+        return;
+      }
+
+      this.lessonTitlePointerId = event.pointerId;
+      const rect = element.getBoundingClientRect();
+      this.lessonTitlePointerOffset = {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+      };
+      element.classList.add('is-dragging');
+
+      try {
+        element.setPointerCapture?.(event.pointerId);
+      } catch (error) {
+        // Ignore inability to capture pointer.
+      }
+
+      updateFromPointer(event.clientX, event.clientY);
+      event.preventDefault();
+    };
+
+    const handlePointerMove = event => {
+      if (!this.isFullscreenActive) {
+        return;
+      }
+
+      if (this.lessonTitlePointerId === null || event.pointerId !== this.lessonTitlePointerId) {
+        return;
+      }
+
+      updateFromPointer(event.clientX, event.clientY);
+      event.preventDefault();
+    };
+
+    const endDrag = event => {
+      if (this.lessonTitlePointerId === null || (event && event.pointerId !== this.lessonTitlePointerId)) {
+        return;
+      }
+
+      const pointerId = this.lessonTitlePointerId;
+      this.lessonTitlePointerId = null;
+      this.lessonTitlePointerOffset = { x: 0, y: 0 };
+      element.classList.remove('is-dragging');
+
+      if (pointerId !== null) {
+        try {
+          element.releasePointerCapture?.(pointerId);
+        } catch (error) {
+          // Ignore inability to release pointer.
+        }
+      }
+    };
+
+    element.addEventListener('pointerdown', handlePointerDown);
+    element.addEventListener('pointermove', handlePointerMove);
+    element.addEventListener('pointerup', endDrag);
+    element.addEventListener('pointercancel', endDrag);
+    element.addEventListener('lostpointercapture', () => {
+      this.lessonTitlePointerId = null;
+      this.lessonTitlePointerOffset = { x: 0, y: 0 };
+      element.classList.remove('is-dragging');
+    });
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', () => {
+        if (this.isFullscreenActive) {
+          this.ensureLessonTitleFloatingPosition();
+        }
+      });
+    }
+  }
+
+  ensureLessonTitleFloatingPosition() {
+    if (!this.boardLessonTitle || !this.boardRegion) {
+      return;
+    }
+
+    const containerRect = this.boardRegion.getBoundingClientRect();
+    const containerWidth = containerRect.width;
+    const containerHeight = containerRect.height;
+
+    if (containerWidth === 0 || containerHeight === 0) {
+      return;
+    }
+
+    const elementWidth = this.boardLessonTitle.offsetWidth;
+    const elementHeight = this.boardLessonTitle.offsetHeight;
+    const maxLeft = Math.max(containerWidth - elementWidth, 0);
+    const maxTop = Math.max(containerHeight - elementHeight, 0);
+
+    let left = typeof this.lessonTitlePosition?.left === 'number'
+      ? this.lessonTitlePosition.left
+      : Math.max((containerWidth - elementWidth) / 2, 0);
+    let top = typeof this.lessonTitlePosition?.top === 'number'
+      ? this.lessonTitlePosition.top
+      : clamp(containerHeight * 0.06, 16, maxTop);
+
+    left = clamp(left, 0, maxLeft);
+    top = clamp(top, 0, maxTop);
+
+    this.boardLessonTitle.style.left = `${left}px`;
+    this.boardLessonTitle.style.top = `${top}px`;
+    this.boardLessonTitle.style.transform = 'translate3d(0, 0, 0)';
+    this.lessonTitlePosition = { left, top };
+  }
+
+  setLessonTitleFloatingPosition(left, top) {
+    if (!this.boardLessonTitle || !this.boardRegion) {
+      return;
+    }
+
+    const containerRect = this.boardRegion.getBoundingClientRect();
+    const elementWidth = this.boardLessonTitle.offsetWidth;
+    const elementHeight = this.boardLessonTitle.offsetHeight;
+    const maxLeft = Math.max(containerRect.width - elementWidth, 0);
+    const maxTop = Math.max(containerRect.height - elementHeight, 0);
+
+    const clampedLeft = clamp(left, 0, maxLeft);
+    const clampedTop = clamp(top, 0, maxTop);
+
+    this.boardLessonTitle.style.left = `${clampedLeft}px`;
+    this.boardLessonTitle.style.top = `${clampedTop}px`;
+    this.boardLessonTitle.style.transform = 'translate3d(0, 0, 0)';
+    this.lessonTitlePosition = { left: clampedLeft, top: clampedTop };
+  }
+
+  applyFullscreenLessonTitleState(isFullscreen) {
+    this.isFullscreenActive = isFullscreen;
+
+    if (!this.boardLessonTitle) {
+      return;
+    }
+
+    if (!isFullscreen) {
+      this.lessonTitlePosition = null;
+      const pointerId = this.lessonTitlePointerId;
+      this.lessonTitlePointerId = null;
+      this.lessonTitlePointerOffset = { x: 0, y: 0 };
+      if (pointerId !== null) {
+        try {
+          this.boardLessonTitle.releasePointerCapture?.(pointerId);
+        } catch (error) {
+          // Ignore inability to release pointer.
+        }
+      }
+      this.boardLessonTitle.style.left = '';
+      this.boardLessonTitle.style.top = '';
+      this.boardLessonTitle.style.transform = '';
+      this.boardLessonTitle.classList.remove('is-dragging');
+      return;
+    }
+
+    if (typeof window !== 'undefined') {
+      window.requestAnimationFrame(() => {
+        this.ensureLessonTitleFloatingPosition();
+      });
+    } else {
+      this.ensureLessonTitleFloatingPosition();
+    }
+  }
+
   setupBoardHeaderScaling() {
     if (!this.boardHeader) {
       return;
@@ -1200,6 +1383,16 @@ export class Controls {
     }
 
     this.queueBoardHeaderResize();
+
+    if (this.isFullscreenActive) {
+      if (typeof window !== 'undefined') {
+        window.requestAnimationFrame(() => {
+          this.ensureLessonTitleFloatingPosition();
+        });
+      } else {
+        this.ensureLessonTitleFloatingPosition();
+      }
+    }
   }
 
   applyToolbarLayoutVersion() {
