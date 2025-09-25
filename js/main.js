@@ -15,6 +15,66 @@ userData.loadFromLocalStorage();
 const controls = new Controls(userData);
 const storage = getLocalStorage();
 
+const ensureButtonHasAriaLabel = (button, fallbackLabel = '') => {
+  if (!button || typeof button.setAttribute !== 'function') {
+    return;
+  }
+
+  if (button.hasAttribute('aria-label') || button.hasAttribute('aria-labelledby')) {
+    return;
+  }
+
+  const rawText = typeof button.textContent === 'string' ? button.textContent : '';
+  const textLabel = rawText.replace(/\s+/g, ' ').trim();
+
+  if (textLabel) {
+    button.setAttribute('aria-label', textLabel);
+    return;
+  }
+
+  const titleAttribute = button.getAttribute?.('title') ?? '';
+  if (titleAttribute) {
+    button.setAttribute('aria-label', titleAttribute);
+    return;
+  }
+
+  if (fallbackLabel) {
+    button.setAttribute('aria-label', fallbackLabel);
+  }
+};
+
+const ensureAriaLabelsForButtons = root => {
+  if (!root || typeof root.querySelectorAll !== 'function') {
+    return;
+  }
+
+  root.querySelectorAll('button').forEach(button => {
+    ensureButtonHasAriaLabel(button);
+  });
+};
+
+ensureAriaLabelsForButtons(document);
+
+if (typeof MutationObserver === 'function' && typeof Element !== 'undefined' && document?.body) {
+  const observer = new MutationObserver(mutationList => {
+    mutationList.forEach(mutation => {
+      mutation.addedNodes.forEach(node => {
+        if (!(node instanceof Element)) {
+          return;
+        }
+
+        if (node.matches('button')) {
+          ensureButtonHasAriaLabel(node);
+        }
+
+        ensureAriaLabelsForButtons(node);
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+}
+
 const PEN_COLOUR_DEFAULT = '#333';
 const PEN_SIZE_DEFAULT = 8;
 const ERASER_STROKE_COLOUR = '#000000';
@@ -2445,6 +2505,7 @@ function setupLessonAndPracticePrompts() {
 
       practiceStrip.appendChild(practiceStripForm);
       document.body.appendChild(practiceStrip);
+      ensureAriaLabelsForButtons(practiceStrip);
     }
 
     if (!practiceStripForm) {
@@ -2556,6 +2617,20 @@ function setupLessonAndPracticePrompts() {
     });
   }
 
+  const submitPracticeStripForm = () => {
+    if (!practiceStripForm) {
+      return;
+    }
+
+    if (typeof practiceStripForm.requestSubmit === 'function') {
+      practiceStripForm.requestSubmit();
+      return;
+    }
+
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+    practiceStripForm.dispatchEvent(submitEvent);
+  };
+
   practiceStripForm?.addEventListener('submit', event => {
     event.preventDefault();
 
@@ -2579,6 +2654,19 @@ function setupLessonAndPracticePrompts() {
   const handlePracticeStripDismiss = () => {
     closePracticeStrip({ restoreFocus: true });
   };
+
+  practiceStripInput?.addEventListener('keydown', event => {
+    if (event.key === 'Enter' && !event.shiftKey && !event.altKey && !event.metaKey && !event.ctrlKey) {
+      event.preventDefault();
+      submitPracticeStripForm();
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closePracticeStrip({ restoreFocus: true });
+    }
+  });
 
   practiceStripCancel?.addEventListener('click', handlePracticeStripDismiss);
   practiceStripBackdrop?.addEventListener('click', handlePracticeStripDismiss);
@@ -2617,10 +2705,37 @@ function setupLessonAndPracticePrompts() {
     }
   });
 
+  const submitRevealLettersForm = () => {
+    if (!revealLettersForm) {
+      return;
+    }
+
+    if (typeof revealLettersForm.requestSubmit === 'function') {
+      revealLettersForm.requestSubmit();
+      return;
+    }
+
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+    revealLettersForm.dispatchEvent(submitEvent);
+  };
+
   revealLettersForm?.addEventListener('submit', event => {
     event.preventDefault();
     applyHiddenLetters(revealLettersInput?.value ?? '');
     closeRevealFlyout({ restoreFocus: true });
+  });
+
+  revealLettersInput?.addEventListener('keydown', event => {
+    if (event.key === 'Enter' && !event.shiftKey && !event.altKey && !event.metaKey && !event.ctrlKey) {
+      event.preventDefault();
+      submitRevealLettersForm();
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeRevealFlyout({ restoreFocus: true });
+    }
   });
 
   revealLettersCancel?.addEventListener('click', () => {

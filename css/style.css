@@ -3437,6 +3437,11 @@ body.info-panel-open {
   box-shadow: 0 2px 6px rgba(10, 9, 3, 0.2);
 }
 
+.toolbar__button:focus-visible {
+  outline: 3px solid #1d2951;
+  outline-offset: 2px;
+}
+
 .toolbar__button svg {
   width: 20px;
   height: 20px;
