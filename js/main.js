@@ -49,31 +49,46 @@ const timerController = new TimerController({
 });
 timerController.init();
 
-await loadInitialPenImage();
-await drawStoredLines(rewriterContext, true);
+async function initialiseApp() {
+  try {
+    await loadInitialPenImage();
+  } catch (error) {
+    console.error('Unable to load the initial pen image.', error);
+  }
 
-setupEventListeners();
+  try {
+    await drawStoredLines(rewriterContext, true);
+  } catch (error) {
+    console.error('Unable to restore stored handwriting.', error);
+  }
 
-teachController = new TeachController({
-  overlay: document.getElementById('teachOverlay'),
-  textInput: document.getElementById('teachTextInput'),
-  teachButton: document.getElementById('btnTeach'),
-  nextButton: document.getElementById('btnTeachNext'),
-  previousButton: document.getElementById('btnTeachPrevious'),
-  previewContainer: document.getElementById('teachPreview'),
-  previewToggleButton: document.getElementById('btnToggleFreezePreview'),
-  hideLettersButton: document.getElementById('btnHideLetters'),
-  hideLettersModal: document.getElementById('hideLettersModal'),
-  hideLettersBackdrop: document.getElementById('hideLettersModalBackdrop'),
-  hideLettersList: document.getElementById('hideLettersList'),
-  hideLettersCloseButton: document.getElementById('hideLettersClose'),
-  hideLettersResetButton: document.getElementById('hideLettersReset'),
-  hideLettersDoneButton: document.getElementById('hideLettersDone'),
-  enableDefaultNextHandler: false
+  setupEventListeners();
+
+  teachController = new TeachController({
+    overlay: document.getElementById('teachOverlay'),
+    textInput: document.getElementById('teachTextInput'),
+    teachButton: document.getElementById('btnTeach'),
+    nextButton: document.getElementById('btnTeachNext'),
+    previousButton: document.getElementById('btnTeachPrevious'),
+    previewContainer: document.getElementById('teachPreview'),
+    previewToggleButton: document.getElementById('btnToggleFreezePreview'),
+    hideLettersButton: document.getElementById('btnHideLetters'),
+    hideLettersModal: document.getElementById('hideLettersModal'),
+    hideLettersBackdrop: document.getElementById('hideLettersModalBackdrop'),
+    hideLettersList: document.getElementById('hideLettersList'),
+    hideLettersCloseButton: document.getElementById('hideLettersClose'),
+    hideLettersResetButton: document.getElementById('hideLettersReset'),
+    hideLettersDoneButton: document.getElementById('hideLettersDone'),
+    enableDefaultNextHandler: false
+  });
+
+  setupCombinedNextRedoButton();
+  setupLessonAndPracticePrompts();
+}
+
+initialiseApp().catch(error => {
+  console.error('Failed to initialise Teach Handwriting.', error);
 });
-
-setupCombinedNextRedoButton();
-setupLessonAndPracticePrompts();
 
 function setBoardControlsHidden(isHidden) {
   const body = document.body;
