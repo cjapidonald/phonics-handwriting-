@@ -84,6 +84,43 @@ controls.setPenSize = function patchedSetPenSize(value, persist = true) {
   syncPenSizeInput(nextSize);
 };
 
+let undoRedoGloballyEnabled = true;
+
+function updateUndoRedoButtonState() {
+  const storedLinesLength = Array.isArray(userData?.storedLines) ? userData.storedLines.length : 0;
+  const deletedLinesLength = Array.isArray(userData?.deletedLines) ? userData.deletedLines.length : 0;
+
+  const canUndo = undoRedoGloballyEnabled && storedLinesLength > 0;
+  const canRedo = undoRedoGloballyEnabled && deletedLinesLength > 0;
+
+  if (controls.undoButton) {
+    controls.undoButton.disabled = !canUndo;
+    controls.undoButton.classList.toggle('is-disabled', !canUndo);
+  }
+
+  if (controls.redoButton) {
+    controls.redoButton.disabled = !canRedo;
+    controls.redoButton.classList.toggle('is-disabled', !canRedo);
+  }
+}
+
+const originalSetUndoRedoEnabled =
+  typeof controls.setUndoRedoEnabled === 'function' ? controls.setUndoRedoEnabled.bind(controls) : null;
+
+if (typeof controls.setUndoRedoEnabled === 'function') {
+  controls.setUndoRedoEnabled = function patchedSetUndoRedoEnabled(enabled) {
+    undoRedoGloballyEnabled = Boolean(enabled);
+
+    if (originalSetUndoRedoEnabled) {
+      originalSetUndoRedoEnabled(enabled);
+    }
+
+    updateUndoRedoButtonState();
+  };
+}
+
+updateUndoRedoButtonState();
+
 const resolveStoredPenColour = () => {
   const stored = typeof controls.getStorageItem === 'function' ? controls.getStorageItem('pen.color') : null;
   if (typeof stored === 'string' && stored) {
@@ -815,34 +852,42 @@ function setupEventListeners() {
 
 async function undoLastLine() {
   if (isRewriting || isReplaying) {
+    updateUndoRedoButtonState();
     return false;
   }
+
+  let lineUndone = false;
 
   if (userData.deletedLines.length < 100 && userData.storedLines.length > 0) {
     userData.deletedLines.push(userData.storedLines.pop());
     rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
     await drawStoredLines(rewriterContext, true);
     userData.saveToLocalStorage();
-    return true;
+    lineUndone = true;
   }
 
-  return false;
+  updateUndoRedoButtonState();
+  return lineUndone;
 }
 
 async function redoLastLine() {
   if (isRewriting || isReplaying) {
+    updateUndoRedoButtonState();
     return false;
   }
+
+  let lineRestored = false;
 
   if (userData.deletedLines.length > 0) {
     userData.storedLines.push(userData.deletedLines.pop());
     rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
     await drawStoredLines(rewriterContext, true);
     userData.saveToLocalStorage();
-    return true;
+    lineRestored = true;
   }
 
-  return false;
+  updateUndoRedoButtonState();
+  return lineRestored;
 }
 
 function setupCombinedNextRedoButton() {
@@ -1292,6 +1337,7 @@ function resetCanvas() {
   userData.deletedLines = [];
   userData.storedLines = [];
   userData.saveToLocalStorage();
+  updateUndoRedoButtonState();
 }
 
 async function rewrite(abortSignal = new AbortSignal()) {
@@ -1426,6 +1472,7 @@ function drawStart(event) {
 
   if (isWithinCanvas(mousePos)) {
     userData.deletedLines = [];
+    updateUndoRedoButtonState();
     const usingEraser = eraserMode;
 
     let strokeColour = ERASER_STROKE_COLOUR;
@@ -1538,6 +1585,7 @@ function drawEnd() {
   penDown = false;
   rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
   userData.saveToLocalStorage();
+  updateUndoRedoButtonState();
 }
 
 function drawPenIndicator(x, y, penSize) {
