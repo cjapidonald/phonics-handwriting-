@@ -11,6 +11,7 @@ const REWRITE_SPEED_MIN = 0.5;
 const REWRITE_SPEED_MAX = 8;
 
 const TOOLBAR_POSITION_KEY = 'ui.toolbarPosition';
+const DATE_POSITION_KEY = 'ui.datePosition';
 
 const PEN_COLOUR_SWATCHES = [
   '#111111',
@@ -144,6 +145,19 @@ export class Controls {
     this.cookieSettingsLink = document.getElementById('cookieSettingsLink');
 
     this.boardDate = document.getElementById('boardDate');
+    this.boardDateContainer = this.boardDate?.parentElement ?? null;
+    this.boardDateDragPointerId = null;
+    this.boardDateDragStartX = 0;
+    this.boardDateDragStartY = 0;
+    this.boardDateDragStartLeft = 0;
+    this.boardDateDragStartTop = 0;
+    this.boardDateFloatingLeft = null;
+    this.boardDateFloatingTop = null;
+    this.isFloatingDateActive = false;
+    this.floatingDateEdgeMargin = 16;
+    this.handleFloatingDateResize = () => {
+      this.ensureFloatingDateWithinViewport();
+    };
     this.boardLessonTitle = document.getElementById('boardLessonTitle');
     this.boardHeader = document.getElementById('boardHeader');
     this.lessonTitleInput = document.getElementById('inputLessonTitle');
@@ -183,6 +197,7 @@ export class Controls {
     this.setupToolbarDragging();
     this.setupCookieBanner();
     this.setupDateDisplay();
+    this.setupFloatingDateDragging();
     this.setupLessonTitle();
     this.setupLessonTitleDrag();
     this.setupBoardHeaderScaling();
@@ -870,7 +885,11 @@ export class Controls {
 
       applyCollapsedState(isAppFullscreen && wasCollapsed);
       this.updateToolbarWidthFromBoard();
+ codex/implement-draggable-lesson-title-editor
       this.applyFullscreenLessonTitleState(isAppFullscreen);
+
+      this.updateFloatingDateFullscreenState(isAppFullscreen);
+main
     };
 
     if (this.toolbarToggleButton) {
@@ -1027,6 +1046,31 @@ export class Controls {
     });
 
     this.queueBoardHeaderResize();
+  }
+
+  setupFloatingDateDragging() {
+    if (!this.boardDate) {
+      return;
+    }
+
+    this.boundFloatingDatePointerDown = event => {
+      this.handleFloatingDatePointerDown(event);
+    };
+    this.boundFloatingDatePointerMove = event => {
+      this.handleFloatingDatePointerMove(event);
+    };
+    this.boundFloatingDatePointerUp = event => {
+      this.handleFloatingDatePointerUp(event);
+    };
+
+    this.boardDate.addEventListener('pointerdown', this.boundFloatingDatePointerDown);
+    this.boardDate.addEventListener('pointermove', this.boundFloatingDatePointerMove);
+    this.boardDate.addEventListener('pointerup', this.boundFloatingDatePointerUp);
+    this.boardDate.addEventListener('pointercancel', this.boundFloatingDatePointerUp);
+    this.boardDate.addEventListener('lostpointercapture', () => {
+      this.boardDateDragPointerId = null;
+      this.boardDate?.classList.remove('is-dragging');
+    });
   }
 
   setupLessonTitle() {
@@ -1296,6 +1340,227 @@ export class Controls {
     if (typeof window !== 'undefined') {
       window.addEventListener('resize', this.handleBoardHeaderResize);
     }
+  }
+
+  updateFloatingDateFullscreenState(isFullscreen) {
+    if (!this.boardDate || !this.boardDateContainer) {
+      return;
+    }
+
+    if (isFullscreen) {
+      this.activateFloatingDate();
+    } else {
+      this.deactivateFloatingDate();
+    }
+  }
+
+  activateFloatingDate() {
+    if (this.isFloatingDateActive || !this.boardDate || !this.boardDateContainer) {
+      return;
+    }
+
+    this.isFloatingDateActive = true;
+    this.boardDateContainer.classList.add('is-floating-hidden');
+
+    if (typeof document !== 'undefined') {
+      document.body?.appendChild(this.boardDate);
+    }
+
+    this.boardDate.classList.add('is-floating');
+
+    const storedPosition = this.getStoredFloatingDatePosition();
+    const { left, top } = storedPosition ?? this.getDefaultFloatingDatePosition();
+    this.setFloatingDatePosition(left, top);
+    this.ensureFloatingDateWithinViewport();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', this.handleFloatingDateResize);
+    }
+  }
+
+  deactivateFloatingDate() {
+    if (!this.isFloatingDateActive || !this.boardDate || !this.boardDateContainer) {
+      return;
+    }
+
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', this.handleFloatingDateResize);
+    }
+
+    this.isFloatingDateActive = false;
+    this.boardDateDragPointerId = null;
+    this.boardDate.classList.remove('is-floating', 'is-dragging');
+    this.boardDate.style.left = '';
+    this.boardDate.style.top = '';
+    this.boardDateContainer.classList.remove('is-floating-hidden');
+    this.boardDateContainer.appendChild(this.boardDate);
+  }
+
+  handleFloatingDatePointerDown(event) {
+    if (!this.isFloatingDateActive || !this.boardDate || event.button === 2) {
+      return;
+    }
+
+    this.boardDateDragPointerId = event.pointerId;
+    this.boardDateDragStartX = event.clientX;
+    this.boardDateDragStartY = event.clientY;
+
+    const { left, top } = this.getFloatingDatePosition();
+    this.boardDateDragStartLeft = left;
+    this.boardDateDragStartTop = top;
+
+    try {
+      this.boardDate.setPointerCapture(event.pointerId);
+    } catch (error) {
+      // Ignore inability to capture pointer.
+    }
+
+    this.boardDate.classList.add('is-dragging');
+  }
+
+  handleFloatingDatePointerMove(event) {
+    if (!this.isFloatingDateActive) {
+      return;
+    }
+
+    if (this.boardDateDragPointerId === null || event.pointerId !== this.boardDateDragPointerId) {
+      return;
+    }
+
+    const deltaX = event.clientX - this.boardDateDragStartX;
+    const deltaY = event.clientY - this.boardDateDragStartY;
+    const desiredLeft = this.boardDateDragStartLeft + deltaX;
+    const desiredTop = this.boardDateDragStartTop + deltaY;
+
+    const { left, top } = this.getClampedFloatingDatePosition(desiredLeft, desiredTop);
+    this.setFloatingDatePosition(left, top);
+
+    event.preventDefault();
+  }
+
+  handleFloatingDatePointerUp(event) {
+    if (!this.isFloatingDateActive) {
+      return;
+    }
+
+    if (this.boardDateDragPointerId === null || event.pointerId !== this.boardDateDragPointerId) {
+      return;
+    }
+
+    this.boardDateDragPointerId = null;
+
+    try {
+      this.boardDate.releasePointerCapture(event.pointerId);
+    } catch (error) {
+      // Ignore inability to release pointer.
+    }
+
+    this.boardDate.classList.remove('is-dragging');
+    const { left, top } = this.getFloatingDatePosition();
+    this.saveFloatingDatePosition(left, top);
+  }
+
+  getFloatingDatePosition() {
+    if (Number.isFinite(this.boardDateFloatingLeft) && Number.isFinite(this.boardDateFloatingTop)) {
+      return {
+        left: this.boardDateFloatingLeft,
+        top: this.boardDateFloatingTop
+      };
+    }
+
+    const rect = this.boardDate?.getBoundingClientRect();
+    return {
+      left: rect?.left ?? 0,
+      top: rect?.top ?? 0
+    };
+  }
+
+  setFloatingDatePosition(left, top) {
+    if (!this.boardDate) {
+      return;
+    }
+
+    this.boardDateFloatingLeft = left;
+    this.boardDateFloatingTop = top;
+    this.boardDate.style.left = `${left}px`;
+    this.boardDate.style.top = `${top}px`;
+  }
+
+  getClampedFloatingDatePosition(left, top) {
+    if (!this.boardDate || typeof window === 'undefined') {
+      return { left, top };
+    }
+
+    const rect = this.boardDate.getBoundingClientRect();
+    const margin = this.floatingDateEdgeMargin;
+    const maxLeft = Math.max(margin, window.innerWidth - rect.width - margin);
+    const maxTop = Math.max(margin, window.innerHeight - rect.height - margin);
+
+    return {
+      left: clamp(left, margin, maxLeft),
+      top: clamp(top, margin, maxTop)
+    };
+  }
+
+  ensureFloatingDateWithinViewport() {
+    if (!this.isFloatingDateActive || !this.boardDate || typeof window === 'undefined') {
+      return;
+    }
+
+    const { left, top } = this.getClampedFloatingDatePosition(
+      this.boardDateFloatingLeft ?? 0,
+      this.boardDateFloatingTop ?? 0
+    );
+
+    this.setFloatingDatePosition(left, top);
+    this.saveFloatingDatePosition(left, top);
+  }
+
+  getStoredFloatingDatePosition() {
+    const storedValue = this.getStorageItem(DATE_POSITION_KEY);
+    if (!storedValue) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(storedValue);
+      if (Number.isFinite(parsed?.left) && Number.isFinite(parsed?.top)) {
+        return {
+          left: parsed.left,
+          top: parsed.top
+        };
+      }
+    } catch (error) {
+      console.warn('Unable to parse stored floating date position.', error);
+    }
+
+    return null;
+  }
+
+  saveFloatingDatePosition(left, top) {
+    if (!Number.isFinite(left) || !Number.isFinite(top)) {
+      this.removeStorageItem(DATE_POSITION_KEY);
+      return;
+    }
+
+    const payload = JSON.stringify({ left, top });
+    this.setStorageItem(DATE_POSITION_KEY, payload);
+  }
+
+  getDefaultFloatingDatePosition() {
+    if (!this.boardDate || typeof window === 'undefined') {
+      return { left: 24, top: 24 };
+    }
+
+    const margin = Math.max(this.floatingDateEdgeMargin, 24);
+    const rect = this.boardDate.getBoundingClientRect();
+    const preferredLeft = window.innerWidth - rect.width - margin;
+    const left = clamp(preferredLeft, margin, Math.max(margin, window.innerWidth - rect.width - margin));
+
+    return {
+      left,
+      top: margin
+    };
   }
 
   queueBoardHeaderResize() {
