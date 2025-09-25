@@ -32,7 +32,7 @@ const PEN_COLOUR_SWATCHES = [
 
 const RAINBOW_INDICATOR = 'conic-gradient(from 0deg, #ff004d, #ffa500, #ffee00, #00d084, #1e4dd8, #7f3f98, #ff004d)';
 
-const PHONICS_LINES_ASSET_PATH = 'icons/Phonics lines.png';
+const PHONICS_LINES_ASSET_PATH = 'icons/Phonics lines.svg';
 const PHONICS_LINES_IMAGE_SRC = getAssetUrl(PHONICS_LINES_ASSET_PATH);
 let phonicsLinesImage = null;
 let phonicsLinesImagePromise = null;

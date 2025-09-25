@@ -2250,7 +2250,7 @@ body.is-fullscreen #toolbarBottom {
 
 .style-preview.style-phonics-lines {
   /* Keep in sync with PHONICS_LINES_ASSET_PATH in js/Controls.js */
-  background-image: url("../assets/icons/Phonics lines.png");
+  background-image: url("../assets/icons/Phonics lines.svg");
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
