@@ -15,6 +15,9 @@
   --control-button-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.72) 100%);
   --control-button-bg-hover: linear-gradient(180deg, rgba(29, 41, 81, 0.92) 0%, rgba(10, 9, 3, 0.88) 100%);
   --control-button-bg-active: linear-gradient(180deg, rgba(29, 41, 81, 0.88) 0%, rgba(10, 9, 3, 0.82) 100%);
+  --control-button-surface: var(--control-button-bg);
+  --control-button-surface-hover: var(--control-button-bg-hover);
+  --control-button-surface-active: var(--control-button-bg-active);
 }
 
 body {
@@ -1354,7 +1357,7 @@ body.is-fullscreen .board-palette {
     .side-panel .control-popover__toggle,
     #toolbarToggle
   ) {
-  --glass-base: var(--control-button-bg);
+  --glass-base: var(--control-button-surface);
   --glass-border-width: 2px;
   --glass-border-color: rgba(255, 255, 255, 0.55);
   --glass-shadow: 0 16px 32px rgba(10, 9, 3, 0.22);
@@ -1370,6 +1373,8 @@ body.is-fullscreen .board-palette {
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.28) 45%, rgba(255, 255, 255, 0.08) 100%),
     var(--glass-base);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
   box-shadow: var(--glass-focus-ring), var(--glass-shadow), var(--glass-inset-shadow);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -1852,7 +1857,7 @@ body.is-fullscreen .board-palette {
   color: #111111;
 }
 .btn.icon {
-  --glass-base: var(--control-button-bg);
+  --glass-base: var(--control-button-surface);
   --glass-border-width: 2px;
   --glass-border-color: rgba(255, 255, 255, 0.6);
   --glass-shadow: 0 16px 30px rgba(10, 9, 3, 0.22);
@@ -1878,14 +1883,14 @@ body.is-fullscreen .board-palette {
 
 .btn.icon:hover,
 .btn.icon:focus-visible {
-  --glass-base: var(--control-button-bg-hover);
+  --glass-base: var(--control-button-surface-hover);
   --glass-border-color: rgba(255, 255, 255, 0.78);
   color: #ffffff;
   outline: none;
 }
 
 .btn.icon:active {
-  --glass-base: var(--control-button-bg-active);
+  --glass-base: var(--control-button-surface-active);
 }
 
 .btn.icon.is-disabled,
