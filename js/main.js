@@ -1327,6 +1327,85 @@ function setupLessonAndPracticePrompts() {
     );
   };
 
+  const LETTER_APPEAR_CLASS = 'letter-appear';
+
+  const animateLetterPaths = element => {
+    if (!element) {
+      return false;
+    }
+
+    const svgPaths = element.querySelectorAll('svg path');
+    if (!svgPaths.length) {
+      return false;
+    }
+
+    let applied = false;
+
+    svgPaths.forEach(path => {
+      if (typeof path?.getTotalLength !== 'function') {
+        path.style.transition = '';
+        path.style.strokeDasharray = '';
+        path.style.strokeDashoffset = '';
+        return;
+      }
+
+      const totalLength = path.getTotalLength();
+      if (!Number.isFinite(totalLength) || totalLength <= 0) {
+        path.style.transition = '';
+        path.style.strokeDasharray = '';
+        path.style.strokeDashoffset = '';
+        return;
+      }
+
+      applied = true;
+
+      path.style.transition = 'none';
+      path.style.strokeDasharray = totalLength;
+      path.style.strokeDashoffset = totalLength;
+
+      path.getBoundingClientRect();
+
+      path.style.transition = 'stroke-dashoffset 420ms ease-out';
+      path.style.strokeDashoffset = '0';
+
+      const cleanup = () => {
+        path.style.transition = '';
+        path.style.strokeDasharray = '';
+        path.style.strokeDashoffset = '';
+        path.removeEventListener('transitionend', cleanup);
+        path.removeEventListener('transitioncancel', cleanup);
+      };
+
+      path.addEventListener('transitionend', cleanup);
+      path.addEventListener('transitioncancel', cleanup);
+    });
+
+    return applied;
+  };
+
+  const animatePracticeLetterReveal = element => {
+    if (!element) {
+      return;
+    }
+
+    if (animateLetterPaths(element)) {
+      return;
+    }
+
+    element.classList.remove(LETTER_APPEAR_CLASS);
+    void element.offsetWidth;
+
+    const cleanup = () => {
+      element.classList.remove(LETTER_APPEAR_CLASS);
+      element.removeEventListener('animationend', cleanup);
+      element.removeEventListener('animationcancel', cleanup);
+    };
+
+    element.addEventListener('animationend', cleanup);
+    element.addEventListener('animationcancel', cleanup);
+    element.classList.add(LETTER_APPEAR_CLASS);
+  };
+
   const setActivePracticeLetter = pointerIndex => {
     if (practiceState.activeLetterElement) {
       practiceState.activeLetterElement.classList.remove('is-active');
@@ -1511,6 +1590,9 @@ function setupLessonAndPracticePrompts() {
     if (letter && letter.isHidden) {
       letter.isHidden = false;
       letter.element?.classList.remove('is-hidden');
+      if (letter.element) {
+        animatePracticeLetterReveal(letter.element);
+      }
     }
 
     setActivePracticeLetter(pointer);

@@ -2988,6 +2988,11 @@ body.info-panel-open {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
 }
 
+.letter-appear {
+  animation: letterIn 420ms ease-out;
+  transform-origin: left bottom;
+}
+
 .practice-preview__letter.is-hidden {
   opacity: 0;
   transform: scale(0.7);
@@ -3036,6 +3041,17 @@ body.info-panel-open {
   100% {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes letterIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
   }
 }
 
