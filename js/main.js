@@ -2342,6 +2342,18 @@ function setupLessonAndPracticePrompts() {
     }
   };
 
+  const requestRevealFlyoutSubmit = () => {
+    if (!revealLettersForm) {
+      return;
+    }
+
+    if (typeof revealLettersForm.requestSubmit === 'function') {
+      revealLettersForm.requestSubmit();
+    } else {
+      revealLettersForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    }
+  };
+
   const openRevealFlyout = () => {
     if (!revealLettersFlyout || !revealLettersButton || isRevealFlyoutOpen) {
       return;
@@ -2429,12 +2441,14 @@ function setupLessonAndPracticePrompts() {
       applyButton.type = 'submit';
       applyButton.className = 'practice-strip__button practice-strip__button--primary';
       applyButton.textContent = 'Apply';
+      applyButton.setAttribute('aria-label', 'Apply practice text');
 
       practiceStripCancel = document.createElement('button');
       practiceStripCancel.type = 'button';
       practiceStripCancel.id = 'practiceStripCancel';
       practiceStripCancel.className = 'practice-strip__button';
       practiceStripCancel.textContent = 'Cancel';
+      practiceStripCancel.setAttribute('aria-label', 'Cancel practice text changes');
 
       actions.appendChild(applyButton);
       actions.appendChild(practiceStripCancel);
@@ -2576,6 +2590,31 @@ function setupLessonAndPracticePrompts() {
     closePracticeStrip({ restoreFocus: true });
   });
 
+  const requestPracticeStripSubmit = () => {
+    if (!practiceStripForm) {
+      return;
+    }
+
+    if (typeof practiceStripForm.requestSubmit === 'function') {
+      practiceStripForm.requestSubmit();
+    } else {
+      practiceStripForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    }
+  };
+
+  practiceStripInput?.addEventListener('keydown', event => {
+    if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      requestPracticeStripSubmit();
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closePracticeStrip({ restoreFocus: true });
+    }
+  });
+
   const handlePracticeStripDismiss = () => {
     closePracticeStrip({ restoreFocus: true });
   };
@@ -2621,6 +2660,19 @@ function setupLessonAndPracticePrompts() {
     event.preventDefault();
     applyHiddenLetters(revealLettersInput?.value ?? '');
     closeRevealFlyout({ restoreFocus: true });
+  });
+
+  revealLettersInput?.addEventListener('keydown', event => {
+    if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      requestRevealFlyoutSubmit();
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeRevealFlyout({ restoreFocus: true });
+    }
   });
 
   revealLettersCancel?.addEventListener('click', () => {
