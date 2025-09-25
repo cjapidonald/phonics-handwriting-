@@ -17,11 +17,91 @@ const controls = new Controls(userData);
 const storage = getLocalStorage();
 
 const rewriterLinesContext = controls.rewriterLinesCanvas.getContext('2d');
-rewriterLinesContext.imageSmoothingEnabled = false;
 const rewriterContext = controls.rewriterCanvas.getContext('2d');
 const rewriterMaskContext = controls.rewriterMaskCanvas.getContext('2d');
 
-rewriterContext.lineCap = 'round';
+const canvasElements = [
+  controls.rewriterCanvas,
+  controls.rewriterTraceCanvas,
+  controls.rewriterLinesCanvas,
+  controls.rewriterPageCanvas,
+  controls.rewriterMaskCanvas
+];
+
+let resizeDebounceHandle = null;
+
+function applyCanvasContextDefaults() {
+  [rewriterContext, rewriterLinesContext, rewriterMaskContext].forEach(context => {
+    if (!context) {
+      return;
+    }
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+  });
+
+  if (rewriterLinesContext) {
+    rewriterLinesContext.imageSmoothingEnabled = false;
+  }
+}
+
+function resizeCanvasesToContainer() {
+  const container = controls.writerContainer;
+  if (!container) {
+    return;
+  }
+
+  const rect = container.getBoundingClientRect();
+  const cssWidth = rect.width || container.clientWidth || 0;
+  const cssHeight = rect.height || container.clientHeight || 0;
+  if (!cssWidth || !cssHeight) {
+    return;
+  }
+  const pixelRatio = window.devicePixelRatio || 1;
+  const pixelWidth = Math.max(0, Math.round(cssWidth * pixelRatio));
+  const pixelHeight = Math.max(0, Math.round(cssHeight * pixelRatio));
+
+  canvasElements.forEach(canvas => {
+    if (!canvas) {
+      return;
+    }
+
+    if (canvas.width !== pixelWidth) {
+      canvas.width = pixelWidth;
+    }
+    if (canvas.height !== pixelHeight) {
+      canvas.height = pixelHeight;
+    }
+
+    canvas.style.width = `${cssWidth}px`;
+    canvas.style.height = `${cssHeight}px`;
+  });
+
+  applyCanvasContextDefaults();
+}
+
+function handleResizeDebounced() {
+  if (resizeDebounceHandle !== null) {
+    window.clearTimeout(resizeDebounceHandle);
+  }
+
+  resizeDebounceHandle = window.setTimeout(() => {
+    resizeDebounceHandle = null;
+    resizeCanvasesToContainer();
+  }, 150);
+}
+
+function initialiseCanvasResizing() {
+  resizeCanvasesToContainer();
+  window.addEventListener('resize', handleResizeDebounced);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initialiseCanvasResizing);
+} else {
+  initialiseCanvasResizing();
+}
+
+applyCanvasContextDefaults();
 
 let penDown = false;
 let isRewriting = false;
