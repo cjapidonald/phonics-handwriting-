@@ -104,6 +104,11 @@ applyCanvasContextDefaults();
 
 let penDown = false;
 let isRewriting = false;
+let isReplaying = false;
+let replayAnimationFrameId = null;
+let replayQueueEntries = [];
+let replayQueueIndex = 0;
+let replayLastTimestamp = null;
 let previousDrawPosition = new Point(0, 0);
 let currentLine = [];
 let rainbowHue = 0;
@@ -128,6 +133,9 @@ const timerController = new TimerController({
   controls
 });
 timerController.init();
+
+const replayButton = document.getElementById('btnReplay');
+const replaySpeedInput = document.getElementById('replaySpeed');
 
 async function initialiseApp() {
   try {
@@ -169,6 +177,144 @@ async function initialiseApp() {
 initialiseApp().catch(error => {
   console.error('Failed to initialise Teach Handwriting.', error);
 });
+
+function stopReplay({ restore = true } = {}) {
+  if (replayAnimationFrameId !== null) {
+    if (typeof window !== 'undefined' && typeof window.cancelAnimationFrame === 'function') {
+      window.cancelAnimationFrame(replayAnimationFrameId);
+    }
+    replayAnimationFrameId = null;
+  }
+
+  const wasReplaying = isReplaying;
+  replayQueueEntries = [];
+  replayQueueIndex = 0;
+  replayLastTimestamp = null;
+  isReplaying = false;
+
+  if (replayButton) {
+    replayButton.classList.remove('is-active');
+    replayButton.setAttribute('aria-pressed', 'false');
+  }
+
+  controls.setUndoRedoEnabled(true);
+
+  if (restore && wasReplaying && controls.rewriterCanvas) {
+    rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
+    rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
+    drawStoredLines(rewriterContext, true).catch(error => {
+      console.error('Unable to restore stored handwriting after replay.', error);
+    });
+  }
+}
+
+function replayStrokes(speed = Number(replaySpeedInput?.value ?? 1)) {
+  if (isRewriting || isReplaying) {
+    return;
+  }
+
+  if (!controls.rewriterCanvas || !rewriterContext || !userData?.storedLines?.length) {
+    return;
+  }
+
+  const entries = [];
+  for (let lineIndex = 0; lineIndex < userData.storedLines.length; lineIndex++) {
+    const line = userData.storedLines[lineIndex];
+    if (!Array.isArray(line) || !line.length) {
+      continue;
+    }
+
+    for (let segmentIndex = 0; segmentIndex < line.length; segmentIndex++) {
+      const segment = line[segmentIndex];
+      if (!segment) {
+        continue;
+      }
+      entries.push({ type: 'segment', segment });
+    }
+
+    if (lineIndex < userData.storedLines.length - 1) {
+      entries.push({ type: 'pause' });
+    }
+  }
+
+  if (!entries.length) {
+    return;
+  }
+
+  replayQueueEntries = entries;
+  replayQueueIndex = 0;
+  replayLastTimestamp = null;
+  isReplaying = true;
+
+  controls.setUndoRedoEnabled(false);
+
+  if (replayButton) {
+    replayButton.classList.add('is-active');
+    replayButton.setAttribute('aria-pressed', 'true');
+  }
+
+  rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
+  rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
+
+  const resolveSpeed = () => {
+    const sliderValue = Number(replaySpeedInput?.value);
+    if (Number.isFinite(sliderValue) && sliderValue > 0) {
+      return sliderValue;
+    }
+    if (Number.isFinite(speed) && speed > 0) {
+      return speed;
+    }
+    return 1;
+  };
+
+  const step = timestamp => {
+    if (!isReplaying) {
+      return;
+    }
+
+    if (replayQueueIndex >= replayQueueEntries.length) {
+      stopReplay({ restore: false });
+      return;
+    }
+
+    const entry = replayQueueEntries[replayQueueIndex];
+    const currentSpeed = Math.max(resolveSpeed(), 0.01);
+    const baseDelay = entry.type === 'pause' ? 400 : 50;
+    const requiredElapsed = baseDelay / currentSpeed;
+
+    if (replayLastTimestamp === null) {
+      replayLastTimestamp = timestamp - requiredElapsed;
+    }
+
+    if (timestamp - replayLastTimestamp < requiredElapsed) {
+      replayAnimationFrameId = window.requestAnimationFrame(step);
+      return;
+    }
+
+    replayLastTimestamp = timestamp;
+
+    if (entry.type === 'segment') {
+      const { segment } = entry;
+      rewriterContext.lineWidth = segment.penOptions.width;
+      rewriterContext.strokeStyle = segment.penOptions.colour;
+      rewriterContext.beginPath();
+      rewriterContext.moveTo(segment.start.x, segment.start.y);
+      rewriterContext.lineTo(segment.end.x, segment.end.y);
+      rewriterContext.stroke();
+    }
+
+    replayQueueIndex += 1;
+
+    if (replayQueueIndex >= replayQueueEntries.length) {
+      stopReplay({ restore: false });
+      return;
+    }
+
+    replayAnimationFrameId = window.requestAnimationFrame(step);
+  };
+
+  replayAnimationFrameId = window.requestAnimationFrame(step);
+}
 
 function setBoardControlsHidden(isHidden) {
   const body = document.body;
@@ -244,6 +390,10 @@ function setupEventListeners() {
   attachClickListener(
     controls.rewriteButton,
     async () => {
+      if (isReplaying) {
+        stopReplay({ restore: false });
+      }
+
       if (isRewriting) {
         controller?.abort();
         return;
@@ -255,6 +405,19 @@ function setupEventListeners() {
       await rewrite(signal);
     },
     '#btnRewrite'
+  );
+
+  attachClickListener(
+    replayButton,
+    () => {
+      if (isReplaying) {
+        stopReplay();
+        return;
+      }
+
+      replayStrokes();
+    },
+    '#btnReplay'
   );
 
   const undoRedoHandlers = [
@@ -278,6 +441,9 @@ function setupEventListeners() {
       handler: () => {
         if (isRewriting) {
           controller?.abort();
+        }
+        if (isReplaying) {
+          stopReplay({ restore: false });
         }
         resetCanvas();
       }
@@ -432,7 +598,7 @@ function setupEventListeners() {
 }
 
 async function undoLastLine() {
-  if (isRewriting) {
+  if (isRewriting || isReplaying) {
     return false;
   }
 
@@ -448,7 +614,7 @@ async function undoLastLine() {
 }
 
 async function redoLastLine() {
-  if (isRewriting) {
+  if (isRewriting || isReplaying) {
     return false;
   }
 
@@ -901,6 +1067,10 @@ function setupLessonAndPracticePrompts() {
 }
 
 function resetCanvas() {
+  if (isReplaying) {
+    stopReplay({ restore: false });
+  }
+
   rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
   rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
   userData.deletedLines = [];
@@ -909,6 +1079,10 @@ function resetCanvas() {
 }
 
 async function rewrite(abortSignal = new AbortSignal()) {
+  if (isReplaying) {
+    stopReplay({ restore: false });
+  }
+
   if (abortSignal.aborted || isRewriting || !userData.storedLines.length) {
     setRewriteButtonState(false);
     return;
@@ -1002,7 +1176,7 @@ function getActiveStrokeColour() {
 }
 
 function drawStart(event) {
-  if (isRewriting) {
+  if (isRewriting || isReplaying) {
     return;
   }
 
