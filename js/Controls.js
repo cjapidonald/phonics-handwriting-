@@ -12,6 +12,7 @@ const REWRITE_SPEED_MAX = 8;
 
 const TOOLBAR_POSITION_KEY = 'ui.toolbarPosition';
 const DATE_POSITION_KEY = 'ui.datePosition';
+const LESSON_TITLE_POSITION_KEY = 'ui.lessonTitlePosition';
 
 const PEN_COLOUR_SWATCHES = [
   '#111111',
@@ -179,6 +180,8 @@ export class Controls {
       this.queueBoardHeaderResize();
     };
     this.isFullscreenActive = false;
+    this.lessonTitleIsFloating = false;
+    this.lessonTitleHasStoredPosition = false;
     this.lessonTitlePosition = null;
     this.lessonTitlePointerId = null;
     this.lessonTitlePointerOffset = { x: 0, y: 0 };
@@ -1071,6 +1074,11 @@ main
       this.boardDateDragPointerId = null;
       this.boardDate?.classList.remove('is-dragging');
     });
+
+    const storedDatePosition = this.getStoredFloatingDatePosition();
+    if (storedDatePosition) {
+      this.activateFloatingDate();
+    }
   }
 
   setupLessonTitle() {
@@ -1140,10 +1148,11 @@ main
     };
 
     const handlePointerDown = event => {
-      if (!this.isFullscreenActive || event.button === 1 || event.button === 2) {
+      if (event.button === 1 || event.button === 2) {
         return;
       }
 
+      this.enableLessonTitleFloating(true);
       this.lessonTitlePointerId = event.pointerId;
       const rect = element.getBoundingClientRect();
       this.lessonTitlePointerOffset = {
@@ -1163,10 +1172,6 @@ main
     };
 
     const handlePointerMove = event => {
-      if (!this.isFullscreenActive) {
-        return;
-      }
-
       if (this.lessonTitlePointerId === null || event.pointerId !== this.lessonTitlePointerId) {
         return;
       }
@@ -1192,6 +1197,10 @@ main
           // Ignore inability to release pointer.
         }
       }
+
+      if (this.lessonTitlePosition) {
+        this.saveLessonTitlePosition(this.lessonTitlePosition.left, this.lessonTitlePosition.top);
+      }
     };
 
     element.addEventListener('pointerdown', handlePointerDown);
@@ -1206,10 +1215,18 @@ main
 
     if (typeof window !== 'undefined') {
       window.addEventListener('resize', () => {
-        if (this.isFullscreenActive) {
+        if (this.lessonTitleIsFloating || this.isFullscreenActive) {
           this.ensureLessonTitleFloatingPosition();
         }
       });
+    }
+
+    const storedLessonPosition = this.getStoredLessonTitlePosition();
+    if (storedLessonPosition) {
+      this.lessonTitlePosition = storedLessonPosition;
+      this.lessonTitleHasStoredPosition = true;
+      this.enableLessonTitleFloating(false);
+      this.setLessonTitleFloatingPosition(storedLessonPosition.left, storedLessonPosition.top);
     }
   }
 
@@ -1218,6 +1235,8 @@ main
       return;
     }
 
+    this.boardLessonTitle.classList.add('is-floating');
+    this.lessonTitleIsFloating = true;
     const containerRect = this.boardRegion.getBoundingClientRect();
     const containerWidth = containerRect.width;
     const containerHeight = containerRect.height;
@@ -1245,6 +1264,9 @@ main
     this.boardLessonTitle.style.top = `${top}px`;
     this.boardLessonTitle.style.transform = 'translate3d(0, 0, 0)';
     this.lessonTitlePosition = { left, top };
+    if (this.lessonTitleHasStoredPosition) {
+      this.saveLessonTitlePosition(left, top);
+    }
   }
 
   setLessonTitleFloatingPosition(left, top) {
@@ -1252,6 +1274,8 @@ main
       return;
     }
 
+    this.boardLessonTitle.classList.add('is-floating');
+    this.lessonTitleIsFloating = true;
     const containerRect = this.boardRegion.getBoundingClientRect();
     const elementWidth = this.boardLessonTitle.offsetWidth;
     const elementHeight = this.boardLessonTitle.offsetHeight;
@@ -1267,6 +1291,28 @@ main
     this.lessonTitlePosition = { left: clampedLeft, top: clampedTop };
   }
 
+  enableLessonTitleFloating(preserveCurrentPosition = false) {
+    if (!this.boardLessonTitle || !this.boardRegion) {
+      return;
+    }
+
+    this.boardLessonTitle.classList.add('is-floating');
+    this.lessonTitleIsFloating = true;
+
+    if (preserveCurrentPosition) {
+      const containerRect = this.boardRegion.getBoundingClientRect();
+      const elementRect = this.boardLessonTitle.getBoundingClientRect();
+      if (containerRect && elementRect) {
+        this.lessonTitlePosition = {
+          left: elementRect.left - containerRect.left,
+          top: elementRect.top - containerRect.top
+        };
+      }
+    }
+
+    this.ensureLessonTitleFloatingPosition();
+  }
+
   applyFullscreenLessonTitleState(isFullscreen) {
     this.isFullscreenActive = isFullscreen;
 
@@ -1274,32 +1320,51 @@ main
       return;
     }
 
-    if (!isFullscreen) {
-      this.lessonTitlePosition = null;
-      const pointerId = this.lessonTitlePointerId;
-      this.lessonTitlePointerId = null;
-      this.lessonTitlePointerOffset = { x: 0, y: 0 };
-      if (pointerId !== null) {
-        try {
-          this.boardLessonTitle.releasePointerCapture?.(pointerId);
-        } catch (error) {
-          // Ignore inability to release pointer.
-        }
+    if (isFullscreen) {
+      if (typeof window !== 'undefined') {
+        window.requestAnimationFrame(() => {
+          this.enableLessonTitleFloating(false);
+        });
+      } else {
+        this.enableLessonTitleFloating(false);
       }
-      this.boardLessonTitle.style.left = '';
-      this.boardLessonTitle.style.top = '';
-      this.boardLessonTitle.style.transform = '';
-      this.boardLessonTitle.classList.remove('is-dragging');
       return;
     }
 
-    if (typeof window !== 'undefined') {
-      window.requestAnimationFrame(() => {
-        this.ensureLessonTitleFloatingPosition();
-      });
-    } else {
-      this.ensureLessonTitleFloatingPosition();
+    const storedPosition = this.getStoredLessonTitlePosition();
+    if (storedPosition) {
+      this.lessonTitlePosition = storedPosition;
+      this.lessonTitleHasStoredPosition = true;
+      if (typeof window !== 'undefined') {
+        window.requestAnimationFrame(() => {
+          this.enableLessonTitleFloating(false);
+          this.setLessonTitleFloatingPosition(storedPosition.left, storedPosition.top);
+        });
+      } else {
+        this.enableLessonTitleFloating(false);
+        this.setLessonTitleFloatingPosition(storedPosition.left, storedPosition.top);
+      }
+      return;
     }
+
+    const pointerId = this.lessonTitlePointerId;
+    this.lessonTitlePointerId = null;
+    this.lessonTitlePointerOffset = { x: 0, y: 0 };
+    if (pointerId !== null) {
+      try {
+        this.boardLessonTitle.releasePointerCapture?.(pointerId);
+      } catch (error) {
+        // Ignore inability to release pointer.
+      }
+    }
+    this.lessonTitleIsFloating = false;
+    this.lessonTitleHasStoredPosition = false;
+    this.lessonTitlePosition = null;
+    this.boardLessonTitle.style.left = '';
+    this.boardLessonTitle.style.top = '';
+    this.boardLessonTitle.style.transform = '';
+    this.boardLessonTitle.classList.remove('is-dragging', 'is-floating');
+    this.removeStorageItem(LESSON_TITLE_POSITION_KEY);
   }
 
   setupBoardHeaderScaling() {
@@ -1349,27 +1414,48 @@ main
 
     if (isFullscreen) {
       this.activateFloatingDate();
-    } else {
-      this.deactivateFloatingDate();
-    }
-  }
-
-  activateFloatingDate() {
-    if (this.isFloatingDateActive || !this.boardDate || !this.boardDateContainer) {
       return;
     }
 
-    this.isFloatingDateActive = true;
-    this.boardDateContainer.classList.add('is-floating-hidden');
+    const storedPosition = this.getStoredFloatingDatePosition();
+    if (storedPosition) {
+      this.activateFloatingDate();
+      this.setFloatingDatePosition(storedPosition.left, storedPosition.top);
+      this.ensureFloatingDateWithinViewport();
+      return;
+    }
 
-    if (typeof document !== 'undefined') {
-      document.body?.appendChild(this.boardDate);
+    this.deactivateFloatingDate();
+  }
+
+  activateFloatingDate({ preserveCurrentPosition = false } = {}) {
+    if (!this.boardDate || !this.boardDateContainer) {
+      return;
+    }
+
+    const currentRect = this.boardDate.getBoundingClientRect();
+    if (!this.isFloatingDateActive) {
+      this.isFloatingDateActive = true;
+      this.boardDateContainer.classList.add('is-floating-hidden');
+
+      if (typeof document !== 'undefined') {
+        document.body?.appendChild(this.boardDate);
+      }
     }
 
     this.boardDate.classList.add('is-floating');
 
     const storedPosition = this.getStoredFloatingDatePosition();
-    const { left, top } = storedPosition ?? this.getDefaultFloatingDatePosition();
+    let initialPosition = storedPosition ?? null;
+
+    if (!initialPosition && preserveCurrentPosition && currentRect) {
+      initialPosition = {
+        left: currentRect.left,
+        top: currentRect.top
+      };
+    }
+
+    const { left, top } = initialPosition ?? this.getDefaultFloatingDatePosition();
     this.setFloatingDatePosition(left, top);
     this.ensureFloatingDateWithinViewport();
 
@@ -1392,13 +1478,19 @@ main
     this.boardDate.classList.remove('is-floating', 'is-dragging');
     this.boardDate.style.left = '';
     this.boardDate.style.top = '';
+    this.boardDateFloatingLeft = null;
+    this.boardDateFloatingTop = null;
     this.boardDateContainer.classList.remove('is-floating-hidden');
     this.boardDateContainer.appendChild(this.boardDate);
   }
 
   handleFloatingDatePointerDown(event) {
-    if (!this.isFloatingDateActive || !this.boardDate || event.button === 2) {
+    if (!this.boardDate || event.button === 2) {
       return;
+    }
+
+    if (!this.isFloatingDateActive) {
+      this.activateFloatingDate({ preserveCurrentPosition: true });
     }
 
     this.boardDateDragPointerId = event.pointerId;
@@ -1416,6 +1508,7 @@ main
     }
 
     this.boardDate.classList.add('is-dragging');
+    event.preventDefault();
   }
 
   handleFloatingDatePointerMove(event) {
@@ -1458,6 +1551,7 @@ main
     this.boardDate.classList.remove('is-dragging');
     const { left, top } = this.getFloatingDatePosition();
     this.saveFloatingDatePosition(left, top);
+    event.preventDefault();
   }
 
   getFloatingDatePosition() {
@@ -1480,6 +1574,8 @@ main
       return;
     }
 
+    this.isFloatingDateActive = true;
+    this.boardDate.classList.add('is-floating');
     this.boardDateFloatingLeft = left;
     this.boardDateFloatingTop = top;
     this.boardDate.style.left = `${left}px`;
@@ -1545,6 +1641,39 @@ main
 
     const payload = JSON.stringify({ left, top });
     this.setStorageItem(DATE_POSITION_KEY, payload);
+  }
+
+  getStoredLessonTitlePosition() {
+    const storedValue = this.getStorageItem(LESSON_TITLE_POSITION_KEY);
+    if (!storedValue) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(storedValue);
+      if (Number.isFinite(parsed?.left) && Number.isFinite(parsed?.top)) {
+        return {
+          left: parsed.left,
+          top: parsed.top
+        };
+      }
+    } catch (error) {
+      console.warn('Unable to parse stored lesson title position.', error);
+    }
+
+    return null;
+  }
+
+  saveLessonTitlePosition(left, top) {
+    if (!Number.isFinite(left) || !Number.isFinite(top)) {
+      this.removeStorageItem(LESSON_TITLE_POSITION_KEY);
+      this.lessonTitleHasStoredPosition = false;
+      return;
+    }
+
+    const payload = JSON.stringify({ left, top });
+    this.setStorageItem(LESSON_TITLE_POSITION_KEY, payload);
+    this.lessonTitleHasStoredPosition = true;
   }
 
   getDefaultFloatingDatePosition() {
@@ -1649,7 +1778,7 @@ main
 
     this.queueBoardHeaderResize();
 
-    if (this.isFullscreenActive) {
+    if (this.isFullscreenActive || this.lessonTitleIsFloating) {
       if (typeof window !== 'undefined') {
         window.requestAnimationFrame(() => {
           this.ensureLessonTitleFloatingPosition();

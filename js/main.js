@@ -63,6 +63,12 @@ teachController = new TeachController({
   previewContainer: document.getElementById('teachPreview'),
   previewToggleButton: document.getElementById('btnToggleFreezePreview'),
   hideLettersButton: document.getElementById('btnHideLetters'),
+  hideLettersModal: document.getElementById('hideLettersModal'),
+  hideLettersBackdrop: document.getElementById('hideLettersModalBackdrop'),
+  hideLettersList: document.getElementById('hideLettersList'),
+  hideLettersCloseButton: document.getElementById('hideLettersClose'),
+  hideLettersResetButton: document.getElementById('hideLettersReset'),
+  hideLettersDoneButton: document.getElementById('hideLettersDone'),
   enableDefaultNextHandler: false
 });
 
@@ -331,19 +337,9 @@ function setupLessonAndPracticePrompts() {
 
   if (lessonTitleButton) {
     lessonTitleButton.addEventListener('click', () => {
-      if (isFullscreenActive() && lessonTitleFlyout && lessonTitleFlyoutInput) {
+      if (lessonTitleFlyout && lessonTitleFlyoutInput) {
         toggleLessonFlyout();
-        return;
       }
-
-      const inputValue = controls.lessonTitleInput?.value ?? '';
-      const boardValue = controls.boardLessonTitle?.textContent ?? '';
-      const initialValue = inputValue.trim() || boardValue.trim();
-      const result = window.prompt('Enter lesson title', initialValue);
-      if (result === null) {
-        return;
-      }
-      syncStoredLessonTitle(result);
     });
   }
 

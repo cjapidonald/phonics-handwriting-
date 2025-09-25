@@ -15,6 +15,12 @@ export class TeachController {
     previewContainer,
     previewToggleButton,
     hideLettersButton,
+    hideLettersModal,
+    hideLettersBackdrop,
+    hideLettersList,
+    hideLettersCloseButton,
+    hideLettersResetButton,
+    hideLettersDoneButton,
     enableDefaultNextHandler = true
   }) {
     this.overlay = overlay ?? null;
@@ -26,6 +32,12 @@ export class TeachController {
     this.previewToggleButton = previewToggleButton ?? null;
     this.hideLettersButton = hideLettersButton ?? null;
     this.hideLettersLabelElement = this.hideLettersButton?.querySelector('[data-button-label]') ?? null;
+    this.hideLettersModal = hideLettersModal ?? null;
+    this.hideLettersBackdrop = hideLettersBackdrop ?? null;
+    this.hideLettersList = hideLettersList ?? null;
+    this.hideLettersCloseButton = hideLettersCloseButton ?? null;
+    this.hideLettersResetButton = hideLettersResetButton ?? null;
+    this.hideLettersDoneButton = hideLettersDoneButton ?? null;
     this.enableDefaultNextHandler = enableDefaultNextHandler;
 
     this.overlayContent = null;
@@ -46,6 +58,8 @@ export class TeachController {
     this.revealHistory = [];
     this.hiddenLettersPromptValue = '';
     this.hiddenLetterFilter = new Set();
+    this.isHideLettersModalOpen = false;
+    this.hideLettersModalHideTimer = null;
 
     this.handleTeach = this.handleTeach.bind(this);
     this.handleNext = this.handleNext.bind(this);
@@ -55,6 +69,8 @@ export class TeachController {
     this.handleHideLetters = this.handleHideLetters.bind(this);
     this.handleOverlayClick = this.handleOverlayClick.bind(this);
     this.handleOverlayKeydown = this.handleOverlayKeydown.bind(this);
+    this.handleHideLettersListClick = this.handleHideLettersListClick.bind(this);
+    this.handleHideLettersListKeydown = this.handleHideLettersListKeydown.bind(this);
 
     this.teachButton?.addEventListener('click', this.handleTeach);
     if (this.nextButton && this.enableDefaultNextHandler) {
@@ -66,12 +82,39 @@ export class TeachController {
     this.previewContainer?.addEventListener('click', this.handlePreviewClick);
     this.previewToggleButton?.addEventListener('click', this.handleTogglePreview);
     this.hideLettersButton?.addEventListener('click', this.handleHideLetters);
+    this.hideLettersList?.addEventListener('click', this.handleHideLettersListClick);
+    this.hideLettersList?.addEventListener('keydown', this.handleHideLettersListKeydown);
+    this.hideLettersCloseButton?.addEventListener('click', () => {
+      this.closeHideLettersModal({ restoreFocus: true });
+    });
+    this.hideLettersDoneButton?.addEventListener('click', () => {
+      this.closeHideLettersModal({ restoreFocus: true });
+    });
+    this.hideLettersResetButton?.addEventListener('click', () => {
+      this.applyHiddenLetterFilter('');
+      this.updateHideLettersModalButtons();
+    });
+    this.hideLettersBackdrop?.addEventListener('click', () => {
+      this.closeHideLettersModal({ restoreFocus: true });
+    });
     this.textInput?.addEventListener('keydown', event => {
       if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
         this.handleTeach();
       }
     });
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('keydown', event => {
+        if (!this.isHideLettersModalOpen) {
+          return;
+        }
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          this.closeHideLettersModal({ restoreFocus: true });
+        }
+      });
+    }
 
     this.overlay?.addEventListener('click', this.handleOverlayClick);
     this.overlay?.addEventListener('keydown', this.handleOverlayKeydown, true);
@@ -151,22 +194,250 @@ export class TeachController {
       return;
     }
 
-    const promptValue = this.hiddenLettersPromptValue ?? '';
-    const result = window.prompt('Enter letters to hide (leave blank to show all letters)', promptValue);
-    if (result === null) {
+    this.openHideLettersModal();
+  }
+
+  openHideLettersModal() {
+    if (!this.hideLettersModal) {
       return;
     }
 
-    const nextValue = typeof result === 'string' ? result : '';
-    this.hiddenLettersPromptValue = nextValue;
-    this.applyHiddenLetterFilter(nextValue);
-    this.setHideMode(false);
+    this.populateHideLettersModal();
+    this.updateHideLettersModalButtons();
+
+    window.clearTimeout(this.hideLettersModalHideTimer);
+    this.hideLettersModalHideTimer = null;
+
+    if (this.hideLettersBackdrop) {
+      this.hideLettersBackdrop.hidden = false;
+      window.requestAnimationFrame(() => {
+        this.hideLettersBackdrop?.classList.add('is-visible');
+      });
+    }
+
+    this.hideLettersModal.hidden = false;
+    this.hideLettersModal.setAttribute('aria-hidden', 'false');
+    window.requestAnimationFrame(() => {
+      this.hideLettersModal?.classList.add('is-open');
+    });
+
+    this.isHideLettersModalOpen = true;
+
+    const initialLetterButton = this.hideLettersList?.querySelector('.hide-letters__letter[data-letter]');
+    const canFocusReset = this.hideLettersResetButton && !this.hideLettersResetButton.disabled;
+    const focusTarget =
+      initialLetterButton ??
+      (canFocusReset ? this.hideLettersResetButton : null) ??
+      this.hideLettersDoneButton ??
+      this.hideLettersCloseButton ??
+      this.hideLettersButton;
+
+    if (focusTarget?.focus) {
+      window.setTimeout(() => {
+        focusTarget.focus({ preventScroll: true });
+      }, 50);
+    }
+  }
+
+  closeHideLettersModal({ restoreFocus = false } = {}) {
+    if (!this.hideLettersModal) {
+      if (restoreFocus) {
+        this.hideLettersButton?.focus?.({ preventScroll: true });
+      }
+      return;
+    }
+
+    if (!this.isHideLettersModalOpen && this.hideLettersModal.hidden) {
+      if (restoreFocus) {
+        this.hideLettersButton?.focus?.({ preventScroll: true });
+      }
+      return;
+    }
+
+    this.isHideLettersModalOpen = false;
+    this.hideLettersModal.classList.remove('is-open');
+    this.hideLettersModal.setAttribute('aria-hidden', 'true');
+    this.hideLettersBackdrop?.classList.remove('is-visible');
+
+    window.clearTimeout(this.hideLettersModalHideTimer);
+    this.hideLettersModalHideTimer = window.setTimeout(() => {
+      if (this.hideLettersModal) {
+        this.hideLettersModal.hidden = true;
+      }
+      if (this.hideLettersBackdrop) {
+        this.hideLettersBackdrop.hidden = true;
+      }
+      if (restoreFocus) {
+        this.hideLettersButton?.focus?.({ preventScroll: true });
+      }
+      this.hideLettersModalHideTimer = null;
+    }, 220);
+  }
+
+  getHideLettersCandidates() {
+    const uniqueLetters = new Map();
+    this.letters.forEach(letter => {
+      if (!letter || !letter.isRevealable) {
+        return;
+      }
+      const rawChar = typeof letter.char === 'string' ? letter.char : '';
+      if (!rawChar.trim()) {
+        return;
+      }
+      const key = rawChar.toLowerCase();
+      if (!key) {
+        return;
+      }
+      if (!uniqueLetters.has(key)) {
+        uniqueLetters.set(key, rawChar);
+      }
+    });
+
+    const keys = Array.from(uniqueLetters.keys());
+    if (LETTER_COLLATOR) {
+      keys.sort((a, b) => LETTER_COLLATOR.compare(a, b));
+    } else {
+      keys.sort((a, b) => a.localeCompare(b));
+    }
+
+    return keys.map(key => {
+      const displaySource = uniqueLetters.get(key) ?? key;
+      return {
+        key,
+        display: displaySource.toUpperCase()
+      };
+    });
+  }
+
+  populateHideLettersModal() {
+    if (!this.hideLettersList) {
+      return;
+    }
+
+    this.hideLettersList.innerHTML = '';
+    const candidates = this.getHideLettersCandidates();
+
+    if (!candidates.length) {
+      const emptyMessage = document.createElement('p');
+      emptyMessage.className = 'hide-letters__empty';
+      emptyMessage.textContent = 'Add practice text to choose letters to hide.';
+      this.hideLettersList.appendChild(emptyMessage);
+      if (this.hideLettersResetButton) {
+        this.hideLettersResetButton.disabled = true;
+        this.hideLettersResetButton.setAttribute('aria-disabled', 'true');
+      }
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    candidates.forEach(({ key, display }) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'hide-letters__letter';
+      button.dataset.letter = key;
+      button.dataset.display = display;
+      button.textContent = display;
+      fragment.appendChild(button);
+    });
+
+    this.hideLettersList.appendChild(fragment);
+  }
+
+  updateHideLettersModalButtons() {
+    if (!this.hideLettersList) {
+      return;
+    }
+
+    const hasHiddenLetters = this.hiddenLetterFilter.size > 0;
+    if (this.hideLettersResetButton) {
+      this.hideLettersResetButton.disabled = !hasHiddenLetters;
+      if (hasHiddenLetters) {
+        this.hideLettersResetButton.removeAttribute('aria-disabled');
+      } else {
+        this.hideLettersResetButton.setAttribute('aria-disabled', 'true');
+      }
+    }
+
+    const buttons = Array.from(
+      this.hideLettersList.querySelectorAll('.hide-letters__letter[data-letter]')
+    );
+
+    buttons.forEach(button => {
+      const letterKey = button.dataset.letter ?? '';
+      const display = button.dataset.display ?? letterKey.toUpperCase();
+      const isHidden = this.hiddenLetterFilter.has(letterKey);
+      button.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+      button.classList.toggle('is-active', isHidden);
+      const action = isHidden ? 'Show' : 'Hide';
+      const labelText = `${action} letter ${display}`;
+      button.setAttribute('aria-label', labelText);
+      button.title = labelText;
+    });
+  }
+
+  handleHideLettersListClick(event) {
+    const target = event.target?.closest?.('.hide-letters__letter[data-letter]');
+    if (!target) {
+      return;
+    }
+
+    const letterKey = target.dataset.letter ?? '';
+    if (!letterKey) {
+      return;
+    }
+
+    event.preventDefault();
+    this.toggleHiddenLetter(letterKey);
+  }
+
+  handleHideLettersListKeydown(event) {
+    const target = event.target?.closest?.('.hide-letters__letter[data-letter]');
+    if (!target) {
+      return;
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      const letterKey = target.dataset.letter ?? '';
+      if (letterKey) {
+        this.toggleHiddenLetter(letterKey);
+      }
+    }
+  }
+
+  toggleHiddenLetter(letterKey) {
+    if (typeof letterKey !== 'string' || !letterKey) {
+      return;
+    }
+
+    const normalizedKey = letterKey.toLowerCase();
+    const nextFilter = new Set(this.hiddenLetterFilter);
+    if (nextFilter.has(normalizedKey)) {
+      nextFilter.delete(normalizedKey);
+    } else {
+      nextFilter.add(normalizedKey);
+    }
+
+    this.applyHiddenLetterFilter(nextFilter);
+    this.updateHideLettersModalButtons();
   }
 
   applyHiddenLetterFilter(rawValue) {
-    const value = typeof rawValue === 'string' ? rawValue : '';
-    const cleaned = value.replace(/\s+/g, '').toLowerCase();
-    const uniqueCharacters = Array.from(new Set(cleaned));
+    let characters = [];
+
+    if (rawValue instanceof Set) {
+      characters = Array.from(rawValue);
+    } else if (Array.isArray(rawValue)) {
+      characters = rawValue;
+    } else if (typeof rawValue === 'string') {
+      characters = rawValue.replace(/\s+/g, '').split('');
+    }
+
+    const normalized = characters
+      .map(char => (typeof char === 'string' ? char.trim().toLowerCase() : ''))
+      .filter(char => char.length > 0);
+
+    const uniqueCharacters = Array.from(new Set(normalized));
     this.hiddenLetterFilter = new Set(uniqueCharacters);
     this.hiddenLettersPromptValue = uniqueCharacters.join('');
 
@@ -191,6 +462,7 @@ export class TeachController {
 
     this.updateAllLetterStates();
     this.updateButtonStates();
+    this.setHideMode(false);
   }
 
   handleOverlayClick(event) {
@@ -308,6 +580,7 @@ export class TeachController {
     this.hiddenLettersPromptValue = '';
     this.hiddenLetterFilter.clear();
     this.setHideMode(false);
+    this.closeHideLettersModal({ restoreFocus: false });
 
     if (!text.trim()) {
       this.clearOverlay();
