@@ -26,8 +26,214 @@ const eraserSizeInput = document.getElementById('btnEraserSize');
 const uploadCursorButton = document.getElementById('btnUploadCursor');
 const resetCursorButton = document.getElementById('btnResetCursor');
 const cursorFileInput = document.getElementById('cursorFile');
+const backgroundButton = document.getElementById('btnBackground');
+const writerPageCanvas = document.getElementById('writerPage');
 
 const CURSOR_STORAGE_KEY = 'ph.cursor';
+const BACKGROUND_STORAGE_KEY = 'ph.bg';
+const DOTTED_LINE_SPACING = 24;
+const DOTTED_BASELINE_OFFSET = 6;
+const DOTTED_PATTERN_WIDTH = 240;
+
+const BACKGROUND_OPTIONS = {
+  white: { className: 'bg-white', label: 'White' },
+  dotted: { className: 'bg-dotted', label: 'Dotted' }
+};
+
+const BACKGROUND_CLASS_NAMES = Object.values(BACKGROUND_OPTIONS).map(option => option.className);
+
+const backgroundOptionElements = new Map();
+let backgroundPopover = null;
+let currentBackgroundKey = null;
+
+const normaliseBackgroundKey = key => (key === 'dotted' ? 'dotted' : 'white');
+
+const updateBackgroundSelectionUI = key => {
+  backgroundOptionElements.forEach((label, optionKey) => {
+    const isSelected = optionKey === key;
+    const input = label.querySelector('input[type="radio"]');
+    label.classList.toggle('is-selected', isSelected);
+    if (input) {
+      input.checked = isSelected;
+    }
+  });
+};
+
+const generateDottedBackgroundPattern = () => {
+  try {
+    const ratio = window.devicePixelRatio || 1;
+    const canvas = document.createElement('canvas');
+    const width = Math.max(1, Math.round(DOTTED_PATTERN_WIDTH * ratio));
+    const height = Math.max(1, Math.round(DOTTED_LINE_SPACING * ratio));
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext('2d');
+    if (!context) {
+      return null;
+    }
+
+    context.save();
+    context.scale(ratio, ratio);
+    context.strokeStyle = 'rgba(29, 41, 81, 0.45)';
+    context.lineWidth = 1.4;
+    context.setLineDash([4, 6]);
+    context.lineCap = 'round';
+    const baselineY = DOTTED_LINE_SPACING - DOTTED_BASELINE_OFFSET;
+    context.beginPath();
+    context.moveTo(0, baselineY);
+    context.lineTo(width / ratio, baselineY);
+    context.stroke();
+    context.restore();
+
+    return canvas.toDataURL('image/png');
+  } catch (error) {
+    console.warn('Unable to generate dotted background pattern.', error);
+    return null;
+  }
+};
+
+const applyWriterBackground = (key, { persist = true } = {}) => {
+  const normalisedKey = normaliseBackgroundKey(key);
+  currentBackgroundKey = normalisedKey;
+
+  if (writerPageCanvas) {
+    writerPageCanvas.classList.remove(...BACKGROUND_CLASS_NAMES);
+    const className = BACKGROUND_OPTIONS[normalisedKey]?.className ?? BACKGROUND_OPTIONS.white.className;
+    writerPageCanvas.classList.add(className);
+
+    if (normalisedKey === 'dotted') {
+      const patternUrl = generateDottedBackgroundPattern();
+      if (patternUrl) {
+        writerPageCanvas.style.backgroundImage = `url(${patternUrl})`;
+        writerPageCanvas.style.backgroundSize = `auto ${DOTTED_LINE_SPACING}px`;
+        writerPageCanvas.style.backgroundRepeat = 'repeat';
+        writerPageCanvas.style.backgroundPosition = 'left top';
+      } else {
+        writerPageCanvas.style.backgroundImage = 'none';
+        writerPageCanvas.style.removeProperty('background-size');
+        writerPageCanvas.style.removeProperty('background-position');
+        writerPageCanvas.style.removeProperty('background-repeat');
+      }
+    } else {
+      writerPageCanvas.style.backgroundImage = 'none';
+      writerPageCanvas.style.removeProperty('background-size');
+      writerPageCanvas.style.removeProperty('background-position');
+      writerPageCanvas.style.removeProperty('background-repeat');
+    }
+  }
+
+  updateBackgroundSelectionUI(normalisedKey);
+
+  if (persist && storage) {
+    storage.setItem(BACKGROUND_STORAGE_KEY, normalisedKey);
+  }
+
+  return normalisedKey;
+};
+
+const buildBackgroundPopover = () => {
+  if (!document?.body) {
+    return null;
+  }
+
+  backgroundOptionElements.clear();
+
+  const popover = document.createElement('div');
+  popover.id = 'backgroundPopover';
+  popover.className = 'popover';
+  popover.setAttribute('role', 'dialog');
+  popover.setAttribute('aria-label', 'Background options');
+
+  const section = document.createElement('div');
+  section.className = 'popover-section';
+
+  const heading = document.createElement('h2');
+  heading.className = 'popover-title';
+  heading.textContent = 'Background';
+  section.appendChild(heading);
+
+  const optionsContainer = document.createElement('div');
+  optionsContainer.className = 'background-options';
+
+  Object.entries(BACKGROUND_OPTIONS).forEach(([optionKey, option]) => {
+    const label = document.createElement('label');
+    label.className = 'background-option';
+    label.dataset.backgroundKey = optionKey;
+
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'writerBackground';
+    input.value = optionKey;
+
+    const text = document.createElement('span');
+    text.className = 'background-option__label';
+    text.textContent = option.label;
+
+    label.appendChild(input);
+    label.appendChild(text);
+    optionsContainer.appendChild(label);
+    backgroundOptionElements.set(optionKey, label);
+
+    input.addEventListener('change', () => {
+      if (!input.checked) {
+        return;
+      }
+      applyWriterBackground(optionKey);
+      controls.closeOpenPopover();
+    });
+  });
+
+  section.appendChild(optionsContainer);
+  popover.appendChild(section);
+  document.body.appendChild(popover);
+
+  return popover;
+};
+
+const initialiseBackgroundControls = () => {
+  if (!backgroundButton || !writerPageCanvas) {
+    return;
+  }
+
+  backgroundPopover = buildBackgroundPopover();
+  if (!backgroundPopover) {
+    return;
+  }
+
+  backgroundButton.setAttribute('aria-haspopup', 'dialog');
+  backgroundButton.setAttribute('aria-expanded', 'false');
+
+  backgroundButton.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    controls.togglePopover(backgroundButton, backgroundPopover);
+  });
+
+  const storedBackground = storage?.getItem?.(BACKGROUND_STORAGE_KEY);
+  applyWriterBackground(storedBackground, { persist: false });
+
+  window.addEventListener('resize', () => {
+    if (currentBackgroundKey === 'dotted') {
+      applyWriterBackground('dotted', { persist: false });
+    }
+  });
+};
+
+initialiseBackgroundControls();
+
+if (typeof controls.setPageColour === 'function') {
+  const originalSetPageColour = controls.setPageColour.bind(controls);
+  controls.setPageColour = function patchedSetPageColour(colour, persist = true) {
+    originalSetPageColour(colour, persist);
+
+    const pageCanvas = this.rewriterPageCanvas ?? null;
+    const pageContext = this.pageContext ?? pageCanvas?.getContext?.('2d') ?? null;
+    if (pageCanvas && pageContext) {
+      pageContext.clearRect(0, 0, pageCanvas.width || 0, pageCanvas.height || 0);
+    }
+  };
+}
 
 const applyCustomCursor = dataUrl => {
   if (typeof dataUrl === 'string' && dataUrl) {
@@ -95,6 +301,459 @@ if (resetCursorButton) {
   resetCursorButton.addEventListener('click', () => {
     resetCursor();
   });
+}
+
+const STOPWATCH_POSITION_STORAGE_KEY = 'ph.stopwatch.pos';
+
+const boardRegionElement = document.getElementById('boardRegion');
+const stopwatchPanel = document.getElementById('stopwatchPanel');
+const stopwatchToggleButton = document.getElementById('btnStopwatchLeft');
+const stopwatchCloseButton = stopwatchPanel?.querySelector('[data-stopwatch-close]') ?? null;
+const stopwatchDisplay = document.getElementById('stopwatchDisplay');
+const stopwatchStartButton = document.getElementById('stopwatchStart');
+const stopwatchPauseButton = document.getElementById('stopwatchPause');
+const stopwatchResetButton = document.getElementById('stopwatchReset');
+const stopwatchDragHandle = stopwatchPanel?.querySelector('[data-stopwatch-drag-handle]') ?? null;
+
+let stopwatchPosition = readStoredStopwatchPosition();
+let stopwatchHasLoadedPosition = Boolean(stopwatchPosition);
+let stopwatchIsRunning = false;
+let stopwatchStartTimestamp = 0;
+let stopwatchAccumulatedMs = 0;
+let stopwatchAnimationFrameId = null;
+let stopwatchDragPointerId = null;
+let stopwatchResizeAnimationFrameId = null;
+const stopwatchDragOffset = { x: 0, y: 0 };
+
+function readStoredStopwatchPosition() {
+  if (!storage || typeof storage.getItem !== 'function') {
+    return null;
+  }
+
+  try {
+    const rawValue = storage.getItem(STOPWATCH_POSITION_STORAGE_KEY);
+    if (typeof rawValue !== 'string' || rawValue === '') {
+      return null;
+    }
+
+    const parsed = JSON.parse(rawValue);
+    const left = Number(parsed?.left);
+    const top = Number(parsed?.top);
+    if (Number.isFinite(left) && Number.isFinite(top)) {
+      return { left, top };
+    }
+  } catch (error) {
+    // Ignore malformed stored values
+  }
+
+  return null;
+}
+
+function persistStopwatchPosition(position) {
+  if (!storage || typeof storage.setItem !== 'function' || !position) {
+    return;
+  }
+
+  try {
+    storage.setItem(
+      STOPWATCH_POSITION_STORAGE_KEY,
+      JSON.stringify({ left: Number(position.left) || 0, top: Number(position.top) || 0 })
+    );
+  } catch (error) {
+    // Ignore storage write errors
+  }
+}
+
+function formatStopwatchTime(elapsedMs) {
+  const totalMs = Math.max(0, Math.floor(elapsedMs));
+  const totalSeconds = Math.floor(totalMs / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  const hundredths = Math.floor((totalMs % 1000) / 10);
+
+  const minutePart = String(minutes).padStart(2, '0');
+  const secondPart = String(seconds).padStart(2, '0');
+  const hundredthPart = String(hundredths).padStart(2, '0');
+  return `${minutePart}:${secondPart}.${hundredthPart}`;
+}
+
+function updateStopwatchDisplay(elapsedMs) {
+  if (!stopwatchDisplay) {
+    return;
+  }
+
+  const formatted = formatStopwatchTime(elapsedMs);
+  if (stopwatchDisplay.textContent !== formatted) {
+    stopwatchDisplay.textContent = formatted;
+  }
+}
+
+function getStopwatchElapsedMs() {
+  if (stopwatchIsRunning) {
+    return stopwatchAccumulatedMs + (performance.now() - stopwatchStartTimestamp);
+  }
+  return stopwatchAccumulatedMs;
+}
+
+function updateStopwatchControls() {
+  const elapsed = getStopwatchElapsedMs();
+
+  if (stopwatchStartButton) {
+    stopwatchStartButton.disabled = stopwatchIsRunning;
+  }
+
+  if (stopwatchPauseButton) {
+    stopwatchPauseButton.disabled = !stopwatchIsRunning;
+  }
+
+  if (stopwatchResetButton) {
+    const shouldDisableReset = !stopwatchIsRunning && elapsed <= 10;
+    stopwatchResetButton.disabled = shouldDisableReset;
+  }
+
+  if (stopwatchPanel) {
+    stopwatchPanel.classList.toggle('is-running', stopwatchIsRunning);
+  }
+}
+
+function handleStopwatchFrame(now) {
+  if (!stopwatchIsRunning) {
+    stopwatchAnimationFrameId = null;
+    return;
+  }
+
+  const elapsed = stopwatchAccumulatedMs + (now - stopwatchStartTimestamp);
+  updateStopwatchDisplay(elapsed);
+  stopwatchAnimationFrameId = window.requestAnimationFrame(handleStopwatchFrame);
+}
+
+function startStopwatch() {
+  if (stopwatchIsRunning) {
+    return;
+  }
+
+  stopwatchIsRunning = true;
+  stopwatchStartTimestamp = performance.now();
+  updateStopwatchControls();
+  updateStopwatchDisplay(getStopwatchElapsedMs());
+  stopwatchAnimationFrameId = window.requestAnimationFrame(handleStopwatchFrame);
+}
+
+function pauseStopwatch() {
+  if (!stopwatchIsRunning) {
+    return;
+  }
+
+  const now = performance.now();
+  stopwatchAccumulatedMs += now - stopwatchStartTimestamp;
+  stopwatchIsRunning = false;
+
+  if (stopwatchAnimationFrameId !== null) {
+    window.cancelAnimationFrame(stopwatchAnimationFrameId);
+    stopwatchAnimationFrameId = null;
+  }
+
+  updateStopwatchDisplay(stopwatchAccumulatedMs);
+  updateStopwatchControls();
+}
+
+function resetStopwatch() {
+  if (stopwatchIsRunning) {
+    pauseStopwatch();
+  }
+
+  stopwatchAccumulatedMs = 0;
+  updateStopwatchDisplay(0);
+  updateStopwatchControls();
+}
+
+function applyStopwatchPosition(left, top, { persist = false } = {}) {
+  if (!stopwatchPanel || !boardRegionElement) {
+    return null;
+  }
+
+  const boardRect = boardRegionElement.getBoundingClientRect();
+  const panelWidth = stopwatchPanel.offsetWidth;
+  const panelHeight = stopwatchPanel.offsetHeight;
+
+  if (!panelWidth || !panelHeight || boardRect.width <= 0 || boardRect.height <= 0) {
+    return null;
+  }
+
+  const numericLeft = Number(left);
+  const numericTop = Number(top);
+  const desiredLeft = Number.isFinite(numericLeft) ? numericLeft : 0;
+  const desiredTop = Number.isFinite(numericTop) ? numericTop : 0;
+
+  const maxLeft = Math.max(0, boardRect.width - panelWidth);
+  const maxTop = Math.max(0, boardRect.height - panelHeight);
+
+  const clampedLeft = clamp(desiredLeft, 0, maxLeft);
+  const clampedTop = clamp(desiredTop, 0, maxTop);
+
+  stopwatchPanel.style.left = `${clampedLeft}px`;
+  stopwatchPanel.style.top = `${clampedTop}px`;
+
+  const applied = { left: clampedLeft, top: clampedTop };
+  stopwatchPosition = applied;
+  stopwatchHasLoadedPosition = true;
+
+  if (persist) {
+    persistStopwatchPosition(applied);
+  }
+
+  return applied;
+}
+
+function ensureStopwatchWithinBounds({ persist = false } = {}) {
+  if (!stopwatchPanel || stopwatchPanel.hidden) {
+    return;
+  }
+
+  const currentLeft = Number.parseFloat(stopwatchPanel.style.left);
+  const currentTop = Number.parseFloat(stopwatchPanel.style.top);
+  const fallbackLeft = stopwatchPosition?.left ?? 0;
+  const fallbackTop = stopwatchPosition?.top ?? 0;
+
+  const applied = applyStopwatchPosition(
+    Number.isFinite(currentLeft) ? currentLeft : fallbackLeft,
+    Number.isFinite(currentTop) ? currentTop : fallbackTop,
+    { persist }
+  );
+
+  if (applied) {
+    stopwatchPosition = applied;
+  }
+}
+
+function getDefaultStopwatchPosition() {
+  const margin = 24;
+  const boardRect = boardRegionElement?.getBoundingClientRect();
+  const panelWidth = stopwatchPanel?.offsetWidth ?? 0;
+
+  if (boardRect) {
+    const defaultLeft = boardRect.width - panelWidth - margin;
+    return {
+      left: Number.isFinite(defaultLeft) ? defaultLeft : margin,
+      top: margin
+    };
+  }
+
+  return { left: margin, top: margin };
+}
+
+function showStopwatchPanel() {
+  if (!stopwatchPanel || !boardRegionElement) {
+    return;
+  }
+
+  if (!stopwatchPanel.hidden) {
+    ensureStopwatchWithinBounds({ persist: true });
+    return;
+  }
+
+  stopwatchPanel.hidden = false;
+  stopwatchPanel.setAttribute('aria-hidden', 'false');
+  stopwatchPanel.classList.add('is-floating');
+
+  if (stopwatchToggleButton) {
+    stopwatchToggleButton.classList.add('is-active');
+    stopwatchToggleButton.setAttribute('aria-pressed', 'true');
+  }
+
+  window.requestAnimationFrame(() => {
+    if (!stopwatchPanel) {
+      return;
+    }
+
+    if (!stopwatchHasLoadedPosition) {
+      const stored = readStoredStopwatchPosition();
+      if (stored) {
+        stopwatchPosition = stored;
+      }
+
+      const target = stopwatchPosition ?? getDefaultStopwatchPosition();
+      const applied = applyStopwatchPosition(target.left, target.top, { persist: !stopwatchPosition });
+      if (applied) {
+        stopwatchPosition = applied;
+      }
+    } else {
+      ensureStopwatchWithinBounds({ persist: true });
+    }
+  });
+}
+
+function hideStopwatchPanel() {
+  if (!stopwatchPanel || stopwatchPanel.hidden) {
+    return;
+  }
+
+  stopwatchPanel.hidden = true;
+  stopwatchPanel.setAttribute('aria-hidden', 'true');
+  stopwatchPanel.classList.remove('is-dragging');
+
+  if (stopwatchToggleButton) {
+    stopwatchToggleButton.classList.remove('is-active');
+    stopwatchToggleButton.setAttribute('aria-pressed', 'false');
+  }
+}
+
+function toggleStopwatchPanel() {
+  if (!stopwatchPanel) {
+    return;
+  }
+
+  if (stopwatchPanel.hidden) {
+    showStopwatchPanel();
+  } else {
+    hideStopwatchPanel();
+  }
+}
+
+function updateStopwatchDragPosition(event) {
+  if (!boardRegionElement || !stopwatchPanel) {
+    return null;
+  }
+
+  const boardRect = boardRegionElement.getBoundingClientRect();
+  const proposedLeft = event.clientX - boardRect.left - stopwatchDragOffset.x;
+  const proposedTop = event.clientY - boardRect.top - stopwatchDragOffset.y;
+  return applyStopwatchPosition(proposedLeft, proposedTop);
+}
+
+function handleStopwatchPointerDown(event) {
+  if (!stopwatchPanel || !stopwatchDragHandle || !boardRegionElement) {
+    return;
+  }
+
+  if (stopwatchPanel.hidden) {
+    return;
+  }
+
+  if (event.pointerType !== 'touch' && event.button !== 0) {
+    return;
+  }
+
+  stopwatchDragPointerId = event.pointerId;
+
+  const panelRect = stopwatchPanel.getBoundingClientRect();
+  stopwatchDragOffset.x = event.clientX - panelRect.left;
+  stopwatchDragOffset.y = event.clientY - panelRect.top;
+
+  stopwatchPanel.classList.add('is-dragging');
+  stopwatchDragHandle.setPointerCapture?.(event.pointerId);
+  event.preventDefault();
+}
+
+function handleStopwatchPointerMove(event) {
+  if (event.pointerId !== stopwatchDragPointerId) {
+    return;
+  }
+
+  event.preventDefault();
+  const applied = updateStopwatchDragPosition(event);
+  if (applied) {
+    stopwatchPosition = applied;
+  }
+}
+
+function handleStopwatchPointerUp(event) {
+  if (event.pointerId !== stopwatchDragPointerId) {
+    return;
+  }
+
+  stopwatchDragHandle?.releasePointerCapture?.(event.pointerId);
+  stopwatchDragPointerId = null;
+
+  if (stopwatchPanel) {
+    stopwatchPanel.classList.remove('is-dragging');
+  }
+
+  if (stopwatchPosition) {
+    persistStopwatchPosition(stopwatchPosition);
+  }
+}
+
+function handleStopwatchPointerCancel(event) {
+  if (event.pointerId !== stopwatchDragPointerId) {
+    return;
+  }
+
+  handleStopwatchPointerUp(event);
+}
+
+function handleStopwatchResize() {
+  if (!stopwatchPanel || stopwatchPanel.hidden) {
+    return;
+  }
+
+  if (stopwatchResizeAnimationFrameId !== null) {
+    return;
+  }
+
+  stopwatchResizeAnimationFrameId = window.requestAnimationFrame(() => {
+    stopwatchResizeAnimationFrameId = null;
+    ensureStopwatchWithinBounds({ persist: true });
+  });
+}
+
+if (stopwatchStartButton) {
+  stopwatchStartButton.addEventListener('click', () => {
+    startStopwatch();
+  });
+}
+
+if (stopwatchPauseButton) {
+  stopwatchPauseButton.addEventListener('click', () => {
+    pauseStopwatch();
+  });
+}
+
+if (stopwatchResetButton) {
+  stopwatchResetButton.addEventListener('click', () => {
+    resetStopwatch();
+  });
+}
+
+if (stopwatchToggleButton && stopwatchPanel) {
+  stopwatchToggleButton.addEventListener('click', () => {
+    toggleStopwatchPanel();
+  });
+}
+
+if (stopwatchCloseButton) {
+  stopwatchCloseButton.addEventListener('click', () => {
+    hideStopwatchPanel();
+    stopwatchToggleButton?.focus?.({ preventScroll: true });
+  });
+}
+
+if (stopwatchPanel) {
+  stopwatchPanel.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      hideStopwatchPanel();
+      stopwatchToggleButton?.focus?.({ preventScroll: true });
+    }
+  });
+}
+
+if (stopwatchDragHandle) {
+  stopwatchDragHandle.addEventListener('pointerdown', handleStopwatchPointerDown);
+  stopwatchDragHandle.addEventListener('pointermove', handleStopwatchPointerMove);
+  stopwatchDragHandle.addEventListener('pointerup', handleStopwatchPointerUp);
+  stopwatchDragHandle.addEventListener('pointercancel', handleStopwatchPointerCancel);
+}
+
+if (boardRegionElement) {
+  window.addEventListener('resize', handleStopwatchResize);
+}
+
+if (stopwatchDisplay) {
+  updateStopwatchDisplay(stopwatchAccumulatedMs);
+}
+
+if (stopwatchPanel) {
+  updateStopwatchControls();
 }
 
 const isHexColour = colour => typeof colour === 'string' && /^#([0-9a-f]{6}|[0-9a-f]{3})$/i.test(colour);
