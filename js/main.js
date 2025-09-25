@@ -1215,6 +1215,432 @@ function setupLessonAndPracticePrompts() {
   let practiceStripInput = document.getElementById('practiceStripInput');
   let practiceStripCancel = document.getElementById('practiceStripCancel');
 
+  const practicePreview = document.getElementById('practicePreview');
+  const practicePreviewLetters = document.getElementById('practicePreviewLetters');
+  const previousLetterButton = document.getElementById('btnPrevLetter');
+  const nextLetterButton = document.getElementById('btnNextLetter');
+  const revealLettersButton = document.getElementById('btnRevealLettersPrompt');
+  const deletePracticeButton = document.getElementById('btnDeletePracticeText');
+  const revealLettersFlyout = document.getElementById('revealLettersFlyout');
+  const revealLettersForm = document.getElementById('revealLettersForm');
+  const revealLettersInput = document.getElementById('revealLettersInput');
+  const revealLettersCancel = document.getElementById('revealLettersCancel');
+
+  if (revealLettersButton) {
+    revealLettersButton.setAttribute('aria-controls', 'revealLettersFlyout');
+    revealLettersButton.setAttribute('aria-expanded', 'false');
+    revealLettersButton.setAttribute('aria-haspopup', 'dialog');
+  }
+
+  const practiceState = {
+    text: '',
+    letters: [],
+    revealableIndices: [],
+    activeRevealableIndex: -1,
+    activeLetterIndex: -1,
+    activeLetterElement: null,
+    hiddenLetters: new Set()
+  };
+
+  const normaliseHiddenLetters = rawValue => {
+    let characters = [];
+
+    if (rawValue instanceof Set) {
+      characters = Array.from(rawValue);
+    } else if (Array.isArray(rawValue)) {
+      characters = rawValue;
+    } else if (typeof rawValue === 'string') {
+      characters = Array.from(rawValue);
+    }
+
+    const seen = new Set();
+    const uniqueCharacters = [];
+
+    characters.forEach(char => {
+      if (typeof char !== 'string') {
+        return;
+      }
+      const trimmed = char.trim();
+      if (!trimmed) {
+        return;
+      }
+      const lower = trimmed.toLowerCase();
+      if (!lower) {
+        return;
+      }
+      if (!seen.has(lower)) {
+        seen.add(lower);
+        uniqueCharacters.push(lower);
+      }
+    });
+
+    return new Set(uniqueCharacters);
+  };
+
+  const updatePracticeNavigationButtons = hasRevealable => {
+    const disable = !hasRevealable;
+
+    const applyState = (button, disabled) => {
+      if (!button) {
+        return;
+      }
+      button.disabled = disabled;
+      if (disabled) {
+        button.setAttribute('aria-disabled', 'true');
+      } else {
+        button.removeAttribute('aria-disabled');
+      }
+    };
+
+    applyState(previousLetterButton, disable);
+    applyState(nextLetterButton, disable);
+  };
+
+  const updateRevealLettersButtonState = hasLetters => {
+    if (!revealLettersButton) {
+      return;
+    }
+
+    const shouldDisable = !hasLetters;
+    revealLettersButton.disabled = shouldDisable;
+    if (shouldDisable) {
+      revealLettersButton.setAttribute('aria-disabled', 'true');
+      revealLettersButton.setAttribute('aria-expanded', 'false');
+    } else {
+      revealLettersButton.removeAttribute('aria-disabled');
+    }
+  };
+
+  const triggerPracticeLetterAnimation = element => {
+    if (!element) {
+      return;
+    }
+    element.classList.remove('is-animating');
+    void element.offsetWidth;
+    element.classList.add('is-animating');
+    element.addEventListener(
+      'animationend',
+      () => {
+        element.classList.remove('is-animating');
+      },
+      { once: true }
+    );
+  };
+
+  const setActivePracticeLetter = pointerIndex => {
+    if (practiceState.activeLetterElement) {
+      practiceState.activeLetterElement.classList.remove('is-active');
+    }
+
+    if (
+      typeof pointerIndex !== 'number' ||
+      pointerIndex < 0 ||
+      pointerIndex >= practiceState.revealableIndices.length
+    ) {
+      practiceState.activeRevealableIndex = -1;
+      practiceState.activeLetterIndex = -1;
+      practiceState.activeLetterElement = null;
+      return;
+    }
+
+    const letterIndex = practiceState.revealableIndices[pointerIndex];
+    const letter = practiceState.letters[letterIndex];
+    practiceState.activeRevealableIndex = pointerIndex;
+    practiceState.activeLetterIndex = letterIndex;
+    practiceState.activeLetterElement = letter?.element ?? null;
+
+    if (letter?.element) {
+      letter.element.classList.add('is-active');
+      triggerPracticeLetterAnimation(letter.element);
+    }
+  };
+
+  const rebuildPracticeLetters = () => {
+    const normalised = (practiceState.text ?? '').replace(/\r\n/g, '\n');
+    const characters = Array.from(normalised);
+    const letters = [];
+
+    characters.forEach((char, index) => {
+      const isNewline = char === '\n';
+      const isWhitespace = !isNewline && /\s/.test(char);
+      const isRevealable = !isWhitespace && !isNewline;
+      const lower = typeof char === 'string' ? char.toLowerCase() : '';
+      const shouldHide = isRevealable && practiceState.hiddenLetters.has(lower);
+
+      letters.push({
+        index,
+        char,
+        lower,
+        type: isNewline ? 'newline' : isWhitespace ? 'space' : 'char',
+        isRevealable,
+        isHidden: shouldHide,
+        element: null
+      });
+    });
+
+    practiceState.letters = letters;
+    practiceState.revealableIndices = [];
+
+    letters.forEach((letter, letterIndex) => {
+      if (letter.isRevealable) {
+        practiceState.revealableIndices.push(letterIndex);
+      }
+    });
+
+    let firstHiddenOrderIndex = -1;
+    for (let orderIndex = 0; orderIndex < practiceState.revealableIndices.length; orderIndex += 1) {
+      const revealIndex = practiceState.revealableIndices[orderIndex];
+      const letter = letters[revealIndex];
+      if (letter?.isHidden) {
+        firstHiddenOrderIndex = orderIndex;
+        break;
+      }
+    }
+
+    let pointerIndex = -1;
+    const revealableCount = practiceState.revealableIndices.length;
+    if (firstHiddenOrderIndex >= 0 && revealableCount > 0) {
+      pointerIndex = (firstHiddenOrderIndex - 1 + revealableCount) % revealableCount;
+    } else if (revealableCount) {
+      pointerIndex = 0;
+    }
+
+    practiceState.activeRevealableIndex = pointerIndex;
+    practiceState.activeLetterIndex =
+      pointerIndex >= 0 ? practiceState.revealableIndices[pointerIndex] : -1;
+    practiceState.activeLetterElement = null;
+  };
+
+  const updatePracticePreviewUI = () => {
+    if (practicePreviewLetters) {
+      practicePreviewLetters.innerHTML = '';
+    }
+
+    const hasLetters = practiceState.letters.length > 0;
+    if (!hasLetters) {
+      if (practicePreview) {
+        practicePreview.hidden = true;
+        practicePreview.setAttribute('aria-hidden', 'true');
+      }
+      updatePracticeNavigationButtons(false);
+      updateRevealLettersButtonState(false);
+      setActivePracticeLetter(-1);
+      return;
+    }
+
+    if (practicePreview) {
+      practicePreview.hidden = false;
+      practicePreview.setAttribute('aria-hidden', 'false');
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    practiceState.letters.forEach((letter, index) => {
+      if (letter.type === 'newline') {
+        const breakElement = document.createElement('span');
+        breakElement.className = 'practice-preview__break';
+        breakElement.setAttribute('aria-label', 'Line break');
+        breakElement.textContent = '↵';
+        fragment.appendChild(breakElement);
+        fragment.appendChild(document.createElement('br'));
+        letter.element = breakElement;
+        return;
+      }
+
+      const letterElement = document.createElement('span');
+      letterElement.className = 'practice-preview__letter';
+      letterElement.dataset.practiceIndex = String(index);
+
+      if (!letter.isRevealable) {
+        letterElement.classList.add('practice-preview__letter--space');
+        letterElement.textContent = '·';
+        letterElement.setAttribute('aria-label', 'Space');
+      } else {
+        letterElement.textContent = letter.char;
+        letterElement.setAttribute('aria-label', `Character ${letter.char}`);
+      }
+
+      if (letter.isHidden) {
+        letterElement.classList.add('is-hidden');
+      }
+
+      fragment.appendChild(letterElement);
+      letter.element = letterElement;
+    });
+
+    practicePreviewLetters?.appendChild(fragment);
+
+    const hasRevealable = practiceState.revealableIndices.length > 0;
+    updatePracticeNavigationButtons(hasRevealable);
+    updateRevealLettersButtonState(hasRevealable);
+
+    let pointerIndex = practiceState.activeRevealableIndex;
+    if (pointerIndex >= practiceState.revealableIndices.length) {
+      pointerIndex = hasRevealable ? practiceState.revealableIndices.length - 1 : -1;
+    }
+    setActivePracticeLetter(pointerIndex);
+  };
+
+  const refreshPracticePreview = () => {
+    rebuildPracticeLetters();
+    updatePracticePreviewUI();
+  };
+
+  const setPracticeText = text => {
+    practiceState.text = typeof text === 'string' ? text : '';
+    refreshPracticePreview();
+  };
+
+  const movePracticePointer = step => {
+    if (!practiceState.revealableIndices.length) {
+      return;
+    }
+
+    const total = practiceState.revealableIndices.length;
+    let pointer = practiceState.activeRevealableIndex;
+
+    if (pointer === -1) {
+      pointer = step > 0 ? 0 : total - 1;
+    } else {
+      pointer = (pointer + step + total) % total;
+    }
+
+    const letterIndex = practiceState.revealableIndices[pointer];
+    const letter = practiceState.letters[letterIndex];
+
+    if (letter && letter.isHidden) {
+      letter.isHidden = false;
+      letter.element?.classList.remove('is-hidden');
+    }
+
+    setActivePracticeLetter(pointer);
+  };
+
+  const getHiddenLettersDisplayValue = () =>
+    Array.from(practiceState.hiddenLetters)
+      .map(char => char.toUpperCase())
+      .join('');
+
+  let isRevealFlyoutOpen = false;
+
+  const positionRevealFlyout = () => {
+    if (!isRevealFlyoutOpen || !revealLettersFlyout || !revealLettersButton) {
+      return;
+    }
+
+    const buttonRect = revealLettersButton.getBoundingClientRect();
+    const flyoutRect = revealLettersFlyout.getBoundingClientRect();
+    const scrollX =
+      window.scrollX ?? window.pageXOffset ?? document.documentElement.scrollLeft ?? 0;
+    const scrollY =
+      window.scrollY ?? window.pageYOffset ?? document.documentElement.scrollTop ?? 0;
+    const viewportWidth = window.innerWidth ?? document.documentElement.clientWidth ?? flyoutRect.width;
+    const margin = 16;
+
+    let left = buttonRect.left + scrollX;
+    const maxLeft = scrollX + viewportWidth - flyoutRect.width - margin;
+    if (left > maxLeft) {
+      left = Math.max(scrollX + margin, maxLeft);
+    } else {
+      left = Math.max(scrollX + margin, left);
+    }
+
+    const top = buttonRect.bottom + scrollY + 12;
+
+    revealLettersFlyout.style.left = `${left}px`;
+    revealLettersFlyout.style.top = `${top}px`;
+  };
+
+  const handleRevealFlyoutPointerDown = event => {
+    if (!isRevealFlyoutOpen) {
+      return;
+    }
+    const target = event.target;
+    if (!(target instanceof Node)) {
+      return;
+    }
+    if (revealLettersFlyout?.contains(target) || revealLettersButton?.contains(target)) {
+      return;
+    }
+    closeRevealFlyout({ restoreFocus: false });
+  };
+
+  const handleRevealFlyoutKeydown = event => {
+    if (!isRevealFlyoutOpen) {
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeRevealFlyout({ restoreFocus: true });
+    }
+  };
+
+  const closeRevealFlyout = ({ restoreFocus = false } = {}) => {
+    if (!isRevealFlyoutOpen || !revealLettersFlyout) {
+      if (restoreFocus) {
+        revealLettersButton?.focus?.({ preventScroll: true });
+      }
+      return;
+    }
+
+    isRevealFlyoutOpen = false;
+    revealLettersFlyout.classList.remove('is-open');
+    revealLettersFlyout.setAttribute('aria-hidden', 'true');
+    revealLettersFlyout.hidden = true;
+    revealLettersFlyout.style.visibility = '';
+
+    revealLettersButton?.setAttribute('aria-expanded', 'false');
+
+    document.removeEventListener('pointerdown', handleRevealFlyoutPointerDown);
+    document.removeEventListener('keydown', handleRevealFlyoutKeydown, true);
+    window.removeEventListener('resize', positionRevealFlyout);
+    window.removeEventListener('scroll', positionRevealFlyout, true);
+
+    if (restoreFocus) {
+      revealLettersButton?.focus?.({ preventScroll: true });
+    }
+  };
+
+  const openRevealFlyout = () => {
+    if (!revealLettersFlyout || !revealLettersButton || isRevealFlyoutOpen) {
+      return;
+    }
+
+    if (!practiceState.revealableIndices.length) {
+      return;
+    }
+
+    if (revealLettersInput) {
+      revealLettersInput.value = getHiddenLettersDisplayValue();
+    }
+
+    revealLettersFlyout.hidden = false;
+    revealLettersFlyout.style.visibility = 'hidden';
+    revealLettersFlyout.setAttribute('aria-hidden', 'false');
+    revealLettersFlyout.classList.add('is-open');
+    revealLettersButton.setAttribute('aria-expanded', 'true');
+    isRevealFlyoutOpen = true;
+
+    requestAnimationFrame(() => {
+      positionRevealFlyout();
+      revealLettersFlyout.style.visibility = '';
+      revealLettersInput?.focus?.({ preventScroll: true });
+      revealLettersInput?.select?.();
+    });
+
+    document.addEventListener('pointerdown', handleRevealFlyoutPointerDown);
+    document.addEventListener('keydown', handleRevealFlyoutKeydown, true);
+    window.addEventListener('resize', positionRevealFlyout);
+    window.addEventListener('scroll', positionRevealFlyout, true);
+  };
+
+  const applyHiddenLetters = value => {
+    practiceState.hiddenLetters = normaliseHiddenLetters(value);
+    refreshPracticePreview();
+  };
+
+  refreshPracticePreview();
+
   const ensurePracticeStripElements = () => {
     if (practiceButton) {
       practiceButton.setAttribute('aria-controls', 'practiceStrip');
@@ -1376,7 +1802,10 @@ function setupLessonAndPracticePrompts() {
       }
 
       const currentText =
-        teachController.getCurrentText?.() ?? controls.textInput?.value ?? '';
+        practiceState.text ||
+        teachController.getCurrentText?.() ||
+        controls.textInput?.value ||
+        '';
 
       if (practiceStripInput) {
         practiceStripInput.value = currentText;
@@ -1389,12 +1818,14 @@ function setupLessonAndPracticePrompts() {
   practiceStripForm?.addEventListener('submit', event => {
     event.preventDefault();
 
+    const textValue = practiceStripInput?.value ?? '';
+    setPracticeText(textValue);
+
     if (!teachController) {
       closePracticeStrip({ restoreFocus: true });
       return;
     }
 
-    const textValue = practiceStripInput?.value ?? '';
     teachController.applyText(textValue);
 
     if (controls.textInput) {
@@ -1429,22 +1860,45 @@ function setupLessonAndPracticePrompts() {
     }
   });
 
+  previousLetterButton?.addEventListener('click', () => {
+    movePracticePointer(-1);
+  });
 
-  const clearPracticeButton = document.getElementById('btnClearPracticeText');
-  if (clearPracticeButton) {
-    clearPracticeButton.addEventListener('click', () => {
-      if (!teachController) {
-        return;
-      }
-      teachController.applyText('');
-      closePracticeStrip({ restoreFocus: false });
-      const practiceInput = document.getElementById('teachTextInput');
-      if (practiceInput) {
-        practiceInput.value = '';
-        practiceInput.focus?.({ preventScroll: true });
-      }
-    });
-  }
+  nextLetterButton?.addEventListener('click', () => {
+    movePracticePointer(1);
+  });
+
+  revealLettersButton?.addEventListener('click', () => {
+    if (isRevealFlyoutOpen) {
+      closeRevealFlyout({ restoreFocus: false });
+    } else {
+      openRevealFlyout();
+    }
+  });
+
+  revealLettersForm?.addEventListener('submit', event => {
+    event.preventDefault();
+    applyHiddenLetters(revealLettersInput?.value ?? '');
+    closeRevealFlyout({ restoreFocus: true });
+  });
+
+  revealLettersCancel?.addEventListener('click', () => {
+    closeRevealFlyout({ restoreFocus: true });
+  });
+
+  deletePracticeButton?.addEventListener('click', () => {
+    practiceState.hiddenLetters = new Set();
+    setPracticeText('');
+    closeRevealFlyout({ restoreFocus: false });
+    closePracticeStrip({ restoreFocus: false });
+    if (practiceStripInput) {
+      practiceStripInput.value = '';
+    }
+    if (controls.textInput) {
+      controls.textInput.value = '';
+    }
+    teachController?.applyText('');
+  });
 }
 
 function resetCanvas() {

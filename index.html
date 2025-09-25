@@ -240,6 +240,18 @@ main
     </div>
   </section>
 
+  <section
+    id="practicePreview"
+    class="practice-preview"
+    aria-label="Practice preview"
+    aria-live="polite"
+    hidden
+  >
+    <div class="practice-preview__scroll">
+      <div id="practicePreviewLetters" class="practice-preview__letters"></div>
+    </div>
+  </section>
+
   <footer id="bottomBar" class="bottom-bar" aria-label="Pen controls">
     <input id="penColour" type="color" aria-label="Pen colour" />
     <input id="penSize" type="range" min="1" max="60" value="8" aria-label="Pen size" />
@@ -272,6 +284,38 @@ main
         <div class="practice-strip__actions">
           <button class="practice-strip__button practice-strip__button--primary" type="submit">Apply</button>
           <button class="practice-strip__button" type="button" id="practiceStripCancel">Cancel</button>
+        </div>
+      </form>
+    </section>
+
+    <section
+      id="revealLettersFlyout"
+      class="reveal-flyout"
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby="revealLettersLabel"
+      hidden
+    >
+      <form class="reveal-flyout__form" id="revealLettersForm">
+        <label class="reveal-flyout__label" id="revealLettersLabel" for="revealLettersInput"
+          >Letters to hide</label
+        >
+        <input
+          id="revealLettersInput"
+          class="reveal-flyout__input"
+          type="text"
+          name="hiddenLetters"
+          inputmode="text"
+          autocomplete="off"
+          spellcheck="false"
+          aria-describedby="revealLettersHint"
+        />
+        <p class="reveal-flyout__hint" id="revealLettersHint">
+          Enter letters to start hidden. Characters are case-insensitive.
+        </p>
+        <div class="reveal-flyout__actions">
+          <button class="reveal-flyout__button reveal-flyout__button--primary" type="submit">Apply</button>
+          <button class="reveal-flyout__button" type="button" id="revealLettersCancel">Cancel</button>
         </div>
       </form>
     </section>
