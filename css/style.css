@@ -43,6 +43,17 @@ body {
   --fullscreen-toolbar-offset: 0px;
 }
 
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 3px solid rgba(29, 41, 81, 0.85);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.55);
+}
+
+button:focus {
+  outline: none;
+}
+
 .title-container {
   position: relative;
   width: 100%;
