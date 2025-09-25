@@ -1114,12 +1114,11 @@ body.is-fullscreen .fullscreen-palette {
   justify-content: center;
   align-items: center;
   gap: clamp(4px, 1vw, 8px);
-  width: auto;
-  max-width: none;
+  width: max-content;
+  max-width: 100%;
   overflow-x: auto;
   padding-bottom: 4px;
-  flex: 1 1 clamp(360px, 48vw, 720px);
-  min-width: clamp(360px, 48vw, 720px);
+  flex: 0 0 auto;
 }
 
 body.is-fullscreen .fullscreen-palette .swatch {
