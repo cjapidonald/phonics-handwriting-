@@ -15,6 +15,111 @@ userData.loadFromLocalStorage();
 const controls = new Controls(userData);
 const storage = getLocalStorage();
 
+const PEN_COLOUR_DEFAULT = '#333';
+const PEN_SIZE_DEFAULT = 8;
+
+const penColourInput = document.getElementById('penColour');
+const penSizeInput = document.getElementById('penSize');
+
+const isHexColour = colour => typeof colour === 'string' && /^#([0-9a-f]{6}|[0-9a-f]{3})$/i.test(colour);
+
+const toColourInputValue = colour => {
+  if (!isHexColour(colour)) {
+    return null;
+  }
+  if (colour.length === 4) {
+    const [, r, g, b] = colour;
+    return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
+  }
+  return colour.length === 7 ? colour.toLowerCase() : null;
+};
+
+const syncPenColourInput = colour => {
+  if (!penColourInput) {
+    return;
+  }
+
+  const inputColour = toColourInputValue(colour);
+  if (!inputColour) {
+    return;
+  }
+
+  if (penColourInput.value !== inputColour) {
+    penColourInput.value = inputColour;
+  }
+};
+
+const syncPenSizeInput = size => {
+  if (!penSizeInput) {
+    return;
+  }
+
+  const stringValue = String(size);
+  if (penSizeInput.value !== stringValue) {
+    penSizeInput.value = stringValue;
+  }
+  penSizeInput.setAttribute('aria-valuenow', stringValue);
+};
+
+const originalSetPenColour = controls.setPenColour.bind(controls);
+controls.setPenColour = function patchedSetPenColour(colour, persist = true) {
+  originalSetPenColour(colour, persist);
+
+  const nextColour = this.userData?.userSettings?.selectedPenColour;
+  if (isHexColour(nextColour)) {
+    syncPenColourInput(nextColour);
+  } else {
+    syncPenColourInput(PEN_COLOUR_DEFAULT);
+  }
+};
+
+const originalSetPenSize = controls.setPenSize.bind(controls);
+controls.setPenSize = function patchedSetPenSize(value, persist = true) {
+  originalSetPenSize(value, persist);
+
+  const nextSize = this.userData?.userSettings?.selectedPenWidth ?? PEN_SIZE_DEFAULT;
+  syncPenSizeInput(nextSize);
+};
+
+const resolveStoredPenColour = () => {
+  const stored = typeof controls.getStorageItem === 'function' ? controls.getStorageItem('pen.color') : null;
+  if (typeof stored === 'string' && stored) {
+    return stored;
+  }
+  const current = userData.userSettings.selectedPenColour;
+  if (
+    typeof current === 'string' &&
+    current &&
+    current !== DEFAULT_SETTINGS.selectedPenColour &&
+    current !== undefined
+  ) {
+    return current;
+  }
+  return PEN_COLOUR_DEFAULT;
+};
+
+const resolveStoredPenSize = () => {
+  const stored =
+    typeof controls.getStorageItem === 'function' ? Number(controls.getStorageItem('pen.size')) : Number.NaN;
+  if (Number.isFinite(stored)) {
+    return clamp(stored, 1, 200);
+  }
+  const current = userData.userSettings.selectedPenWidth;
+  if (Number.isFinite(current) && current !== DEFAULT_SETTINGS.selectedPenWidth) {
+    return clamp(current, 1, 200);
+  }
+  return PEN_SIZE_DEFAULT;
+};
+
+const initialPenColour = resolveStoredPenColour();
+const initialPenSize = resolveStoredPenSize();
+
+controls.setPenColour(initialPenColour, false);
+controls.setPenSize(initialPenSize, false);
+
+syncPenColourInput(isHexColour(initialPenColour) ? initialPenColour : PEN_COLOUR_DEFAULT);
+syncPenSizeInput(initialPenSize);
+
 const rewriterLinesContext = controls.rewriterLinesCanvas.getContext('2d');
 const rewriterContext = controls.rewriterCanvas.getContext('2d');
 const rewriterMaskContext = controls.rewriterMaskCanvas.getContext('2d');
@@ -455,6 +560,35 @@ function setupEventListeners() {
   controls.penSizeSlider?.addEventListener('change', () => {
     // Pen size is already persisted by Controls; redraw pen indicator on next move.
   });
+
+  if (penColourInput) {
+    penColourInput.addEventListener('input', event => {
+      const value = event.target.value;
+      if (!isHexColour(value)) {
+        return;
+      }
+
+      if (typeof controls.clearPaletteSelection === 'function') {
+        controls.clearPaletteSelection();
+      }
+
+      controls.setPenColour(value, true);
+    });
+  }
+
+  if (penSizeInput) {
+    const handlePenSizeInput = event => {
+      const nextSize = clamp(Number(event.target.value) || PEN_SIZE_DEFAULT, 1, 200);
+      controls.setPenSize(nextSize, true);
+
+      if (penDown) {
+        rewriterContext.lineWidth = nextSize;
+      }
+    };
+
+    penSizeInput.addEventListener('input', handlePenSizeInput);
+    penSizeInput.addEventListener('change', handlePenSizeInput);
+  }
 
   attachChangeListener(
     controls.penImageInput,
