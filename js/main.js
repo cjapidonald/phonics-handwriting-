@@ -2,7 +2,6 @@ import { UserData, DEFAULT_SETTINGS } from './UserData.js';
 import { Controls } from './Controls.js';
 import { Point } from './Point.js';
 import { DrawnLine } from './DrawnLine.js';
-import { PenOptions } from './PenOptions.js';
 import { clamp, getAssetUrl, loadImage, getLocalStorage } from './utils.js';
 import { TimerController } from './timer.js';
 import { TeachController } from './teach.js';
@@ -340,8 +339,6 @@ function setupEventListeners() {
           return;
         }
 
-        activePointerId = event.pointerId;
-
         try {
           canvas.setPointerCapture?.(event.pointerId);
         } catch (error) {
@@ -349,15 +346,22 @@ function setupEventListeners() {
         }
 
         drawStart(event);
+
+        if (penDown) {
+          activePointerId = event.pointerId;
+        } else {
+          try {
+            canvas.releasePointerCapture?.(event.pointerId);
+          } catch (error) {
+            // Ignore release errors for failed starts.
+          }
+        }
+
         event.preventDefault();
       };
 
       const handlePointerMove = event => {
-        if (activePointerId !== event.pointerId) {
-          return;
-        }
-
-        if (!penDown) {
+        if (activePointerId !== event.pointerId || !penDown) {
           return;
         }
 
@@ -380,15 +384,13 @@ function setupEventListeners() {
           // No action needed if releasePointerCapture is unsupported or fails.
         }
 
-        activePointerId = null;
         event.preventDefault();
       };
 
       canvas.addEventListener('pointerdown', handlePointerDown);
-      canvas.addEventListener('pointermove', handlePointerMove);
-      canvas.addEventListener('pointerup', handlePointerUp);
-      canvas.addEventListener('pointercancel', handlePointerUp);
-      canvas.addEventListener('pointerleave', handlePointerUp);
+      document.addEventListener('pointermove', handlePointerMove);
+      document.addEventListener('pointerup', handlePointerUp);
+      document.addEventListener('pointercancel', handlePointerUp);
     } else {
       canvas.addEventListener('touchstart', event => {
         const touch = event.touches[0];
@@ -956,16 +958,16 @@ async function drawStoredLines(ctx, instantDraw = false, abortSignal = undefined
         return;
       }
 
-      const segment = line[j];
-      ctx.lineWidth = segment.penOptions.width;
-      ctx.strokeStyle = segment.penOptions.colour;
+      const segment = DrawnLine.fromObject(line[j]);
+      ctx.lineWidth = segment.width;
+      ctx.strokeStyle = segment.colour;
 
       ctx.beginPath();
       ctx.moveTo(segment.start.x, segment.start.y);
       ctx.lineTo(segment.end.x, segment.end.y);
 
       if (!instantDraw) {
-        drawPenIndicator(segment.end.x, segment.end.y, segment.penOptions.width);
+        drawPenIndicator(segment.end.x, segment.end.y, segment.width);
       }
 
       ctx.stroke();
@@ -1004,6 +1006,10 @@ function drawStart(event) {
     return;
   }
 
+  if (penDown) {
+    return;
+  }
+
   setBoardControlsHidden(true);
 
   const mousePos = getCanvasCoordinates(event);
@@ -1030,7 +1036,13 @@ function drawStart(event) {
     rewriterContext.lineTo(mousePos.x, mousePos.y);
     rewriterContext.stroke();
 
-    currentLine.push(new DrawnLine(mousePos, mousePos, new PenOptions(strokeColour, userData.userSettings.selectedPenWidth)));
+    currentLine.push(
+      new DrawnLine(mousePos, mousePos, {
+        colour: strokeColour,
+        width: userData.userSettings.selectedPenWidth,
+        tool: 'pen'
+      })
+    );
 
     previousDrawPosition = mousePos;
     penDown = true;
@@ -1059,11 +1071,11 @@ function drawMove(event) {
   );
 
   currentLine.push(
-    new DrawnLine(
-      previousDrawPosition,
-      constrainedPos,
-      new PenOptions(strokeColour, userData.userSettings.selectedPenWidth)
-    )
+    new DrawnLine(previousDrawPosition, constrainedPos, {
+      colour: strokeColour,
+      width: userData.userSettings.selectedPenWidth,
+      tool: 'pen'
+    })
   );
 
   rewriterContext.lineTo(constrainedPos.x, constrainedPos.y);

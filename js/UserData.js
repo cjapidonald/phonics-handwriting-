@@ -1,6 +1,9 @@
 import { DrawnLine } from './DrawnLine.js';
 import { getLocalStorage } from './utils.js';
 
+const STROKES_STORAGE_KEY = 'ph.strokes';
+const STROKES_DELETED_STORAGE_KEY = 'ph.strokes.deleted';
+
 const DEFAULT_SETTINGS = {
   selectedPenWidth: 6,
   selectedPenColour: '#111111',
@@ -41,17 +44,8 @@ export class UserData {
           };
         }
 
-        if (Array.isArray(data.storedLines)) {
-          this.storedLines = data.storedLines.map(line =>
-            Array.isArray(line) ? line.map(DrawnLine.fromObject) : []
-          );
-        }
-
-        if (Array.isArray(data.deletedLines)) {
-          this.deletedLines = data.deletedLines.map(line =>
-            Array.isArray(line) ? line.map(DrawnLine.fromObject) : []
-          );
-        }
+        this.storedLines = this.parseStoredStrokeData(data.storedLines, STROKES_STORAGE_KEY);
+        this.deletedLines = this.parseStoredStrokeData(data.deletedLines, STROKES_DELETED_STORAGE_KEY);
       }
     } catch (error) {
       console.warn('Unable to load handwriting data from localStorage.', error);
@@ -67,15 +61,41 @@ export class UserData {
     }
 
     try {
+      const serialiseLine = line => line.map(segment => DrawnLine.fromObject(segment).toJSON());
+
       const payload = {
         userSettings: this.userSettings,
-        storedLines: this.storedLines.map(line => line.map(segment => segment.toJSON())),
-        deletedLines: this.deletedLines.map(line => line.map(segment => segment.toJSON()))
+        storedLines: this.storedLines.map(serialiseLine),
+        deletedLines: this.deletedLines.map(serialiseLine)
       };
+
       this.storage.setItem(this.storageKey, JSON.stringify(payload));
+      this.storage.setItem(STROKES_STORAGE_KEY, JSON.stringify(payload.storedLines));
+      this.storage.setItem(STROKES_DELETED_STORAGE_KEY, JSON.stringify(payload.deletedLines));
     } catch (error) {
       console.warn('Unable to save handwriting data to localStorage.', error);
     }
+  }
+
+  parseStoredStrokeData(raw, storageKey) {
+    let data = raw;
+
+    if (this.storage) {
+      try {
+        const storedRaw = this.storage.getItem(storageKey);
+        if (storedRaw) {
+          data = JSON.parse(storedRaw);
+        }
+      } catch (error) {
+        console.warn(`Unable to read ${storageKey} from localStorage.`, error);
+      }
+    }
+
+    if (!Array.isArray(data)) {
+      return [];
+    }
+
+    return data.map(line => (Array.isArray(line) ? line.map(DrawnLine.fromObject) : []));
   }
 }
 
