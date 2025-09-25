@@ -208,10 +208,9 @@ body {
   align-items: stretch;
   gap: clamp(20px, 2.6vw, 36px);
   padding: clamp(20px, 3vw, 36px);
-  border-radius: 36px;
-  border: 6px solid rgba(255, 255, 255, 0.85);
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 30px 60px rgba(10, 9, 3, 0.28);
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 24px 48px rgba(10, 9, 3, 0.24);
   box-sizing: border-box;
 }
 
@@ -220,13 +219,11 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(24px, 3vw, 32px);
+  gap: clamp(16px, 2.4vw, 24px);
   touch-action: none;
   background: var(--color-board-surround);
   border-radius: 28px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  padding: clamp(16px, 3vw, 28px);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  padding: clamp(14px, 2.6vw, 24px);
   overflow: visible;
   width: 100%;
   max-width: 100%;
@@ -276,7 +273,7 @@ body {
   display: flex;
   align-items: stretch;
   justify-content: center;
-  gap: clamp(20px, 2.6vw, 32px);
+  gap: clamp(14px, 2vw, 24px);
   flex-wrap: nowrap;
 }
 
@@ -392,15 +389,18 @@ body {
 .side-panel {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  gap: clamp(6px, 1.6vw, 14px);
-  padding: clamp(6px, 1.4vw, 12px);
-  border-radius: 20px;
-  border: 2px solid #000000;
-  background: rgba(255, 244, 213, 0.2);
-  box-shadow: 0 14px 24px rgba(10, 9, 3, 0.16);
-  backdrop-filter: blur(6px);
+  gap: clamp(4px, 1.2vw, 12px);
+  padding: clamp(6px, 1vw, 10px);
+  border-radius: 18px;
+  border: 2px solid rgba(0, 0, 0, 0.75);
+  background: rgba(255, 244, 213, 0.16);
+  box-shadow: 0 12px 22px rgba(10, 9, 3, 0.18);
+  backdrop-filter: blur(4px);
   flex: 0 0 auto;
+  align-self: stretch;
+  max-height: 100%;
 }
 
 .side-panel--left {
@@ -411,8 +411,8 @@ body {
 }
 
 .side-panel__button {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
 }
 
 .side-panel__flyout {
@@ -440,8 +440,8 @@ body {
 }
 
 .side-panel__button.btn-primary {
-  width: 60px;
-  height: 60px;
+  width: 54px;
+  height: 54px;
 }
 
 .side-panel__action {
@@ -464,18 +464,18 @@ body {
   --glass-base: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.7) 100%);
   --glass-border-width: 2px;
   --glass-border-color: rgba(255, 255, 255, 0.62);
-  --glass-shadow: 0 12px 26px rgba(10, 9, 3, 0.18);
-  --glass-hover-shadow: 0 16px 30px rgba(10, 9, 3, 0.22);
-  --glass-active-shadow: 0 10px 20px rgba(10, 9, 3, 0.2);
-  --glass-inset-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68), inset 0 -10px 18px rgba(255, 244, 213, 0.55);
-  width: clamp(64px, 16vw, 92px);
-  min-height: clamp(76px, 18vw, 112px);
-  padding: 12px;
-  font-size: 0.85rem;
+  --glass-shadow: 0 10px 22px rgba(10, 9, 3, 0.16);
+  --glass-hover-shadow: 0 14px 26px rgba(10, 9, 3, 0.2);
+  --glass-active-shadow: 0 8px 18px rgba(10, 9, 3, 0.18);
+  --glass-inset-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68), inset 0 -8px 14px rgba(255, 244, 213, 0.55);
+  width: clamp(56px, 14vw, 84px);
+  min-height: clamp(64px, 14vw, 96px);
+  padding: 10px;
+  font-size: 0.78rem;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  border-radius: 18px;
+  gap: 4px;
+  border-radius: 16px;
   text-align: center;
 }
 
@@ -554,19 +554,18 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(16px, 3vw, 28px);
+  gap: clamp(12px, 2vw, 20px);
   width: 100%;
   flex: 1;
 }
 
 .board-header {
-  width: 100%;
-  max-width: var(--board-fixed-width);
+  width: min(100%, var(--board-fixed-width));
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: clamp(18px, 3vw, 40px);
-  padding: 0 clamp(12px, 3vw, 28px);
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(12px, 2vw, 28px);
+  padding: 0 clamp(8px, 1.6vw, 20px);
   box-sizing: border-box;
 }
 
@@ -580,13 +579,13 @@ body {
 
 .board-header__title {
   max-width: min(100%, 720px);
-  justify-content: center;
+  justify-content: flex-start;
   flex: 1 1 auto;
 }
 
 .board-header__date {
   flex: 0 0 auto;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 body.is-fullscreen .board-header__date.is-floating-hidden {
@@ -631,11 +630,11 @@ body.is-fullscreen .board-header__date.is-floating-hidden {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-shadow: none;
-  padding: 0 12px;
+  padding: 0;
   min-height: 1.2em;
   width: 100%;
   max-width: 100%;
-  text-align: center;
+  text-align: left;
   transition: opacity 0.2s ease;
 }
 
@@ -999,12 +998,10 @@ body.is-fullscreen #timerProgress {
   align-items: center;
   justify-content: center;
   width: min(var(--board-width, var(--board-fixed-width)), 100%);
-  margin: clamp(8px, 1.8vw, 16px) auto 0;
-  background: rgba(255, 244, 213, 0.2);
-  border-radius: 24px;
-  border: 2px solid #000000;
-  box-shadow: 0 14px 24px rgba(10, 9, 3, 0.16);
-  backdrop-filter: blur(6px);
+  margin: clamp(4px, 1vw, 10px) auto 0;
+  background: rgba(255, 244, 213, 0.18);
+  border-radius: 22px;
+  box-shadow: 0 10px 20px rgba(10, 9, 3, 0.16);
   color: var(--color-smoky-black);
   padding: clamp(16px, 2.6vw, 24px);
   transition: opacity 0.3s ease, transform 0.3s ease;
