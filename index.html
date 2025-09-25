@@ -177,7 +177,7 @@ main
                 required
               ></textarea>
             </div>
-            <button class="feedback-submit" type="submit">Send Email</button>
+            <button class="feedback-submit" type="submit" aria-label="Send email feedback">Send Email</button>
           </form>
         </section>
       </div>
@@ -213,18 +213,60 @@ main
   </nav>
 
   <section id="lessonToolsRight" class="toolbar toolbar--right" aria-label="Lesson tools">
-    <button id="btnLessonTitlePrompt" class="toolbar__button" type="button">Lesson Title</button>
-    <button id="btnPracticeTextPrompt" class="toolbar__button" type="button">Practice Text</button>
-    <button id="btnRevealLettersPrompt" class="toolbar__button" type="button">Reveal Letters</button>
-    <button id="btnDeletePracticeText" class="toolbar__button" type="button">Delete Text</button>
+    <button
+      id="btnLessonTitlePrompt"
+      class="toolbar__button"
+      type="button"
+      aria-label="Set lesson title"
+    >
+      Lesson Title
+    </button>
+    <button
+      id="btnPracticeTextPrompt"
+      class="toolbar__button"
+      type="button"
+      aria-label="Set practice text"
+    >
+      Practice Text
+    </button>
+    <button
+      id="btnRevealLettersPrompt"
+      class="toolbar__button"
+      type="button"
+      aria-label="Show reveal letters options"
+    >
+      Reveal Letters
+    </button>
+    <button
+      id="btnDeletePracticeText"
+      class="toolbar__button"
+      type="button"
+      aria-label="Delete practice text"
+    >
+      Delete Text
+    </button>
     <button id="btnPrevLetter" class="toolbar__button" type="button" aria-label="Previous letter">
       <svg aria-hidden="true"><use href="assets/icons.svg#arrow-left"></use></svg>
     </button>
     <button id="btnNextLetter" class="toolbar__button" type="button" aria-label="Next letter">
       <svg aria-hidden="true"><use href="assets/icons.svg#arrow-right"></use></svg>
     </button>
-    <button id="btnUploadCursor" class="toolbar__button" type="button">Upload Cursor</button>
-    <button id="btnResetCursor" class="toolbar__button" type="button">Reset Cursor</button>
+    <button
+      id="btnUploadCursor"
+      class="toolbar__button"
+      type="button"
+      aria-label="Upload custom cursor"
+    >
+      Upload Cursor
+    </button>
+    <button
+      id="btnResetCursor"
+      class="toolbar__button"
+      type="button"
+      aria-label="Reset cursor"
+    >
+      Reset Cursor
+    </button>
     <button id="btnFullscreenRight" class="toolbar__button" type="button" aria-label="Enter fullscreen">
       <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
     </button>
@@ -235,7 +277,7 @@ main
       <div id="boardLessonTitle" class="board-lesson-title" tabindex="0" aria-live="polite"></div>
     </div>
     <div class="board-header__date">
-      <button id="boardDate" class="board-date" type="button"></button>
+      <button id="boardDate" class="board-date" type="button" aria-label="Change board date"></button>
     </div>
   </header>
 
@@ -282,9 +324,25 @@ main
       </div>
       <div id="stopwatchDisplay" class="stopwatch__display" aria-live="polite">00:00.00</div>
       <div class="stopwatch__controls">
-        <button id="stopwatchStart" type="button" class="stopwatch__button">Start</button>
-        <button id="stopwatchPause" type="button" class="stopwatch__button" disabled>Pause</button>
-        <button id="stopwatchReset" type="button" class="stopwatch__button" disabled>Reset</button>
+        <button id="stopwatchStart" type="button" class="stopwatch__button" aria-label="Start stopwatch">Start</button>
+        <button
+          id="stopwatchPause"
+          type="button"
+          class="stopwatch__button"
+          aria-label="Pause stopwatch"
+          disabled
+        >
+          Pause
+        </button>
+        <button
+          id="stopwatchReset"
+          type="button"
+          class="stopwatch__button"
+          aria-label="Reset stopwatch"
+          disabled
+        >
+          Reset
+        </button>
       </div>
     </div>
   </aside>
@@ -311,8 +369,21 @@ main
           autocomplete="off"
         ></textarea>
         <div class="practice-strip__actions">
-          <button class="practice-strip__button practice-strip__button--primary" type="submit">Apply</button>
-          <button class="practice-strip__button" type="button" id="practiceStripCancel">Cancel</button>
+          <button
+            class="practice-strip__button practice-strip__button--primary"
+            type="submit"
+            aria-label="Apply practice text"
+          >
+            Apply
+          </button>
+          <button
+            class="practice-strip__button"
+            type="button"
+            id="practiceStripCancel"
+            aria-label="Cancel practice text"
+          >
+            Cancel
+          </button>
         </div>
       </form>
     </section>
@@ -343,8 +414,21 @@ main
           Enter letters to start hidden. Characters are case-insensitive.
         </p>
         <div class="reveal-flyout__actions">
-          <button class="reveal-flyout__button reveal-flyout__button--primary" type="submit">Apply</button>
-          <button class="reveal-flyout__button" type="button" id="revealLettersCancel">Cancel</button>
+          <button
+            class="reveal-flyout__button reveal-flyout__button--primary"
+            type="submit"
+            aria-label="Apply hidden letters"
+          >
+            Apply
+          </button>
+          <button
+            class="reveal-flyout__button"
+            type="button"
+            id="revealLettersCancel"
+            aria-label="Cancel hidden letters"
+          >
+            Cancel
+          </button>
         </div>
       </form>
     </section>
@@ -372,8 +456,20 @@ main
           <div class="hide-letters__list" id="hideLettersList" role="group" aria-label="Letters"></div>
         </div>
         <footer class="hide-letters__footer">
-          <button type="button" class="hide-letters__action" id="hideLettersReset">Show all letters</button>
-          <button type="button" class="hide-letters__action hide-letters__action--primary" id="hideLettersDone">
+          <button
+            type="button"
+            class="hide-letters__action"
+            id="hideLettersReset"
+            aria-label="Show all letters"
+          >
+            Show all letters
+          </button>
+          <button
+            type="button"
+            class="hide-letters__action hide-letters__action--primary"
+            id="hideLettersDone"
+            aria-label="Close hide letters"
+          >
             Done
           </button>
         </footer>
@@ -387,11 +483,16 @@ main
       <div class="popover-section">
         <h2 class="popover-title">Guidelines</h2>
         <div class="style-grid" role="list">
-          <button class="style-option" type="button" data-page-style="blank">
+          <button class="style-option" type="button" data-page-style="blank" aria-label="Use blank page">
             <span class="style-preview style-none" aria-hidden="true"></span>
             <span class="style-label">White</span>
           </button>
-          <button class="style-option" type="button" data-page-style="phonics-lines">
+          <button
+            class="style-option"
+            type="button"
+            data-page-style="phonics-lines"
+            aria-label="Use phonics lines"
+          >
             <span class="style-preview style-phonics-lines" aria-hidden="true"></span>
             <span class="style-label">Phonics lines</span>
           </button>
@@ -410,9 +511,15 @@ main
 
     <div id="timerMenu" class="popover" role="dialog" aria-label="Timer options">
       <div class="timer-grid">
-        <button class="timer-option" type="button" data-duration="60">1 minute</button>
-        <button class="timer-option" type="button" data-duration="120">2 minutes</button>
-        <button class="timer-option" type="button" data-action="stop">Stop timer</button>
+        <button class="timer-option" type="button" data-duration="60" aria-label="Start 1 minute timer">
+          1 minute
+        </button>
+        <button class="timer-option" type="button" data-duration="120" aria-label="Start 2 minute timer">
+          2 minutes
+        </button>
+        <button class="timer-option" type="button" data-action="stop" aria-label="Stop timer">
+          Stop timer
+        </button>
       </div>
     </div>
 
@@ -434,8 +541,15 @@ main
           >.
         </p>
         <div class="cookie-popup__actions">
-          <button class="cookie-popup__button" id="cookieRejectButton" type="button">Reject</button>
-          <button class="cookie-popup__button cookie-popup__button--primary" id="cookieAcceptButton" type="button">
+          <button class="cookie-popup__button" id="cookieRejectButton" type="button" aria-label="Reject cookies">
+            Reject
+          </button>
+          <button
+            class="cookie-popup__button cookie-popup__button--primary"
+            id="cookieAcceptButton"
+            type="button"
+            aria-label="Accept cookies"
+          >
             Accept
           </button>
         </div>

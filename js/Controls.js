@@ -1028,6 +1028,10 @@ export class Controls {
     const applyDate = () => {
       const formatted = formatDateWithOrdinal(new Date());
       this.boardDate.textContent = formatted;
+      this.boardDate.setAttribute(
+        'aria-label',
+        `Change board date (current value: ${formatted})`
+      );
       this.setStorageItem('ui.dateText', formatted);
       this.queueBoardHeaderResize();
     };
@@ -1044,6 +1048,10 @@ export class Controls {
         applyDate();
       } else {
         this.boardDate.textContent = storedDate;
+        this.boardDate.setAttribute(
+          'aria-label',
+          `Change board date (current value: ${storedDate})`
+        );
         this.queueBoardHeaderResize();
       }
     } else {
