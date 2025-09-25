@@ -215,6 +215,7 @@ main
       <svg aria-hidden="true"><use href="assets/icons.svg#arrow-right"></use></svg>
     </button>
     <button id="btnUploadCursor" class="toolbar__button" type="button">Upload Cursor</button>
+    <button id="btnResetCursor" class="toolbar__button" type="button">Reset Cursor</button>
     <button id="btnFullscreenRight" class="toolbar__button" type="button" aria-label="Enter fullscreen">
       <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
     </button>
@@ -307,6 +308,7 @@ main
     </section>
 
     <input type="file" id="inputPenImage" class="visually-hidden" accept="image/*" aria-hidden="true" />
+    <input id="cursorFile" type="file" accept=".png,.svg,.cur,.ico" hidden />
 
     <div id="pageStylePopover" class="popover" role="dialog" aria-label="Page style options">
       <div class="popover-section">
