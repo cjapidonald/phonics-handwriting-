@@ -753,7 +753,8 @@ body {
 
 body.is-fullscreen {
   align-items: stretch;
-  background: var(--color-aerospace-orange);
+  background: #ff4500;
+  --color-board-surround: #ff4500;
   --fullscreen-horizontal-gutter: clamp(96px, 16vw, 220px);
 }
 
@@ -1769,6 +1770,10 @@ body.is-fullscreen .board-palette {
 
 .teach-overlay.is-hide-mode {
   pointer-events: auto;
+}
+
+.teach-overlay:not(.is-hide-mode) {
+  pointer-events: none;
 }
 
 .teach-overlay.is-hide-mode .teach-letter:not(.teach-letter--space) {
