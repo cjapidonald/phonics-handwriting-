@@ -105,22 +105,45 @@ async function loadInitialPenImage() {
 }
 
 function setupEventListeners() {
-  const attachClickListener = (element, handler, elementId) => {
-    if (!element) {
+  const normaliseId = elementId =>
+    typeof elementId === 'string' && elementId.startsWith('#') ? elementId.slice(1) : elementId;
+
+  const resolveElement = (element, elementId) => {
+    if (element) {
+      const targetId = normaliseId(elementId);
+      if (targetId && element.id && element.id !== targetId) {
+        console.warn(`Element ${elementId} did not match expected id ${targetId}. Found ${element.id} instead.`);
+      }
+      return element;
+    }
+
+    if (!elementId) {
+      return null;
+    }
+
+    const target = document.getElementById(normaliseId(elementId));
+    if (!target) {
       console.warn(`Missing expected element ${elementId}.`);
+    }
+    return target;
+  };
+
+  const attachClickListener = (element, handler, elementId) => {
+    const target = resolveElement(element, elementId);
+    if (!target) {
       return;
     }
 
-    element.addEventListener('click', handler);
+    target.addEventListener('click', handler);
   };
 
   const attachChangeListener = (element, handler, elementId) => {
-    if (!element) {
-      console.warn(`Missing expected element ${elementId}.`);
+    const target = resolveElement(element, elementId);
+    if (!target) {
       return;
     }
 
-    element.addEventListener('change', handler);
+    target.addEventListener('change', handler);
   };
 
   attachClickListener(
@@ -139,32 +162,34 @@ function setupEventListeners() {
     '#btnRewrite'
   );
 
-  attachClickListener(
-    controls.undoButton,
-    async () => {
-      await undoLastLine();
-    },
-    '#btnUndo'
-  );
-
-  attachClickListener(
-    controls.redoButton,
-    async () => {
-      await redoLastLine();
-    },
-    '#btnRedo'
-  );
-
-  attachClickListener(
-    controls.resetButton,
-    () => {
-      if (isRewriting) {
-        controller?.abort();
+  const undoRedoHandlers = [
+    {
+      element: controls.undoButton,
+      id: '#btnUndo',
+      handler: async () => {
+        await undoLastLine();
       }
-      resetCanvas();
     },
-    '#btnReset'
-  );
+    {
+      element: controls.redoButton,
+      id: '#btnRedo',
+      handler: async () => {
+        await redoLastLine();
+      }
+    },
+    {
+      element: controls.resetButton,
+      id: '#btnReset',
+      handler: () => {
+        if (isRewriting) {
+          controller?.abort();
+        }
+        resetCanvas();
+      }
+    }
+  ];
+
+  undoRedoHandlers.forEach(({ element, id, handler }) => attachClickListener(element, handler, id));
 
   controls.penSizeSlider?.addEventListener('change', () => {
     // Pen size is already persisted by Controls; redraw pen indicator on next move.
