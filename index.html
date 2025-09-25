@@ -403,16 +403,38 @@ main
               </div>
 
               <aside class="side-panel side-panel--right" aria-label="Playback controls">
-                <button
-                  class="btn icon side-panel__button"
-                  id="btnLessonTitlePrompt"
-                  type="button"
-                  aria-label="Lesson title"
-                  title="Lesson title"
-                >
-                  <svg aria-hidden="true"><use href="assets/icons.svg#title"></use></svg>
-                  <span class="visually-hidden">Lesson title</span>
-                </button>
+                <div class="side-panel__flyout">
+                  <button
+                    class="btn icon side-panel__button"
+                    id="btnLessonTitlePrompt"
+                    type="button"
+                    aria-label="Lesson title"
+                    title="Lesson title"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="lessonTitleFlyout"
+                  >
+                    <svg aria-hidden="true"><use href="assets/icons.svg#title"></use></svg>
+                    <span class="visually-hidden">Lesson title</span>
+                  </button>
+                  <div
+                    id="lessonTitleFlyout"
+                    class="lesson-title-flyout"
+                    role="presentation"
+                    aria-hidden="true"
+                  >
+                    <label class="lesson-title-flyout__label" for="lessonTitleFlyoutInput"
+                      >Lesson title</label
+                    >
+                    <input
+                      id="lessonTitleFlyoutInput"
+                      class="lesson-title-flyout__input"
+                      type="text"
+                      placeholder="Put the lesson title"
+                      autocomplete="off"
+                    />
+                  </div>
+                </div>
                 <button
                   class="btn icon side-panel__button"
                   id="btnPracticeTextPrompt"

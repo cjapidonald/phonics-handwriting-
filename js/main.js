@@ -258,8 +258,84 @@ function setupCombinedNextRedoButton() {
 
 function setupLessonAndPracticePrompts() {
   const lessonTitleButton = document.getElementById('btnLessonTitlePrompt');
+  const lessonTitleFlyout = document.getElementById('lessonTitleFlyout');
+  const lessonTitleFlyoutInput = document.getElementById('lessonTitleFlyoutInput');
+  let isLessonFlyoutOpen = false;
+
+  const isFullscreenActive = () => document.body?.classList.contains('is-fullscreen') ?? false;
+
+  const syncStoredLessonTitle = value => {
+    const trimmed = value.trim();
+    if (controls.lessonTitleInput) {
+      controls.lessonTitleInput.value = trimmed;
+    }
+    controls.applyLessonTitle(trimmed);
+    if (trimmed) {
+      controls.setStorageItem?.('ui.lessonTitle', trimmed);
+    } else {
+      controls.removeStorageItem?.('ui.lessonTitle');
+    }
+  };
+
+  const closeLessonFlyout = ({ focusButton = false } = {}) => {
+    if (!lessonTitleFlyout || !lessonTitleButton || !isLessonFlyoutOpen) {
+      return;
+    }
+    isLessonFlyoutOpen = false;
+    lessonTitleFlyout.classList.remove('is-open');
+    lessonTitleFlyout.setAttribute('aria-hidden', 'true');
+    lessonTitleButton.setAttribute('aria-expanded', 'false');
+    if (focusButton) {
+      lessonTitleButton.focus?.({ preventScroll: true });
+    }
+  };
+
+  const openLessonFlyout = () => {
+    if (!lessonTitleFlyout || !lessonTitleButton || !lessonTitleFlyoutInput) {
+      return;
+    }
+
+    const inputValue = controls.lessonTitleInput?.value ?? '';
+    const boardValue = controls.boardLessonTitle?.textContent ?? '';
+    const initialValue = (inputValue || boardValue).trim();
+
+    lessonTitleFlyoutInput.value = initialValue;
+    isLessonFlyoutOpen = true;
+    lessonTitleFlyout.classList.add('is-open');
+    lessonTitleFlyout.setAttribute('aria-hidden', 'false');
+    lessonTitleButton.setAttribute('aria-expanded', 'true');
+    lessonTitleFlyoutInput.focus({ preventScroll: true });
+    lessonTitleFlyoutInput.select();
+  };
+
+  const toggleLessonFlyout = () => {
+    if (!lessonTitleFlyout || !lessonTitleFlyoutInput) {
+      return;
+    }
+
+    if (isLessonFlyoutOpen) {
+      closeLessonFlyout({ focusButton: true });
+    } else {
+      openLessonFlyout();
+    }
+  };
+
+  const applyLessonFlyoutValue = () => {
+    if (!lessonTitleFlyoutInput) {
+      return;
+    }
+    const value = lessonTitleFlyoutInput.value ?? '';
+    syncStoredLessonTitle(value);
+    closeLessonFlyout({ focusButton: true });
+  };
+
   if (lessonTitleButton) {
     lessonTitleButton.addEventListener('click', () => {
+      if (isFullscreenActive() && lessonTitleFlyout && lessonTitleFlyoutInput) {
+        toggleLessonFlyout();
+        return;
+      }
+
       const inputValue = controls.lessonTitleInput?.value ?? '';
       const boardValue = controls.boardLessonTitle?.textContent ?? '';
       const initialValue = inputValue.trim() || boardValue.trim();
@@ -267,18 +343,58 @@ function setupLessonAndPracticePrompts() {
       if (result === null) {
         return;
       }
-      const trimmed = result.trim();
-      if (controls.lessonTitleInput) {
-        controls.lessonTitleInput.value = trimmed;
+      syncStoredLessonTitle(result);
+    });
+  }
+
+  if (lessonTitleFlyoutInput) {
+    lessonTitleFlyoutInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        applyLessonFlyoutValue();
+        return;
       }
-      controls.applyLessonTitle(trimmed);
-      if (trimmed) {
-        controls.setStorageItem?.('ui.lessonTitle', trimmed);
-      } else {
-        controls.removeStorageItem?.('ui.lessonTitle');
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeLessonFlyout({ focusButton: true });
       }
     });
   }
+
+  if (lessonTitleFlyout) {
+    lessonTitleFlyout.addEventListener('focusout', () => {
+      if (!isLessonFlyoutOpen) {
+        return;
+      }
+      const activeElement = document.activeElement;
+      if (!lessonTitleFlyout.contains(activeElement) && activeElement !== lessonTitleButton) {
+        closeLessonFlyout();
+      }
+    });
+  }
+
+  document.addEventListener('pointerdown', event => {
+    if (!isLessonFlyoutOpen || !lessonTitleFlyout || !lessonTitleButton) {
+      return;
+    }
+    const target = event.target;
+    if (!(target instanceof Node)) {
+      closeLessonFlyout();
+      return;
+    }
+    if (lessonTitleFlyout.contains(target) || lessonTitleButton.contains(target)) {
+      return;
+    }
+    closeLessonFlyout();
+  });
+
+  ['fullscreenchange', 'webkitfullscreenchange'].forEach(eventName => {
+    document.addEventListener(eventName, () => {
+      if (!isFullscreenActive()) {
+        closeLessonFlyout();
+      }
+    });
+  });
 
   const practiceButton = document.getElementById('btnPracticeTextPrompt');
   if (practiceButton) {

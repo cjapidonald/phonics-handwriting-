@@ -415,6 +415,21 @@ body {
   height: 48px;
 }
 
+.side-panel__flyout {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.side-panel__flyout > .side-panel__button {
+  flex: 0 0 auto;
+}
+
+.lesson-title-flyout {
+  display: none;
+}
+
 .side-panel__button.is-active {
   --glass-base: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.78) 100%);
   --glass-border-color: rgba(255, 255, 255, 0.8);
@@ -628,6 +643,37 @@ body.is-fullscreen .board-header__date.is-floating-hidden {
   opacity: 0;
 }
 
+body.is-fullscreen .board-lesson-title {
+  pointer-events: auto;
+  position: absolute;
+  top: clamp(16px, 6vh, 96px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 244, 213, 0.94);
+  border: 2px solid rgba(10, 9, 3, 0.12);
+  border-radius: 22px;
+  padding: clamp(10px, 1.8vh, 18px) clamp(20px, 3vw, 36px);
+  box-shadow: 0 18px 36px rgba(10, 9, 3, 0.24);
+  max-width: min(calc(100vw - clamp(140px, 24vw, 320px)), 840px);
+  width: auto;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 5;
+  transition: box-shadow 0.2s ease;
+  touch-action: none;
+}
+
+body.is-fullscreen .board-lesson-title:focus-visible {
+  outline: 3px solid rgba(255, 130, 0, 0.7);
+  outline-offset: 4px;
+}
+
+body.is-fullscreen .board-lesson-title.is-dragging {
+  cursor: grabbing;
+  box-shadow: 0 22px 44px rgba(10, 9, 3, 0.32);
+}
+
 body.is-fullscreen {
   align-items: stretch;
   background: var(--color-aerospace-orange);
@@ -656,6 +702,59 @@ body.is-fullscreen .side-panel {
 body.is-fullscreen .side-panel__button {
   width: 44px;
   height: 44px;
+}
+
+body.is-fullscreen .lesson-title-flyout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: absolute;
+  top: 50%;
+  right: calc(100% + clamp(12px, 2.4vw, 22px));
+  transform: translate3d(clamp(16px, 2vw, 24px), -50%, 0);
+  opacity: 0;
+  pointer-events: none;
+  background: rgba(255, 244, 213, 0.94);
+  border: 2px solid rgba(10, 9, 3, 0.16);
+  border-radius: 18px;
+  box-shadow: 0 16px 30px rgba(10, 9, 3, 0.22);
+  padding: 12px 16px;
+  min-width: clamp(220px, 24vw, 320px);
+  z-index: 20;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+body.is-fullscreen .lesson-title-flyout.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate3d(0, -50%, 0);
+}
+
+body.is-fullscreen .lesson-title-flyout__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-smoky-black);
+}
+
+body.is-fullscreen .lesson-title-flyout__input {
+  flex: 1;
+  min-width: 0;
+  border-radius: 12px;
+  border: 2px solid rgba(10, 9, 3, 0.18);
+  background: #ffffff;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 10px 14px;
+  color: var(--color-smoky-black);
+  box-shadow: inset 0 1px 2px rgba(10, 9, 3, 0.08);
+}
+
+body.is-fullscreen .lesson-title-flyout__input:focus {
+  outline: none;
+  border-color: rgba(255, 130, 0, 0.7);
+  box-shadow: inset 0 1px 2px rgba(10, 9, 3, 0.08), 0 0 0 3px rgba(255, 130, 0, 0.18);
 }
 
 body.is-fullscreen .btn.icon.side-panel__button svg {
@@ -734,6 +833,10 @@ body.is-fullscreen .board-header {
 }
 
 body.is-fullscreen #boardRegion {
+  position: relative;
+}
+
+body.is-fullscreen #boardRegion {
   width: 100%;
   max-width: none;
   gap: clamp(10px, 2vh, 20px);
@@ -748,6 +851,7 @@ body.is-fullscreen .board-header__title {
   max-width: none;
   flex: 1 1 auto;
   justify-content: center;
+  min-height: clamp(64px, 10vh, 128px);
 }
 
 body.is-fullscreen .board-header__date {
