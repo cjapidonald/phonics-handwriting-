@@ -3148,6 +3148,16 @@ body.info-panel-open {
   height: 32px;
 }
 
+body.is-eraser #writerContainer,
+body.is-eraser #writerContainer canvas {
+  cursor: crosshair;
+}
+
+#btnEraserSize {
+  width: 96px;
+  flex: 0 0 auto;
+}
+
 .board-header {
   display: flex;
   justify-content: space-between;

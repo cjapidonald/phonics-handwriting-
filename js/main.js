@@ -17,9 +17,12 @@ const storage = getLocalStorage();
 
 const PEN_COLOUR_DEFAULT = '#333';
 const PEN_SIZE_DEFAULT = 8;
+const ERASER_STROKE_COLOUR = '#000000';
 
 const penColourInput = document.getElementById('penColour');
 const penSizeInput = document.getElementById('penSize');
+const eraserButton = document.getElementById('btnEraser');
+const eraserSizeInput = document.getElementById('btnEraserSize');
 
 const isHexColour = colour => typeof colour === 'string' && /^#([0-9a-f]{6}|[0-9a-f]{3})$/i.test(colour);
 
@@ -134,6 +137,13 @@ const canvasElements = [
 
 let resizeDebounceHandle = null;
 
+let eraserMode = false;
+let eraserSize = clamp(
+  Number(eraserSizeInput?.value) || 24,
+  Number(eraserSizeInput?.min) || 1,
+  Number(eraserSizeInput?.max) || 200
+);
+
 function applyCanvasContextDefaults() {
   [rewriterContext, rewriterLinesContext, rewriterMaskContext].forEach(context => {
     if (!context) {
@@ -199,6 +209,58 @@ function initialiseCanvasResizing() {
   window.addEventListener('resize', handleResizeDebounced);
 }
 
+function updateEraserSize(value) {
+  const min = Number(eraserSizeInput?.min) || 1;
+  const max = Number(eraserSizeInput?.max) || 200;
+  const parsedValue = Number(value);
+  const numericValue = clamp(Number.isFinite(parsedValue) ? parsedValue : eraserSize, min, max);
+  eraserSize = numericValue;
+
+  if (eraserSizeInput && eraserSizeInput.value !== String(numericValue)) {
+    eraserSizeInput.value = String(numericValue);
+  }
+
+  if (eraserSizeInput) {
+    eraserSizeInput.setAttribute('aria-valuenow', String(numericValue));
+  }
+}
+
+function setEraserMode(isActive) {
+  eraserMode = Boolean(isActive);
+
+  const body = document.body;
+  if (body) {
+    body.classList.toggle('is-eraser', eraserMode);
+  }
+
+  if (eraserButton) {
+    eraserButton.classList.toggle('is-active', eraserMode);
+    eraserButton.setAttribute('aria-pressed', eraserMode ? 'true' : 'false');
+  }
+
+  if (eraserSizeInput) {
+    eraserSizeInput.hidden = !eraserMode;
+    eraserSizeInput.setAttribute('aria-hidden', eraserMode ? 'false' : 'true');
+  }
+
+  if (eraserMode) {
+    if (rewriterMaskContext && controls.rewriterMaskCanvas) {
+      rewriterMaskContext.clearRect(
+        0,
+        0,
+        controls.rewriterMaskCanvas.width,
+        controls.rewriterMaskCanvas.height
+      );
+    }
+  } else if (rewriterContext) {
+    rewriterContext.globalCompositeOperation = 'source-over';
+  }
+}
+
+function toggleEraserMode() {
+  setEraserMode(!eraserMode);
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initialiseCanvasResizing);
 } else {
@@ -206,6 +268,9 @@ if (document.readyState === 'loading') {
 }
 
 applyCanvasContextDefaults();
+
+updateEraserSize(eraserSize);
+setEraserMode(false);
 
 let penDown = false;
 let isRewriting = false;
@@ -556,6 +621,23 @@ function setupEventListeners() {
   ];
 
   undoRedoHandlers.forEach(({ element, id, handler }) => attachClickListener(element, handler, id));
+
+  attachClickListener(
+    eraserButton,
+    () => {
+      toggleEraserMode();
+    },
+    '#btnEraser'
+  );
+
+  if (eraserSizeInput) {
+    const handleEraserSizeInput = event => {
+      updateEraserSize(event.target.value);
+    };
+
+    eraserSizeInput.addEventListener('input', handleEraserSizeInput);
+    eraserSizeInput.addEventListener('change', handleEraserSizeInput);
+  }
 
   controls.penSizeSlider?.addEventListener('change', () => {
     // Pen size is already persisted by Controls; redraw pen indicator on next move.
@@ -1267,18 +1349,33 @@ async function drawStoredLines(ctx, instantDraw = false, abortSignal = undefined
       }
 
       const segment = DrawnLine.fromObject(line[j]);
+      const isEraserSegment = segment.tool === 'eraser';
+
+      ctx.globalCompositeOperation = isEraserSegment ? 'destination-out' : 'source-over';
       ctx.lineWidth = segment.width;
-      ctx.strokeStyle = segment.colour;
+      ctx.strokeStyle = isEraserSegment ? ERASER_STROKE_COLOUR : segment.colour;
 
       ctx.beginPath();
       ctx.moveTo(segment.start.x, segment.start.y);
       ctx.lineTo(segment.end.x, segment.end.y);
 
       if (!instantDraw) {
-        drawPenIndicator(segment.end.x, segment.end.y, segment.width);
+        if (isEraserSegment) {
+          if (rewriterMaskContext && controls.rewriterMaskCanvas) {
+            rewriterMaskContext.clearRect(
+              0,
+              0,
+              controls.rewriterMaskCanvas.width,
+              controls.rewriterMaskCanvas.height
+            );
+          }
+        } else {
+          drawPenIndicator(segment.end.x, segment.end.y, segment.width);
+        }
       }
 
       ctx.stroke();
+      ctx.globalCompositeOperation = 'source-over';
 
       if (!instantDraw) {
         await delay(50 / userData.userSettings.rewriteSpeed);
@@ -1293,6 +1390,8 @@ async function drawStoredLines(ctx, instantDraw = false, abortSignal = undefined
       await delay(400 / userData.userSettings.rewriteSpeed);
     }
   }
+
+  ctx.globalCompositeOperation = 'source-over';
 
   if (!instantDraw) {
     rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
@@ -1327,19 +1426,30 @@ function drawStart(event) {
 
   if (isWithinCanvas(mousePos)) {
     userData.deletedLines = [];
-    const currentPenColour = userData.userSettings.selectedPenColour ?? DEFAULT_SETTINGS.selectedPenColour;
-    if ((lastPenColour ?? '') !== currentPenColour) {
-      if (typeof currentPenColour === 'string' && currentPenColour.toLowerCase() === 'rainbow') {
-        rainbowHue = 0;
+    const usingEraser = eraserMode;
+
+    let strokeColour = ERASER_STROKE_COLOUR;
+    let strokeWidth = eraserSize;
+
+    if (!usingEraser) {
+      const currentPenColour = userData.userSettings.selectedPenColour ?? DEFAULT_SETTINGS.selectedPenColour;
+      if ((lastPenColour ?? '') !== currentPenColour) {
+        if (typeof currentPenColour === 'string' && currentPenColour.toLowerCase() === 'rainbow') {
+          rainbowHue = 0;
+        }
+        lastPenColour = currentPenColour;
       }
-      lastPenColour = currentPenColour;
+
+      strokeColour = getActiveStrokeColour();
+      strokeWidth = userData.userSettings.selectedPenWidth;
+    } else if (rewriterMaskContext && controls.rewriterMaskCanvas) {
+      rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
     }
 
-    const strokeColour = getActiveStrokeColour();
-
+    rewriterContext.globalCompositeOperation = usingEraser ? 'destination-out' : 'source-over';
     rewriterContext.strokeStyle = strokeColour;
     rewriterContext.beginPath();
-    rewriterContext.lineWidth = userData.userSettings.selectedPenWidth;
+    rewriterContext.lineWidth = strokeWidth;
     rewriterContext.moveTo(mousePos.x, mousePos.y);
     rewriterContext.lineTo(mousePos.x, mousePos.y);
     rewriterContext.stroke();
@@ -1347,10 +1457,14 @@ function drawStart(event) {
     currentLine.push(
       new DrawnLine(mousePos, mousePos, {
         colour: strokeColour,
-        width: userData.userSettings.selectedPenWidth,
-        tool: 'pen'
+        width: strokeWidth,
+        tool: usingEraser ? 'eraser' : 'pen'
       })
     );
+
+    if (!usingEraser) {
+      drawPenIndicator(mousePos.x, mousePos.y, strokeWidth);
+    }
 
     previousDrawPosition = mousePos;
     penDown = true;
@@ -1362,10 +1476,14 @@ function drawMove(event) {
     return;
   }
 
-  const strokeColour = getActiveStrokeColour();
+  const usingEraser = eraserMode;
+  const strokeColour = usingEraser ? ERASER_STROKE_COLOUR : getActiveStrokeColour();
+  const strokeWidth = usingEraser ? eraserSize : userData.userSettings.selectedPenWidth;
+
+  rewriterContext.globalCompositeOperation = usingEraser ? 'destination-out' : 'source-over';
   rewriterContext.strokeStyle = strokeColour;
   rewriterContext.beginPath();
-  rewriterContext.lineWidth = userData.userSettings.selectedPenWidth;
+  rewriterContext.lineWidth = strokeWidth;
   rewriterContext.moveTo(previousDrawPosition.x, previousDrawPosition.y);
 
   const mousePos = getCanvasCoordinates(event);
@@ -1381,23 +1499,37 @@ function drawMove(event) {
   currentLine.push(
     new DrawnLine(previousDrawPosition, constrainedPos, {
       colour: strokeColour,
-      width: userData.userSettings.selectedPenWidth,
-      tool: 'pen'
+      width: strokeWidth,
+      tool: usingEraser ? 'eraser' : 'pen'
     })
   );
 
   rewriterContext.lineTo(constrainedPos.x, constrainedPos.y);
   rewriterContext.stroke();
 
-  drawPenIndicator(constrainedPos.x, constrainedPos.y, userData.userSettings.selectedPenWidth);
+  if (!usingEraser) {
+    drawPenIndicator(constrainedPos.x, constrainedPos.y, strokeWidth);
+  } else if (rewriterMaskContext && controls.rewriterMaskCanvas) {
+    rewriterMaskContext.clearRect(
+      0,
+      0,
+      controls.rewriterMaskCanvas.width,
+      controls.rewriterMaskCanvas.height
+    );
+  }
 
   previousDrawPosition = constrainedPos;
+  rewriterContext.globalCompositeOperation = 'source-over';
 }
 
 function drawEnd() {
   setBoardControlsHidden(false);
   if (!penDown) {
     return;
+  }
+
+  if (rewriterContext) {
+    rewriterContext.globalCompositeOperation = 'source-over';
   }
 
   userData.storedLines.push(currentLine.slice());
