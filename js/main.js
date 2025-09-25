@@ -397,20 +397,146 @@ function setupLessonAndPracticePrompts() {
   });
 
   const practiceButton = document.getElementById('btnPracticeTextPrompt');
+  const practiceStrip = document.getElementById('practiceStrip');
+  const practiceStripBackdrop = document.getElementById('practiceStripBackdrop');
+  const practiceStripForm = document.getElementById('practiceStripForm');
+  const practiceStripInput = document.getElementById('practiceStripInput');
+  const practiceStripCancel = document.getElementById('practiceStripCancel');
+
+  const PRACTICE_STRIP_TRANSITION_MS = 400;
+  let practiceStripHideTimer = null;
+  let isPracticeStripOpen = false;
+
+  const setPracticeButtonExpanded = expanded => {
+    if (practiceButton) {
+      practiceButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    }
+  };
+
+  const closePracticeStrip = ({ restoreFocus = false } = {}) => {
+    if (!practiceStrip) {
+      if (restoreFocus) {
+        practiceButton?.focus?.({ preventScroll: true });
+      }
+      return;
+    }
+
+    if (!isPracticeStripOpen && practiceStrip.hidden) {
+      if (restoreFocus) {
+        practiceButton?.focus?.({ preventScroll: true });
+      }
+      return;
+    }
+
+    isPracticeStripOpen = false;
+    practiceStrip.classList.remove('is-open');
+    practiceStrip.setAttribute('aria-hidden', 'true');
+    practiceStripBackdrop?.classList.remove('is-visible');
+    setPracticeButtonExpanded(false);
+
+    window.clearTimeout(practiceStripHideTimer);
+    practiceStripHideTimer = window.setTimeout(() => {
+      practiceStrip.hidden = true;
+      if (practiceStripBackdrop) {
+        practiceStripBackdrop.hidden = true;
+      }
+      if (restoreFocus) {
+        practiceButton?.focus?.({ preventScroll: true });
+      }
+    }, PRACTICE_STRIP_TRANSITION_MS);
+  };
+
+  const openPracticeStrip = () => {
+    if (!practiceStrip) {
+      return;
+    }
+
+    window.clearTimeout(practiceStripHideTimer);
+    practiceStrip.hidden = false;
+    practiceStrip.setAttribute('aria-hidden', 'false');
+    if (practiceStripBackdrop) {
+      practiceStripBackdrop.hidden = false;
+    }
+
+    practiceStrip.classList.add('is-open');
+    practiceStripBackdrop?.classList.add('is-visible');
+
+    setPracticeButtonExpanded(true);
+    isPracticeStripOpen = true;
+
+    if (practiceStripInput) {
+      window.setTimeout(() => {
+        practiceStripInput.focus?.({ preventScroll: true });
+        practiceStripInput.select?.();
+      }, 50);
+    }
+  };
+
   if (practiceButton) {
     practiceButton.addEventListener('click', () => {
       if (!teachController) {
         return;
       }
-      const currentText = teachController.getCurrentText?.() ?? '';
-      const result = window.prompt('Enter practice text', currentText);
-      if (result === null) {
+
+      if (isPracticeStripOpen) {
+        closePracticeStrip({ restoreFocus: false });
         return;
       }
-      const textValue = typeof result === 'string' ? result : '';
-      teachController.applyText(textValue);
+
+      const currentText =
+        teachController.getCurrentText?.() ?? controls.textInput?.value ?? '';
+
+      if (practiceStripInput) {
+        practiceStripInput.value = currentText;
+      }
+
+      openPracticeStrip();
     });
   }
+
+  practiceStripForm?.addEventListener('submit', event => {
+    event.preventDefault();
+
+    if (!teachController) {
+      closePracticeStrip({ restoreFocus: true });
+      return;
+    }
+
+    const textValue = practiceStripInput?.value ?? '';
+    teachController.applyText(textValue);
+
+    if (controls.textInput) {
+      controls.textInput.value = textValue.replace(/\n/g, ' ');
+    }
+
+    closePracticeStrip({ restoreFocus: true });
+  });
+
+  const handlePracticeStripDismiss = () => {
+    closePracticeStrip({ restoreFocus: true });
+  };
+
+  practiceStripCancel?.addEventListener('click', handlePracticeStripDismiss);
+  practiceStripBackdrop?.addEventListener('click', handlePracticeStripDismiss);
+
+  practiceStrip?.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closePracticeStrip({ restoreFocus: true });
+    }
+  });
+
+  document.addEventListener('keydown', event => {
+    if (!isPracticeStripOpen) {
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closePracticeStrip({ restoreFocus: true });
+    }
+  });
+
 
   const clearPracticeButton = document.getElementById('btnClearPracticeText');
   if (clearPracticeButton) {
@@ -419,6 +545,7 @@ function setupLessonAndPracticePrompts() {
         return;
       }
       teachController.applyText('');
+      closePracticeStrip({ restoreFocus: false });
       const practiceInput = document.getElementById('teachTextInput');
       if (practiceInput) {
         practiceInput.value = '';

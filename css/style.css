@@ -2557,6 +2557,155 @@ body.info-panel-open {
   outline: none;
 }
 
+.practice-strip__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 20, 30, 0.6);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  z-index: 80;
+  pointer-events: none;
+}
+
+.practice-strip__backdrop.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.practice-strip {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  width: min(640px, calc(100% - 2rem));
+  color: #f5f7fa;
+  background: #1d2230;
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 18px 40px rgba(10, 14, 26, 0.55);
+  transform: translate(-50%, calc(100% + 3rem));
+  transition: transform 0.4s ease;
+  z-index: 90;
+  overflow: hidden;
+}
+
+.practice-strip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.12) 0,
+    rgba(255, 255, 255, 0.12) 14px,
+    transparent 14px,
+    transparent 28px
+  );
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.practice-strip.is-open {
+  transform: translate(-50%, 0);
+}
+
+.practice-strip__form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  z-index: 1;
+}
+
+.practice-strip__label {
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.practice-strip__input {
+  width: 100%;
+  min-height: 3.75rem;
+  resize: vertical;
+  border-radius: 14px;
+  border: none;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  font-family: inherit;
+  color: #111;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(17, 17, 17, 0.08);
+}
+
+.practice-strip__input:focus {
+  outline: 3px solid #ffb300;
+  outline-offset: 0;
+}
+
+.practice-strip__actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.practice-strip__button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.8rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.18);
+  color: #f5f7fa;
+  transition: background 0.25s ease, transform 0.25s ease, color 0.25s ease;
+}
+
+.practice-strip__button:hover,
+.practice-strip__button:focus-visible {
+  background: rgba(255, 255, 255, 0.28);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.practice-strip__button:active {
+  transform: translateY(0);
+}
+
+.practice-strip__button--primary {
+  background: #ffb300;
+  color: #231f20;
+}
+
+.practice-strip__button--primary:hover,
+.practice-strip__button--primary:focus-visible {
+  background: #ffca3a;
+}
+
+.practice-strip__button--primary:active {
+  background: #f5ac00;
+}
+
+@media (max-width: 640px) {
+  .practice-strip {
+    width: min(100%, calc(100% - 1.25rem));
+    bottom: 0.75rem;
+    border-radius: 14px;
+    padding: 1.25rem;
+  }
+
+  .practice-strip__actions {
+    justify-content: stretch;
+  }
+
+  .practice-strip__button {
+    flex: 1 1 120px;
+    text-align: center;
+  }
+}
+
 @media (max-width: 640px) {
   body.is-fullscreen #toolbarBottom {
     width: min(var(--board-width, 1200px), 100vw);
@@ -2590,6 +2739,12 @@ body.info-panel-open {
 
   #toolbarBottom,
   body.is-fullscreen #toolbarBottom {
+    transition: none;
+  }
+
+  .practice-strip,
+  .practice-strip__backdrop,
+  .practice-strip__button {
     transition: none;
   }
 }

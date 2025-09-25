@@ -441,6 +441,9 @@ main
                   type="button"
                   aria-label="Practice text"
                   title="Practice text"
+                  aria-haspopup="dialog"
+                  aria-expanded="false"
+                  aria-controls="practiceStrip"
                 >
                   <svg aria-hidden="true"><use href="assets/icons.svg#practice"></use></svg>
                   <span class="visually-hidden">Practice text</span>
@@ -464,7 +467,7 @@ main
                   title="Show letters"
                   disabled
                 >
-                  <svg aria-hidden="true"><use href="assets/icons.svg#view"></use></svg>
+                  <svg aria-hidden="true"><use href="assets/icons.svg#practice"></use></svg>
                   <span class="visually-hidden" data-button-label>Show letters</span>
                 </button>
                 <button
@@ -599,6 +602,33 @@ main
         </section>
       </div>
     </main>
+
+    <div id="practiceStripBackdrop" class="practice-strip__backdrop" hidden></div>
+
+    <section
+      id="practiceStrip"
+      class="practice-strip"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="practiceStripLabel"
+      hidden
+    >
+      <form class="practice-strip__form" id="practiceStripForm">
+        <label class="practice-strip__label" id="practiceStripLabel" for="practiceStripInput">Practice text</label>
+        <textarea
+          id="practiceStripInput"
+          class="practice-strip__input"
+          name="practiceText"
+          rows="2"
+          placeholder="Type the text you want to practice"
+          autocomplete="off"
+        ></textarea>
+        <div class="practice-strip__actions">
+          <button class="practice-strip__button practice-strip__button--primary" type="submit">Apply</button>
+          <button class="practice-strip__button" type="button" id="practiceStripCancel">Cancel</button>
+        </div>
+      </form>
+    </section>
 
     <input type="file" id="inputPenImage" class="visually-hidden" accept="image/*" aria-hidden="true" />
 
