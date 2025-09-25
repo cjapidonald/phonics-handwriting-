@@ -98,37 +98,15 @@
     <line x1="5" y1="5" x2="19" y2="5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
     <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
   </symbol>
-  <symbol id="practice" viewBox="0 0 24 24">
-    <line x1="5" y1="4.5" x2="19" y2="4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-    <line x1="7" y1="4.5" x2="7" y2="7.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-    <line x1="17" y1="4.5" x2="17" y2="7.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+  <symbol id="practice" viewBox="0 0 512 512">
     <path
-      d="M7 7.2l5 2.4 5-2.4"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <circle cx="12" cy="12" r="1.7" fill="none" stroke="currentColor" stroke-width="2" />
-    <path d="M12 13.7v3.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-    <path
-      d="M12 17.5l-3 4.5"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      d="M189.44 234.12h32a6.92 6.92 0 0 1 6.83-5.82h55a6.92 6.92 0 0 1 6.83 5.82h32.5v-72H189.44Zm66.31-66.46a26.44 26.44 0 1 1-26.44 26.44 26.43 26.43 0 0 1 26.44-26.44Z"
+      fill="currentColor"
     />
     <path
-      d="M12 17.5l3 4.5"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      d="M256 0C114.62 0 0 114.62 0 256s114.62 256 256 256 256-114.62 256-256S397.38 0 256 0Zm136 178.38a12.29 12.29 0 0 1-12.29 12.29 12.29 12.29 0 0 1-12.29-12.29v-16.26h-22.14v88.82a11.37 11.37 0 0 1-11.36 11.36h-43.76v48.95h23.84c.51 0 1 0 1.52.07a15 15 0 0 1 14.34 7.41l29.34 50.82a15 15 0 1 1-25.92 15l-19.69-34.1h-117.91l-19.68 34.06a15 15 0 0 1-20.45 5.49 15 15 0 0 1-5.48-20.44l29.34-50.82a15 15 0 0 1 13.72-7.46h.86 27.34v-48.98h-43.25a11.37 11.37 0 0 1-11.36-11.36v-88.82h-22.14v16.26a12.29 12.29 0 0 1-12.29 12.29 12.29 12.29 0 0 1-12.29-12.29v-46.09a12.29 12.29 0 0 1 12.29-12.29 12.29 12.29 0 0 1 12.29 12.29v16.26h22.14a11.36 11.36 0 1 1 22.72 0h133.12a11.36 11.36 0 1 1 22.72 0h22.14v-16.26a12.29 12.29 0 0 1 12.29-12.29 12.29 12.29 0 0 1 12.29 12.29Z"
+      fill="currentColor"
     />
-    <path d="M9.2 22h5.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
   </symbol>
   <symbol id="trash" viewBox="0 0 24 24">
     <path d="M4 7h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
