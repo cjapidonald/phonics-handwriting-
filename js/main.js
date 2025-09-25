@@ -990,6 +990,9 @@ function setupCombinedNextRedoButton() {
 }
 
 function setupLessonAndPracticePrompts() {
+  const LESSON_TITLE_STORAGE_KEY = 'ph.lessonTitle';
+  const LESSON_TITLE_POSITION_STORAGE_KEY = 'ph.lessonTitle.pos';
+
   const lessonTitleButton = document.getElementById('btnLessonTitlePrompt');
   let lessonTitleFlyout = document.getElementById('lessonTitleFlyout');
   let lessonTitleFlyoutInput = document.getElementById('lessonTitleFlyoutInput');
@@ -998,16 +1001,10 @@ function setupLessonAndPracticePrompts() {
   const isFullscreenActive = () => document.body?.classList.contains('is-fullscreen') ?? false;
 
   const ensureLessonFlyoutElements = () => {
-    if (lessonTitleFlyout && lessonTitleFlyoutInput) {
-      return;
-    }
-
     if (!lessonTitleButton) {
       return;
     }
 
-    const flyoutContainer =
-      lessonTitleButton.closest('.side-panel__flyout') ?? lessonTitleButton.parentElement ?? lessonTitleButton;
     lessonTitleButton.setAttribute('aria-controls', 'lessonTitleFlyout');
 
     if (!lessonTitleFlyout) {
@@ -1016,23 +1013,17 @@ function setupLessonAndPracticePrompts() {
       lessonTitleFlyout.className = 'lesson-title-flyout';
       lessonTitleFlyout.setAttribute('role', 'presentation');
       lessonTitleFlyout.setAttribute('aria-hidden', 'true');
-      flyoutContainer.appendChild(lessonTitleFlyout);
+      document.body.appendChild(lessonTitleFlyout);
     }
 
     if (!lessonTitleFlyoutInput) {
-      const label = document.createElement('label');
-      label.className = 'lesson-title-flyout__label';
-      label.htmlFor = 'lessonTitleFlyoutInput';
-      label.textContent = 'Lesson title';
-
       lessonTitleFlyoutInput = document.createElement('input');
       lessonTitleFlyoutInput.id = 'lessonTitleFlyoutInput';
       lessonTitleFlyoutInput.className = 'lesson-title-flyout__input';
       lessonTitleFlyoutInput.type = 'text';
-      lessonTitleFlyoutInput.placeholder = 'Put the lesson title';
+      lessonTitleFlyoutInput.placeholder = 'Lesson title';
+      lessonTitleFlyoutInput.setAttribute('aria-label', 'Lesson title');
       lessonTitleFlyoutInput.autocomplete = 'off';
-
-      lessonTitleFlyout.appendChild(label);
       lessonTitleFlyout.appendChild(lessonTitleFlyoutInput);
     }
   };
@@ -1041,16 +1032,43 @@ function setupLessonAndPracticePrompts() {
 
   const syncStoredLessonTitle = value => {
     const trimmed = value.trim();
+    if (lessonTitleFlyoutInput) {
+      lessonTitleFlyoutInput.value = trimmed;
+    }
     if (controls.lessonTitleInput) {
       controls.lessonTitleInput.value = trimmed;
     }
+
     controls.applyLessonTitle(trimmed);
+
     if (trimmed) {
-      controls.setStorageItem?.('ui.lessonTitle', trimmed);
-    } else {
+      controls.setStorageItem?.(LESSON_TITLE_STORAGE_KEY, trimmed);
       controls.removeStorageItem?.('ui.lessonTitle');
+      controls.removeStorageItem?.('ui.lessonTitlePosition');
+      controls.enableLessonTitleFloating?.(true);
+    } else {
+      controls.removeStorageItem?.(LESSON_TITLE_STORAGE_KEY);
+      controls.removeStorageItem?.(LESSON_TITLE_POSITION_STORAGE_KEY);
+      controls.removeStorageItem?.('ui.lessonTitle');
+      controls.removeStorageItem?.('ui.lessonTitlePosition');
+      controls.lessonTitleHasStoredPosition = false;
+      controls.lessonTitlePosition = null;
+      controls.lessonTitlePointerId = null;
+      controls.lessonTitlePointerOffset = { x: 0, y: 0 };
+      controls.lessonTitleIsFloating = false;
+      if (controls.boardLessonTitle) {
+        controls.boardLessonTitle.style.left = '';
+        controls.boardLessonTitle.style.top = '';
+        controls.boardLessonTitle.style.transform = '';
+        controls.boardLessonTitle.classList.remove('is-dragging', 'is-floating');
+      }
     }
   };
+
+  if (lessonTitleFlyoutInput) {
+    const storedValue = controls.getStorageItem?.(LESSON_TITLE_STORAGE_KEY) ?? '';
+    lessonTitleFlyoutInput.value = storedValue.trim();
+  }
 
   const closeLessonFlyout = ({ focusButton = false } = {}) => {
     if (!lessonTitleFlyout || !lessonTitleButton || !isLessonFlyoutOpen) {
@@ -1059,6 +1077,7 @@ function setupLessonAndPracticePrompts() {
     isLessonFlyoutOpen = false;
     lessonTitleFlyout.classList.remove('is-open');
     lessonTitleFlyout.setAttribute('aria-hidden', 'true');
+    lessonTitleFlyout.style.visibility = '';
     lessonTitleButton.setAttribute('aria-expanded', 'false');
     if (focusButton) {
       lessonTitleButton.focus?.({ preventScroll: true });
@@ -1070,15 +1089,43 @@ function setupLessonAndPracticePrompts() {
       return;
     }
 
-    const inputValue = controls.lessonTitleInput?.value ?? '';
+    const inputValue = controls.lessonTitleInput?.value ?? lessonTitleFlyoutInput.value ?? '';
     const boardValue = controls.boardLessonTitle?.textContent ?? '';
     const initialValue = (inputValue || boardValue).trim();
 
     lessonTitleFlyoutInput.value = initialValue;
     isLessonFlyoutOpen = true;
+
+    lessonTitleFlyout.style.visibility = 'hidden';
     lessonTitleFlyout.classList.add('is-open');
     lessonTitleFlyout.setAttribute('aria-hidden', 'false');
     lessonTitleButton.setAttribute('aria-expanded', 'true');
+
+    const buttonRect = lessonTitleButton.getBoundingClientRect();
+    const flyoutRect = lessonTitleFlyout.getBoundingClientRect();
+    const margin = 12;
+    const viewportWidth = Math.max(window.innerWidth || 0, document.documentElement?.clientWidth || 0);
+    const viewportHeight = Math.max(window.innerHeight || 0, document.documentElement?.clientHeight || 0);
+    const scrollX = window.scrollX ?? window.pageXOffset ?? 0;
+    const scrollY = window.scrollY ?? window.pageYOffset ?? 0;
+
+    const minLeft = scrollX + margin;
+    const maxLeft = scrollX + Math.max(viewportWidth - flyoutRect.width - margin, margin);
+    let left = scrollX + buttonRect.right + margin;
+    if (left > maxLeft) {
+      left = scrollX + buttonRect.left - flyoutRect.width - margin;
+    }
+    left = clamp(left, minLeft, maxLeft);
+
+    const minTop = scrollY + margin;
+    const maxTop = scrollY + Math.max(viewportHeight - flyoutRect.height - margin, margin);
+    let top = scrollY + buttonRect.top + buttonRect.height / 2 - flyoutRect.height / 2;
+    top = clamp(top, minTop, maxTop);
+
+    lessonTitleFlyout.style.left = `${left}px`;
+    lessonTitleFlyout.style.top = `${top}px`;
+    lessonTitleFlyout.style.visibility = '';
+
     lessonTitleFlyoutInput.focus({ preventScroll: true });
     lessonTitleFlyoutInput.select();
   };

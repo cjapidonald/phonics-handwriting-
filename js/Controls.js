@@ -12,7 +12,8 @@ const REWRITE_SPEED_MAX = 8;
 
 const TOOLBAR_POSITION_KEY = 'ui.toolbarPosition';
 const DATE_POSITION_KEY = 'ui.datePosition';
-const LESSON_TITLE_POSITION_KEY = 'ui.lessonTitlePosition';
+const LESSON_TITLE_KEY = 'ph.lessonTitle';
+const LESSON_TITLE_POSITION_KEY = 'ph.lessonTitle.pos';
 
 const PEN_COLOUR_SWATCHES = [
   '#111111',
@@ -1082,14 +1083,40 @@ main
   }
 
   setupLessonTitle() {
-    if (!this.lessonTitleInput || !this.boardLessonTitle) {
+    if (!this.boardLessonTitle) {
       return;
     }
 
-    const storedTitle = this.getStorageItem('ui.lessonTitle') ?? '';
+    let storedTitle = this.getStorageItem(LESSON_TITLE_KEY) ?? '';
+    if (!storedTitle) {
+      const legacyTitle = this.getStorageItem('ui.lessonTitle');
+      if (legacyTitle) {
+        storedTitle = legacyTitle;
+        const trimmedLegacyTitle = legacyTitle.trim();
+        if (trimmedLegacyTitle) {
+          this.setStorageItem(LESSON_TITLE_KEY, trimmedLegacyTitle);
+        } else {
+          this.removeStorageItem(LESSON_TITLE_KEY);
+        }
+        this.removeStorageItem('ui.lessonTitle');
+      }
+    }
+
     const initialTitle = storedTitle.trim();
-    this.lessonTitleInput.value = storedTitle;
+
+    if (this.lessonTitleInput) {
+      this.lessonTitleInput.value = storedTitle;
+    }
+
     this.applyLessonTitle(initialTitle);
+
+    if (initialTitle) {
+      this.enableLessonTitleFloating(false);
+    }
+
+    if (!this.lessonTitleInput) {
+      return;
+    }
 
     const updateButtonState = () => {
       if (!this.lessonTitleSubmitButton) {
@@ -1106,9 +1133,23 @@ main
       this.applyLessonTitle(trimmedValue);
 
       if (trimmedValue) {
-        this.setStorageItem('ui.lessonTitle', trimmedValue);
-      } else {
+        this.setStorageItem(LESSON_TITLE_KEY, trimmedValue);
         this.removeStorageItem('ui.lessonTitle');
+        this.enableLessonTitleFloating(true);
+      } else {
+        this.removeStorageItem(LESSON_TITLE_KEY);
+        this.removeStorageItem('ui.lessonTitle');
+        this.removeStorageItem(LESSON_TITLE_POSITION_KEY);
+        this.removeStorageItem('ui.lessonTitlePosition');
+        this.lessonTitleHasStoredPosition = false;
+        this.lessonTitlePosition = null;
+        this.lessonTitlePointerId = null;
+        this.lessonTitlePointerOffset = { x: 0, y: 0 };
+        this.lessonTitleIsFloating = false;
+        this.boardLessonTitle.style.left = '';
+        this.boardLessonTitle.style.top = '';
+        this.boardLessonTitle.style.transform = '';
+        this.boardLessonTitle.classList.remove('is-dragging', 'is-floating');
       }
 
       updateButtonState();
@@ -1644,35 +1685,58 @@ main
   }
 
   getStoredLessonTitlePosition() {
-    const storedValue = this.getStorageItem(LESSON_TITLE_POSITION_KEY);
-    if (!storedValue) {
-      return null;
-    }
-
-    try {
-      const parsed = JSON.parse(storedValue);
-      if (Number.isFinite(parsed?.left) && Number.isFinite(parsed?.top)) {
-        return {
-          left: parsed.left,
-          top: parsed.top
-        };
+    const parsePosition = value => {
+      if (!value) {
+        return null;
       }
-    } catch (error) {
-      console.warn('Unable to parse stored lesson title position.', error);
+
+      try {
+        const parsed = JSON.parse(value);
+        if (Number.isFinite(parsed?.left) && Number.isFinite(parsed?.top)) {
+          return {
+            left: parsed.left,
+            top: parsed.top
+          };
+        }
+      } catch (error) {
+        console.warn('Unable to parse stored lesson title position.', error);
+      }
+
+      return null;
+    };
+
+    const storedValue = this.getStorageItem(LESSON_TITLE_POSITION_KEY);
+    let parsed = parsePosition(storedValue);
+
+    if (!parsed && storedValue) {
+      this.removeStorageItem(LESSON_TITLE_POSITION_KEY);
     }
 
-    return null;
+    if (!parsed) {
+      const legacyValue = this.getStorageItem('ui.lessonTitlePosition');
+      if (legacyValue) {
+        parsed = parsePosition(legacyValue);
+        if (parsed) {
+          this.setStorageItem(LESSON_TITLE_POSITION_KEY, JSON.stringify(parsed));
+        }
+        this.removeStorageItem('ui.lessonTitlePosition');
+      }
+    }
+
+    return parsed;
   }
 
   saveLessonTitlePosition(left, top) {
     if (!Number.isFinite(left) || !Number.isFinite(top)) {
       this.removeStorageItem(LESSON_TITLE_POSITION_KEY);
+      this.removeStorageItem('ui.lessonTitlePosition');
       this.lessonTitleHasStoredPosition = false;
       return;
     }
 
     const payload = JSON.stringify({ left, top });
     this.setStorageItem(LESSON_TITLE_POSITION_KEY, payload);
+    this.removeStorageItem('ui.lessonTitlePosition');
     this.lessonTitleHasStoredPosition = true;
   }
 
