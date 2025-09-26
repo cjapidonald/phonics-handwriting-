@@ -186,17 +186,42 @@ main
     <main id="app" class="app-shell disable-select" role="main">
   <nav id="toolbarLeft" class="toolbar toolbar--left" aria-label="Drawing tools">
     <button id="btnRedo" class="toolbar__button" type="button" aria-label="Redo">
-      <svg aria-hidden="true"><use href="assets/icons.svg#redo"></use></svg>
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#redo"></use></svg></span>
+      <span class="toolbar__label">Redo</span>
     </button>
     <button id="btnEraser" class="toolbar__button" type="button" aria-label="Toggle eraser">
-      <svg aria-hidden="true"><use href="assets/icons.svg#eraser"></use></svg>
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#eraser"></use></svg></span>
+      <span class="toolbar__label">Eraser</span>
     </button>
-    <input id="btnEraserSize" class="toolbar__slider" type="range" min="4" max="80" value="24" hidden />
+    <div class="toolbar__slider-wrapper" id="eraserSizeControl" hidden aria-hidden="true">
+      <label class="toolbar__slider-label" for="btnEraserSize">Eraser size</label>
+      <input id="btnEraserSize" class="toolbar__slider" type="range" min="4" max="80" value="24" hidden />
+    </div>
     <button id="btnReplay" class="toolbar__button" type="button" aria-label="Replay strokes">
-      <svg aria-hidden="true"><use href="assets/icons.svg#play"></use></svg>
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#play"></use></svg></span>
+      <span class="toolbar__label">Replay</span>
     </button>
     <button id="btnBackground" class="toolbar__button" type="button" aria-label="Change background">
-      <svg aria-hidden="true"><use href="assets/icons.svg#page-lines"></use></svg>
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#page-lines"></use></svg></span>
+      <span class="toolbar__label">Background</span>
+    </button>
+    <button
+      id="btnZoomOut"
+      class="toolbar__button"
+      type="button"
+      aria-label="Zoom out background"
+    >
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#zoom-out"></use></svg></span>
+      <span class="toolbar__label">Zoom&nbsp;Out</span>
+    </button>
+    <button
+      id="btnZoomIn"
+      class="toolbar__button"
+      type="button"
+      aria-label="Zoom in background"
+    >
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#zoom-in"></use></svg></span>
+      <span class="toolbar__label">Zoom&nbsp;In</span>
     </button>
     <button
       id="btnStopwatchLeft"
@@ -205,28 +230,51 @@ main
       aria-label="Toggle stopwatch"
       aria-pressed="false"
     >
-      <svg aria-hidden="true"><use href="assets/icons.svg#timer"></use></svg>
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#timer"></use></svg></span>
+      <span class="toolbar__label">Stopwatch</span>
     </button>
     <button id="btnFullscreenLeft" class="toolbar__button" type="button" aria-label="Enter fullscreen">
-      <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#fullscreen"></use></svg></span>
+      <span class="toolbar__label">Fullscreen</span>
     </button>
   </nav>
 
   <section id="lessonToolsRight" class="toolbar toolbar--right" aria-label="Lesson tools">
-    <button id="btnLessonTitlePrompt" class="toolbar__button" type="button" aria-label="Edit lesson title">Lesson Title</button>
-    <button id="btnPracticeTextPrompt" class="toolbar__button" type="button" aria-label="Edit practice text">Practice Text</button>
-    <button id="btnRevealLettersPrompt" class="toolbar__button" type="button" aria-label="Adjust letters to reveal">Reveal Letters</button>
-    <button id="btnDeletePracticeText" class="toolbar__button" type="button" aria-label="Delete practice text">Delete Text</button>
-    <button id="btnPrevLetter" class="toolbar__button" type="button" aria-label="Previous letter">
-      <svg aria-hidden="true"><use href="assets/icons.svg#arrow-left"></use></svg>
+    <button id="btnLessonTitlePrompt" class="toolbar__button" type="button" aria-label="Edit lesson title">
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#title"></use></svg></span>
+      <span class="toolbar__label">Lesson Title</span>
     </button>
-    <button id="btnNextLetter" class="toolbar__button" type="button" aria-label="Next letter">
-      <svg aria-hidden="true"><use href="assets/icons.svg#arrow-right"></use></svg>
+    <button id="btnPracticeTextPrompt" class="toolbar__button" type="button" aria-label="Edit practice text">
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#practice"></use></svg></span>
+      <span class="toolbar__label">Practice Text</span>
     </button>
-    <button id="btnUploadCursor" class="toolbar__button" type="button" aria-label="Upload custom cursor">Upload Cursor</button>
-    <button id="btnResetCursor" class="toolbar__button" type="button" aria-label="Reset cursor to default">Reset Cursor</button>
+    <button id="btnRevealLettersPrompt" class="toolbar__button" type="button" aria-label="Adjust letters to reveal">
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#view"></use></svg></span>
+      <span class="toolbar__label">Reveal Letters</span>
+    </button>
+    <button id="btnDeletePracticeText" class="toolbar__button" type="button" aria-label="Delete practice text">
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#trash"></use></svg></span>
+      <span class="toolbar__label">Delete Text</span>
+    </button>
+    <button id="btnPrevLetter" class="toolbar__button toolbar__button--icon-only" type="button" aria-label="Previous letter">
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#arrow-left"></use></svg></span>
+      <span class="toolbar__label">Prev</span>
+    </button>
+    <button id="btnNextLetter" class="toolbar__button toolbar__button--icon-only" type="button" aria-label="Next letter">
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#arrow-right"></use></svg></span>
+      <span class="toolbar__label">Next</span>
+    </button>
+    <button id="btnUploadCursor" class="toolbar__button" type="button" aria-label="Upload custom cursor">
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#upload"></use></svg></span>
+      <span class="toolbar__label">Upload Cursor</span>
+    </button>
+    <button id="btnResetCursor" class="toolbar__button" type="button" aria-label="Reset cursor to default">
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#reset"></use></svg></span>
+      <span class="toolbar__label">Reset Cursor</span>
+    </button>
     <button id="btnFullscreenRight" class="toolbar__button" type="button" aria-label="Enter fullscreen">
-      <svg aria-hidden="true"><use href="assets/icons.svg#fullscreen"></use></svg>
+      <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#fullscreen"></use></svg></span>
+      <span class="toolbar__label">Fullscreen</span>
     </button>
   </section>
 
@@ -400,7 +448,7 @@ main
     </section>
 
     <input type="file" id="inputPenImage" class="visually-hidden" accept="image/*" aria-hidden="true" />
-    <input id="cursorFile" type="file" accept=".png,.svg,.cur,.ico" hidden />
+    <input id="cursorFile" type="file" accept=".png,.svg,.cur,.ico" class="visually-hidden" aria-hidden="true" />
 
     <div id="pageStylePopover" class="popover" role="dialog" aria-label="Page style options">
       <div class="popover-section">
