@@ -1,5 +1,5 @@
 import { DEFAULT_SETTINGS } from './UserData.js';
-import { formatDateWithOrdinal, clamp, getAssetUrl, loadImage, getLocalStorage } from './utils.js';
+import { formatDateWithOrdinal, clamp, getLocalStorage } from './utils.js';
 
 const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 600;
@@ -33,11 +33,6 @@ const PEN_COLOUR_SWATCHES = [
 ];
 
 const RAINBOW_INDICATOR = 'conic-gradient(from 0deg, #ff004d, #ffa500, #ffee00, #00d084, #1e4dd8, #7f3f98, #ff004d)';
-
-const PHONICS_LINES_ASSET_PATH = 'icons/Phonics lines.svg';
-const PHONICS_LINES_IMAGE_SRC = getAssetUrl(PHONICS_LINES_ASSET_PATH);
-let phonicsLinesImage = null;
-let phonicsLinesImagePromise = null;
 
 const PAGE_STYLE_DRAWERS = {
   blank: clearBackground,
@@ -2503,43 +2498,8 @@ function clearBackground(ctx, width, height) {
   ctx.clearRect(0, 0, width, height);
 }
 
-function drawPhonicsLinesGuidelines(ctx, width, height, zoom = 1) {
+function drawPhonicsLinesGuidelines(ctx, width, height) {
+  ctx.save();
   ctx.clearRect(0, 0, width, height);
-
-  const drawImage = image => {
-    if (!image) {
-      return;
-    }
-
-    const scale = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
-    const drawWidth = width * scale;
-    const drawHeight = height * scale;
-    const offsetX = (width - drawWidth) / 2;
-    const offsetY = (height - drawHeight) / 2;
-
-    ctx.clearRect(0, 0, width, height);
-    ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-  };
-
-  if (phonicsLinesImage) {
-    drawImage(phonicsLinesImage);
-    return;
-  }
-
-  if (!phonicsLinesImagePromise) {
-    phonicsLinesImagePromise = loadImage(PHONICS_LINES_IMAGE_SRC)
-      .then(image => {
-        phonicsLinesImage = image;
-        return image;
-      })
-      .catch(error => {
-        console.warn(`Unable to load phonics lines background from "${PHONICS_LINES_ASSET_PATH}".`, error);
-        phonicsLinesImagePromise = null;
-        return null;
-      });
-  }
-
-  phonicsLinesImagePromise.then(image => {
-    drawImage(image);
-  });
+  ctx.restore();
 }

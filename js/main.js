@@ -2553,10 +2553,6 @@ function setupLessonAndPracticePrompts() {
 
   if (practiceButton) {
     practiceButton.addEventListener('click', () => {
-      if (!teachController) {
-        return;
-      }
-
       if (isPracticeStripOpen) {
         closePracticeStrip({ restoreFocus: false });
         return;
@@ -2564,7 +2560,7 @@ function setupLessonAndPracticePrompts() {
 
       const currentText =
         practiceState.text ||
-        teachController.getCurrentText?.() ||
+        teachController?.getCurrentText?.() ||
         controls.textInput?.value ||
         '';
 
