@@ -142,11 +142,6 @@ export class Controls {
     this.removePenImageButton = document.getElementById('btnRemovePenImage');
     this.penImageInput = document.getElementById('inputPenImage');
 
-    this.cookiePopup = document.getElementById('cookiePopup');
-    this.cookieAcceptButton = document.getElementById('cookieAcceptButton');
-    this.cookieRejectButton = document.getElementById('cookieRejectButton');
-    this.cookieSettingsLink = document.getElementById('cookieSettingsLink');
-
     this.boardDate = document.getElementById('boardDate');
     this.boardDateContainer = this.boardDate?.parentElement ?? null;
     this.boardDateDragPointerId = null;
@@ -205,7 +200,6 @@ export class Controls {
     this.setupBookmarkDock();
     this.applyToolbarLayoutVersion();
     this.setupToolbarDragging();
-    this.setupCookieBanner();
     this.setupDateDisplay();
     this.setupFloatingDateDragging();
     this.setupLessonTitle();
@@ -985,34 +979,6 @@ export class Controls {
     }
 
     return null;
-  }
-
-  setupCookieBanner() {
-    if (!this.cookiePopup || !this.cookieAcceptButton || !this.cookieRejectButton) {
-      return;
-    }
-
-    this.cookieAcceptButton.addEventListener('click', () => {
-      this.handleCookieConsent(true);
-    });
-
-    this.cookieRejectButton.addEventListener('click', () => {
-      this.handleCookieConsent(false);
-    });
-
-    if (this.cookieSettingsLink) {
-      this.cookieSettingsLink.addEventListener('click', event => {
-        event.preventDefault();
-        this.showCookieBanner();
-      });
-    }
-
-    const consent = this.getCookie('cookie_consent');
-    if (consent === 'accepted') {
-      this.loadAnalytics();
-    } else {
-      this.showCookieBanner();
-    }
   }
 
   setupDateDisplay() {
@@ -2402,69 +2368,6 @@ export class Controls {
     } catch (error) {
       console.warn('Unable to save toolbar position to localStorage.', error);
     }
-  }
-
-  showCookieBanner() {
-    if (!this.cookiePopup) {
-      return;
-    }
-
-    this.cookiePopup.hidden = false;
-    this.cookiePopup.classList.add('is-visible');
-
-    if (typeof window !== 'undefined') {
-      window.requestAnimationFrame(() => {
-        this.cookieAcceptButton?.focus();
-      });
-    }
-  }
-
-  handleCookieConsent(accepted) {
-    this.setCookie('cookie_consent', accepted ? 'accepted' : 'rejected', 365);
-    if (this.cookiePopup) {
-      this.cookiePopup.classList.remove('is-visible');
-      this.cookiePopup.hidden = true;
-    }
-    if (accepted) {
-      this.loadAnalytics();
-    }
-  }
-
-  setCookie(name, value, days) {
-    const date = new Date();
-    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-    const expires = `expires=${date.toUTCString()}`;
-    document.cookie = `${name}=${value};${expires};path=/`;
-  }
-
-  getCookie(name) {
-    const target = `${name}=`;
-    const cookies = decodeURIComponent(document.cookie).split(';');
-    for (let cookie of cookies) {
-      const c = cookie.trim();
-      if (c.startsWith(target)) {
-        return c.substring(target.length);
-      }
-    }
-    return '';
-  }
-
-  loadAnalytics() {
-    if (window.gtag) {
-      return;
-    }
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-45NB3EQYGX';
-    document.head.appendChild(script);
-
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-      window.dataLayer.push(arguments);
-    }
-    window.gtag = gtag;
-    gtag('js', new Date());
-    gtag('config', 'G-45NB3EQYGX');
   }
 
   setUndoRedoEnabled(enabled) {
