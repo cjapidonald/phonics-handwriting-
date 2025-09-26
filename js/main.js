@@ -23,6 +23,7 @@ const penColourInput = document.getElementById('penColour');
 const penSizeInput = document.getElementById('penSize');
 const eraserButton = document.getElementById('btnEraser');
 const eraserSizeInput = document.getElementById('btnEraserSize');
+const eraserSizeControl = document.getElementById('eraserSizeControl');
 const uploadCursorButton = document.getElementById('btnUploadCursor');
 const resetCursorButton = document.getElementById('btnResetCursor');
 const cursorFileInput = document.getElementById('cursorFile');
@@ -1007,10 +1008,15 @@ function setEraserMode(isActive) {
     eraserButton.setAttribute('aria-pressed', eraserMode ? 'true' : 'false');
   }
 
-  if (eraserSizeInput) {
-    eraserSizeInput.hidden = !eraserMode;
-    eraserSizeInput.setAttribute('aria-hidden', eraserMode ? 'false' : 'true');
-  }
+  const eraserControls = [eraserSizeInput, eraserSizeControl];
+  eraserControls.forEach(element => {
+    if (!element) {
+      return;
+    }
+
+    element.hidden = !eraserMode;
+    element.setAttribute('aria-hidden', eraserMode ? 'false' : 'true');
+  });
 
   if (eraserMode) {
     if (rewriterMaskContext && controls.rewriterMaskCanvas) {
