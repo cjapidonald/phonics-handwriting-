@@ -197,6 +197,23 @@ main
       <label class="toolbar__slider-label" for="btnEraserSize">Eraser size</label>
       <input id="btnEraserSize" class="toolbar__slider" type="range" min="4" max="80" value="24" hidden />
     </div>
+    <div class="toolbar__slider-wrapper" id="penSizeControl">
+      <label class="toolbar__slider-label" for="penSize">Pen size</label>
+      <input id="penSize" class="toolbar__slider" type="range" min="1" max="60" value="8" aria-label="Pen size" />
+    </div>
+    <div class="toolbar__slider-wrapper" id="penSpeedControl">
+      <label class="toolbar__slider-label" for="replaySpeed">Replay speed</label>
+      <input
+        id="replaySpeed"
+        class="toolbar__slider"
+        type="range"
+        min="0.25"
+        max="4"
+        step="0.25"
+        value="1"
+        aria-label="Replay speed"
+      />
+    </div>
     <button id="btnReplay" class="toolbar__button" type="button" aria-label="Replay strokes">
       <span class="toolbar__icon" aria-hidden="true"><svg><use href="assets/icons.svg#play"></use></svg></span>
       <span class="toolbar__label">Replay</span>
@@ -310,9 +327,10 @@ main
   </section>
 
   <footer id="bottomBar" class="bottom-bar" aria-label="Pen controls">
-    <input id="penColour" type="color" aria-label="Pen colour" />
-    <input id="penSize" type="range" min="1" max="60" value="8" aria-label="Pen size" />
-    <input id="replaySpeed" type="range" min="0.25" max="4" step="0.25" value="1" aria-label="Replay speed" />
+    <label class="bottom-bar__colour" for="penColour">
+      <span class="bottom-bar__label">Pen colour</span>
+      <input id="penColour" type="color" aria-label="Pen colour" />
+    </label>
   </footer>
 
   <aside id="stopwatchPanel" class="floating-panel" hidden aria-hidden="true">

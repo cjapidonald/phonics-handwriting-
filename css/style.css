@@ -686,52 +686,74 @@ button:focus {
   display: none;
 }
 
-#boardDate {
-  pointer-events: auto;
-  color: var(--color-smoky-black);
+#boardDate,
+.board-date,
+.board-lesson-title {
   font-family: 'Penman KG Lined', 'KG Primary Penmanship Lined', 'KG Primary Penmanship',
     'KG Primary Lined', 'KG Primary', 'Comic Sans MS', 'Comic Sans', cursive;
-  font-size: clamp(1.1rem, 1.2vw + 0.85rem, 2rem);
-  font-weight: 700;
+}
+
+.board-date,
+.board-lesson-title {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 244, 213, 0.94);
+  border: 2px solid rgba(10, 9, 3, 0.12);
+  border-radius: 22px;
+  box-shadow: 0 14px 30px rgba(10, 9, 3, 0.24);
+  color: var(--color-smoky-black);
+  min-height: clamp(2.25rem, 2vw + 1.8rem, 3.75rem);
+  padding: clamp(0.35rem, 0.8vw, 0.75rem) clamp(0.8rem, 2vw, 1.8rem);
   letter-spacing: 0.05em;
-  padding: 4px 12px;
+  text-align: center;
   text-shadow: none;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  cursor: pointer;
+  transition: color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   user-select: none;
-  transition: color 0.15s ease;
-  text-align: right;
+  -webkit-user-select: none;
 }
 
-#boardDate:hover,
-#boardDate:focus-visible {
+.board-date {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  font-size: clamp(1.05rem, 1.4vw, 1.85rem);
+  font-weight: 700;
+  padding-inline: clamp(0.75rem, 1.8vw, 2.1rem);
+}
+
+#boardDate {
+  pointer-events: auto;
+}
+
+.board-date:hover,
+.board-date:focus-visible {
   color: var(--color-ut-orange);
+  box-shadow: 0 16px 32px rgba(10, 9, 3, 0.28);
   outline: none;
-  transform: none;
 }
 
-#boardDate:active {
+.board-date:active {
   color: var(--color-aerospace-orange);
+  transform: translateY(1px);
+  box-shadow: 0 12px 24px rgba(10, 9, 3, 0.25);
 }
 
 .board-lesson-title {
-  pointer-events: none;
-  color: var(--color-smoky-black);
-  font-family: 'Penman KG Lined', 'KG Primary Penmanship Lined', 'KG Primary Penmanship',
-    'KG Primary Lined', 'KG Primary', 'Comic Sans MS', 'Comic Sans', cursive;
-  font-size: clamp(2rem, 2vw + 1.35rem, 3.1rem);
+  pointer-events: auto;
+  cursor: grab;
+  font-size: clamp(1.8rem, 1.2vw + 1.65rem, 3rem);
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-shadow: none;
-  padding: 0;
-  min-height: 1.2em;
-  width: 100%;
-  max-width: 100%;
-  text-align: left;
-  transition: opacity 0.2s ease;
+  padding-inline: clamp(1.4rem, 3vw, 3rem);
+  min-width: clamp(8rem, 40vw, 26rem);
+  max-width: min(100%, 52rem);
+  line-height: 1.2;
+  transition: opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+.board-lesson-title:active {
+  cursor: grabbing;
 }
 
 .board-lesson-title.is-hidden {
@@ -739,31 +761,20 @@ button:focus {
 }
 
 .board-lesson-title.is-floating {
-  pointer-events: auto;
   position: absolute;
-  background: rgba(255, 244, 213, 0.94);
-  border: 2px solid rgba(10, 9, 3, 0.12);
-  border-radius: 22px;
-  padding: clamp(10px, 1.8vh, 18px) clamp(20px, 3vw, 36px);
-  box-shadow: 0 18px 36px rgba(10, 9, 3, 0.24);
-  max-width: min(calc(100vw - clamp(140px, 24vw, 320px)), 840px);
-  width: auto;
-  cursor: grab;
-  user-select: none;
-  -webkit-user-select: none;
   z-index: 5;
-  transition: box-shadow 0.2s ease;
+  max-width: min(calc(100vw - clamp(140px, 24vw, 320px)), 840px);
   touch-action: none;
 }
 
 .board-lesson-title.is-floating:focus-visible {
   outline: 3px solid rgba(255, 130, 0, 0.7);
-  outline-offset: 4px;
+  outline-offset: 6px;
 }
 
 .board-lesson-title.is-floating.is-dragging {
   cursor: grabbing;
-  box-shadow: 0 22px 44px rgba(10, 9, 3, 0.32);
+  box-shadow: 0 20px 36px rgba(10, 9, 3, 0.3);
 }
 
 body.is-fullscreen {
@@ -938,12 +949,12 @@ body.is-fullscreen #boardDate {
   top: 24px;
   left: 24px;
   z-index: 4000;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 18px;
-  border: 2px solid rgba(127, 63, 152, 0.25);
-  box-shadow: 0 14px 32px rgba(10, 9, 3, 0.28);
+  background: rgba(255, 244, 213, 0.96);
+  border-radius: 22px;
+  border: 2px solid rgba(10, 9, 3, 0.14);
+  box-shadow: 0 18px 40px rgba(10, 9, 3, 0.32);
   color: var(--color-smoky-black);
-  padding: 12px 20px;
+  padding: clamp(0.45rem, 1vw, 0.85rem) clamp(1rem, 2.6vw, 2.4rem);
   cursor: grab;
   touch-action: none;
   text-align: center;
@@ -953,14 +964,14 @@ body.is-fullscreen #boardDate {
 
 #boardDate.is-floating:hover,
 #boardDate.is-floating:focus-visible {
-  box-shadow: 0 18px 40px rgba(10, 9, 3, 0.32);
+  box-shadow: 0 22px 48px rgba(10, 9, 3, 0.36);
   transform: translateY(-1px);
   color: var(--color-smoky-black);
 }
 
 #boardDate.is-floating.is-dragging {
   cursor: grabbing;
-  box-shadow: 0 22px 48px rgba(10, 9, 3, 0.38);
+  box-shadow: 0 24px 52px rgba(10, 9, 3, 0.4);
   transform: translateY(0);
 }
 
@@ -3001,6 +3012,8 @@ body.info-panel-open {
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 0.25rem;
+  display: flex;
+  justify-content: center;
 }
 
 .practice-preview__scroll::-webkit-scrollbar {
@@ -3021,11 +3034,15 @@ body.info-panel-open {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
+  align-content: center;
   gap: 0.45rem;
+  width: 100%;
   font-size: clamp(1.1rem, 1.8vw, 1.45rem);
   letter-spacing: 0.04em;
   font-family: 'Penman KG Lined', 'KG Primary Penmanship Lined', 'KG Primary Penmanship',
     'KG Primary Lined', 'KG Primary', 'Comic Sans MS', 'Comic Sans', cursive;
+  text-align: center;
 }
 
 .practice-preview__letters br {
@@ -3683,8 +3700,42 @@ canvas {
   z-index: 12;
 }
 
-.bottom-bar input[type='range'] {
-  width: clamp(140px, 22vw, 280px);
+.bottom-bar__colour {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-smoky-black);
+}
+
+.bottom-bar__label {
+  font-size: clamp(0.7rem, 0.8vw, 0.85rem);
+}
+
+.bottom-bar__colour input[type='color'] {
+  appearance: none;
+  width: clamp(46px, 5vw, 58px);
+  height: clamp(46px, 5vw, 58px);
+  border-radius: 18px;
+  border: 3px solid rgba(10, 9, 3, 0.3);
+  box-shadow: 0 8px 0 rgba(10, 9, 3, 0.3);
+  padding: 0;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.bottom-bar__colour input[type='color']::-webkit-color-swatch {
+  border-radius: 12px;
+  border: none;
+}
+
+.bottom-bar__colour input[type='color']::-moz-color-swatch {
+  border-radius: 12px;
+  border: none;
 }
 
 .floating-panel {
