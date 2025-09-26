@@ -689,7 +689,8 @@ button:focus {
 #boardDate {
   pointer-events: auto;
   color: var(--color-smoky-black);
-  font-family: 'KG Primary', 'Comic Sans MS', 'Comic Sans', cursive;
+  font-family: 'Penman KG Lined', 'KG Primary Penmanship Lined', 'KG Primary Penmanship',
+    'KG Primary Lined', 'KG Primary', 'Comic Sans MS', 'Comic Sans', cursive;
   font-size: clamp(1.1rem, 1.2vw + 0.85rem, 2rem);
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -719,7 +720,8 @@ button:focus {
 .board-lesson-title {
   pointer-events: none;
   color: var(--color-smoky-black);
-  font-family: 'KG Primary', 'Comic Sans MS', 'Comic Sans', cursive;
+  font-family: 'Penman KG Lined', 'KG Primary Penmanship Lined', 'KG Primary Penmanship',
+    'KG Primary Lined', 'KG Primary', 'Comic Sans MS', 'Comic Sans', cursive;
   font-size: clamp(2rem, 2vw + 1.35rem, 3.1rem);
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -810,6 +812,25 @@ body.is-fullscreen .app-shell {
   background: var(--color-board-surround);
   border: none;
   border-radius: 0;
+  display: grid;
+  grid-template-columns: clamp(90px, 12vw, 160px) minmax(0, 1fr) clamp(90px, 12vw, 160px);
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    'left header right'
+    'left board right'
+    'left bottom right';
+  column-gap: clamp(18px, 3vw, 32px);
+  row-gap: clamp(16px, 3vh, 32px);
+  align-items: start;
+}
+
+body.is-fullscreen .toolbar {
+  position: sticky;
+  top: clamp(16px, 4vh, 48px);
+  align-self: start;
+  max-height: calc(100vh - clamp(32px, 8vh, 96px) - var(--fullscreen-toolbar-offset, 0px));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 body.is-fullscreen .writer-container {
@@ -872,6 +893,9 @@ body.is-fullscreen .board-header {
   align-items: flex-end;
   gap: clamp(16px, 4vw, 32px);
   box-sizing: border-box;
+  position: sticky;
+  top: clamp(16px, 4vh, 48px);
+  z-index: 40;
 }
 
 body.is-fullscreen #boardRegion {
@@ -1727,7 +1751,8 @@ body.is-fullscreen .board-palette {
   border: none;
   background: transparent;
   font-size: 1.1rem;
-  font-family: "KG Primary", "Comic Sans MS", "Comic Sans", cursive;
+  font-family: 'Penman KG Lined', 'KG Primary Penmanship Lined', 'KG Primary Penmanship',
+    'KG Primary Lined', 'KG Primary', 'Comic Sans MS', 'Comic Sans', cursive;
   color: var(--color-smoky-black);
   display: inline-flex;
   align-items: center;
@@ -1824,7 +1849,7 @@ body.is-fullscreen .board-palette {
   position: relative;
   font-size: clamp(64px, 12vw, 120px);
   line-height: 1;
-  font-family: "KG Primary", "Comic Sans MS", "Comic Sans", cursive;
+  font-family: 'KG Primary Lined', 'KG Primary', 'Comic Sans MS', 'Comic Sans', cursive;
   color: #111111;
 }
 
@@ -1851,7 +1876,9 @@ body.is-fullscreen .board-palette {
   align-items: flex-end;
   justify-content: center;
   opacity: 0;
-  transform: translateY(6%);
+  transform: none;
+  font-family: 'Penman KG Lined', 'KG Primary Penmanship Lined', 'KG Primary Penmanship',
+    'KG Primary Lined', 'KG Primary', 'Comic Sans MS', 'Comic Sans', cursive;
 }
 
 .teach-letter.is-revealed .teach-char {
@@ -1867,33 +1894,15 @@ body.is-fullscreen .board-palette {
   opacity: 0;
 }
 
-.teach-letter--uppercase {
-  color: #d8342c;
-}
-
-.teach-letter--descender {
-  color: #1e4dd8;
-}
-
-.teach-letter--period {
-  color: #1e4dd8;
-}
-
+.teach-letter--uppercase,
+.teach-letter--descender,
+.teach-letter--period,
 .teach-letter--default,
-.teach-letter--lowercase {
-  color: #111111;
-}
-
-.teach-letter--punctuation {
-  color: #1e4dd8;
-}
-
-.teach-letter--number {
-  color: #d8342c;
-}
-
+.teach-letter--lowercase,
+.teach-letter--punctuation,
+.teach-letter--number,
 .teach-letter--other {
-  color: #111111;
+  color: inherit;
 }
 .btn.icon {
   --glass-base: var(--control-button-surface);
@@ -2289,11 +2298,7 @@ body.is-fullscreen #toolbarBottom {
 }
 
 .style-preview.style-phonics-lines {
-  /* Keep in sync with PHONICS_LINES_ASSET_PATH in js/Controls.js */
-  background-image: url("../assets/icons/Phonics lines.svg");
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
+  background: rgba(255, 244, 213, 0.1);
 }
 
 .style-preview.style-grid::before,
@@ -3019,6 +3024,8 @@ body.info-panel-open {
   gap: 0.45rem;
   font-size: clamp(1.1rem, 1.8vw, 1.45rem);
   letter-spacing: 0.04em;
+  font-family: 'Penman KG Lined', 'KG Primary Penmanship Lined', 'KG Primary Penmanship',
+    'KG Primary Lined', 'KG Primary', 'Comic Sans MS', 'Comic Sans', cursive;
 }
 
 .practice-preview__letters br {
@@ -3036,7 +3043,7 @@ body.info-panel-open {
   border-radius: 14px;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.14);
-  color: inherit;
+  color: #111111;
   transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease, opacity 0.3s ease;
   position: relative;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
