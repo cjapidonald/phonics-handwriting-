@@ -893,9 +893,13 @@ controls.setPenSize(initialPenSize, false);
 syncPenColourInput(isHexColour(initialPenColour) ? initialPenColour : PEN_COLOUR_DEFAULT);
 syncPenSizeInput(initialPenSize);
 
-const rewriterLinesContext = controls.rewriterLinesCanvas.getContext('2d');
-const rewriterContext = controls.rewriterCanvas.getContext('2d');
-const rewriterMaskContext = controls.rewriterMaskCanvas.getContext('2d');
+const rewriterLinesContext = controls.rewriterLinesCanvas?.getContext('2d');
+const rewriterContext = controls.rewriterCanvas?.getContext('2d');
+const rewriterMaskContext = controls.rewriterMaskCanvas?.getContext('2d');
+
+if (!rewriterLinesContext || !rewriterContext || !rewriterMaskContext) {
+  console.error('Failed to initialize canvas contexts');
+}
 
 const canvasElements = [
   controls.rewriterCanvas,
@@ -2701,15 +2705,19 @@ function resetCanvas() {
     stopReplay({ restore: false });
   }
 
-  rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
-  rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
+  if (rewriterMaskContext && controls.rewriterMaskCanvas) {
+    rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
+  }
+  if (rewriterContext && controls.rewriterCanvas) {
+    rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
+  }
   userData.deletedLines = [];
   userData.storedLines = [];
   userData.saveToLocalStorage();
   updateUndoRedoButtonState();
 }
 
-async function rewrite(abortSignal = new AbortSignal()) {
+async function rewrite(abortSignal = new AbortController().signal) {
   if (isReplaying) {
     stopReplay({ restore: false });
   }
@@ -2723,8 +2731,8 @@ async function rewrite(abortSignal = new AbortSignal()) {
   controls.setUndoRedoEnabled(false);
   isRewriting = true;
 
-  if (typeof gtag === 'function') {
-    gtag('event', 'activate_rewrite', {
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+    window.gtag('event', 'activate_rewrite', {
       selected_background: userData.userSettings.selectedBackground,
       selected_page_colour: userData.userSettings.selectedPageColour,
       write_speed_multiplier: userData.userSettings.rewriteSpeed,
@@ -2733,19 +2741,25 @@ async function rewrite(abortSignal = new AbortSignal()) {
   }
 
   try {
-    rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
-    await drawStoredLines(rewriterContext, false, abortSignal);
+    if (rewriterContext && controls.rewriterCanvas) {
+      rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
+      await drawStoredLines(rewriterContext, false, abortSignal);
+    }
   } finally {
     isRewriting = false;
     controls.setUndoRedoEnabled(true);
-    rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
+    if (rewriterMaskContext && controls.rewriterMaskCanvas) {
+      rewriterMaskContext.clearRect(0, 0, controls.rewriterMaskCanvas.width, controls.rewriterMaskCanvas.height);
+    }
     setRewriteButtonState(false);
 
-    if (abortSignal.aborted) {
+    if (abortSignal.aborted && rewriterContext && controls.rewriterCanvas) {
       rewriterContext.clearRect(0, 0, controls.rewriterCanvas.width, controls.rewriterCanvas.height);
     }
 
-    await drawStoredLines(rewriterContext, true);
+    if (rewriterContext) {
+      await drawStoredLines(rewriterContext, true);
+    }
   }
 }
 
